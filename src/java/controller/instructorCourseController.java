@@ -4,6 +4,7 @@
  */
 package controller;
 
+import contants.HttpStatus;
 import jakarta.servlet.ServletConfig;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -27,6 +28,7 @@ public class instructorCourseController extends HttpServlet {
     private categoryServices _categoryService;
     private courseSectionServices _courseSectionService;
     private courseServices _courseService;
+    private HttpStatus _httpStatus;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -36,25 +38,41 @@ public class instructorCourseController extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        try {
 
+        } catch (Exception e) {
+            resp.sendError(_httpStatus.INTERNAL_SERVER_ERROR.getCode(), _httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+        }
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        try {
 
+        } catch (Exception e) {
+            resp.sendError(_httpStatus.INTERNAL_SERVER_ERROR.getCode(), _httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+        }
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
 
+        } catch (Exception e) {
+            resp.sendError(_httpStatus.INTERNAL_SERVER_ERROR.getCode(), _httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+        }
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
 
+        } catch (Exception e) {
+            resp.sendError(_httpStatus.INTERNAL_SERVER_ERROR.getCode(), _httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+        }
     }
-    
+
 }
