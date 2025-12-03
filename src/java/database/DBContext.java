@@ -14,13 +14,14 @@ import java.sql.Connection;
  * @author quan
  */
 public class DBContext {
+
     ResourceBundle bundle = ResourceBundle.getBundle("configuration.database");
-    
+
     public Connection getConnection() {
         try {
             Class.forName(bundle.getString("drivername"));
             String url = bundle.getString("url");
-            String username = bundle.getString("username"); 
+            String username = bundle.getString("username");
             String password = bundle.getString("password");
             Connection connection = DriverManager.getConnection(url, username, password);
             return connection;
@@ -39,7 +40,7 @@ public class DBContext {
 
     public static void main(String[] args) {
         DBContext db = new DBContext();
-        if(db.getConnection() != null){
+        if (db.getConnection() != null) {
             System.out.println("Ok!");
         } else {
             System.err.println("Not Ok!");

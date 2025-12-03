@@ -1,0 +1,116 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package model;
+
+import java.sql.Timestamp;
+
+/**
+ *
+ * @author quan
+ */
+public class Course {
+
+    private int id;
+    private String uuid;
+    private String title;
+    private String description;
+
+    private int category_id;
+    private Category category;
+
+    private Timestamp created_at;
+    private Timestamp updated_at;
+    private int created_by;
+    private int updated_by;
+
+    public Course() {
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public int getCategory_id() {
+        return category_id;
+    }
+
+    public void setCategory_id(int category_id) {
+        this.category_id = category_id;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public Timestamp getCreated_at() {
+        return created_at;
+    }
+
+    public void setCreated_at(Timestamp created_at) {
+        this.created_at = created_at;
+    }
+
+    public Timestamp getUpdated_at() {
+        return updated_at;
+    }
+
+    public void setUpdated_at(Timestamp updated_at) {
+        this.updated_at = updated_at;
+    }
+
+    public int getCreated_by() {
+        return created_by;
+    }
+
+    public void setCreated_by(int created_by) {
+        this.created_by = created_by;
+    }
+
+    public int getUpdated_by() {
+        return updated_by;
+    }
+
+    public void setUpdated_by(int updated_by) {
+        this.updated_by = updated_by;
+    }
+
+    @Override
+    public String toString() {
+        return "Course{" + "id=" + id + ", uuid=" + uuid + ", title=" + title + ", description=" + description + ", category_id=" + category_id + ", category=" + category + ", created_at=" + created_at + ", updated_at=" + updated_at + ", created_by=" + created_by + ", updated_by=" + updated_by + '}';
+    }
+
+}
