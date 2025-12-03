@@ -8,7 +8,7 @@ package contants;
  *
  * @author quan
  */
-public enum HttpStatus {
+public enum httpStatus {
     INTERNAL_SERVER_ERROR(500, "Ối, có gì đó không ổn ở phía máy chủ, vui lòng thử lại sau!"),
     NOT_FOUND(404, "Không tìm thấy tài nguyên, bạn có đang làm nhầm gì đó không?"),
     UNAUTHORIZED(401, "Bạn không có quyền thực hiện điều này, nếu chưa đăng nhập, hãy thử đăng nhập trước nhé!"),
@@ -19,7 +19,7 @@ public enum HttpStatus {
     private final int code;
     private final String message;
 
-    HttpStatus(int code, String message) {
+    httpStatus(int code, String message) {
         this.code = code;
         this.message = message;
     }
@@ -32,8 +32,8 @@ public enum HttpStatus {
         return message;
     }
 
-    public static HttpStatus fromCode(int code) {
-        for (HttpStatus s : values()) {
+    public static httpStatus fromCode(int code) {
+        for (httpStatus s : values()) {
             if (s.code == code) {
                 return s;
             }

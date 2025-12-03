@@ -4,7 +4,7 @@
  */
 package controller;
 
-import contants.HttpStatus;
+import contants.httpStatus;
 import jakarta.servlet.ServletConfig;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -28,7 +28,7 @@ public class instructorCourseController extends HttpServlet {
     private categoryServices _categoryService;
     private courseSectionServices _courseSectionService;
     private courseServices _courseService;
-    private HttpStatus _httpStatus;
+    private httpStatus _httpStatus;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
