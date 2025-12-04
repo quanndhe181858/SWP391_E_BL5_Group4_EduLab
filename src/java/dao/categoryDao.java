@@ -8,6 +8,6 @@ package dao;
  *
  * @author quan
  */
-public class categoryDao {
+public class CategoryDAO {
     
 }

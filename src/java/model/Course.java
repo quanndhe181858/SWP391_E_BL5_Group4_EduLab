@@ -16,6 +16,7 @@ public class Course {
     private String uuid;
     private String title;
     private String description;
+    private String status;
 
     private int category_id;
     private Category category;
@@ -108,9 +109,17 @@ public class Course {
         this.updated_by = updated_by;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
-        return "Course{" + "id=" + id + ", uuid=" + uuid + ", title=" + title + ", description=" + description + ", category_id=" + category_id + ", category=" + category + ", created_at=" + created_at + ", updated_at=" + updated_at + ", created_by=" + created_by + ", updated_by=" + updated_by + '}';
+        return "Course{" + "id=" + id + ", uuid=" + uuid + ", title=" + title + ", description=" + description + ", status=" + status + ", category_id=" + category_id + ", category=" + category + ", created_at=" + created_at + ", updated_at=" + updated_at + ", created_by=" + created_by + ", updated_by=" + updated_by + '}';
     }
 
 }

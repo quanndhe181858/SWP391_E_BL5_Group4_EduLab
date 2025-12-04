@@ -12,29 +12,29 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import service.categoryServices;
-import service.courseSectionServices;
-import service.courseServices;
+import service.CategoryServices;
+import service.CourseSectionServices;
+import service.CourseServices;
 
 /**
  *
  * @author quan
  */
-@WebServlet(name = "instructorCourseController", urlPatterns = {
+@WebServlet(name = "InstructorCourseController", urlPatterns = {
     "/instructor/courses"
 })
-public class instructorCourseController extends HttpServlet {
+public class InstructorCourseController extends HttpServlet {
 
-    private categoryServices _categoryService;
-    private courseSectionServices _courseSectionService;
-    private courseServices _courseService;
+    private CategoryServices _categoryService;
+    private CourseSectionServices _courseSectionService;
+    private CourseServices _courseService;
     private httpStatus _httpStatus;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        _categoryService = new categoryServices();
-        _courseSectionService = new courseSectionServices();
-        _courseService = new courseServices();
+        _categoryService = new CategoryServices();
+        _courseSectionService = new CourseSectionServices();
+        _courseService = new CourseServices();
     }
 
     @Override
