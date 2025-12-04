@@ -4,7 +4,7 @@
  */
 package controller;
 
-import contants.httpStatus;
+import constant.httpStatus;
 import jakarta.servlet.ServletConfig;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
