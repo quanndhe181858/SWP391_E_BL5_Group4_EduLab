@@ -21,6 +21,8 @@ public class CourseSection {
     private String description;
     private String content;
     private String type;
+    private int position;
+    private String status;
 
     private Timestamp created_at;
     private Timestamp updated_at;
@@ -118,9 +120,25 @@ public class CourseSection {
         this.updated_by = updated_by;
     }
 
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
-        return "CourseSection{" + "id=" + id + ", course_id=" + course_id + ", course=" + course + ", title=" + title + ", description=" + description + ", content=" + content + ", type=" + type + ", created_at=" + created_at + ", updated_at=" + updated_at + ", created_by=" + created_by + ", updated_by=" + updated_by + '}';
+        return "CourseSection{" + "id=" + id + ", course_id=" + course_id + ", course=" + course + ", title=" + title + ", description=" + description + ", content=" + content + ", type=" + type + ", position=" + position + ", status=" + status + ", created_at=" + created_at + ", updated_at=" + updated_at + ", created_by=" + created_by + ", updated_by=" + updated_by + '}';
     }
 
 }

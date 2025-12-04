@@ -15,10 +15,10 @@ import java.sql.SQLException;
  */
 public class dao {
 
-    DBContext dbc = new DBContext();
-    Connection con = null;
-    PreparedStatement ps = null;
-    ResultSet rs = null;
+    public DBContext dbc = new DBContext();
+    public Connection con = null;
+    public PreparedStatement ps = null;
+    public ResultSet rs = null;
 
     protected boolean closeResources() {
         try {
