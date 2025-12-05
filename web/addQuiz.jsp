@@ -14,7 +14,13 @@
     </head>
     <body>
         <div class="container">
-            <h1>Add New Quiz</h1>
+            <div class="navigation-top">
+                <a href="${pageContext.request.contextPath}/instructor/quizes?action=list" class="back-link">
+                    &larr; Back to Quiz List
+                </a>
+            </div>
+                    
+            <h1>Add New Quiz</h1>            
             
             <% if (request.getAttribute("error") != null) { %>
                 <div class="error-message">
@@ -23,7 +29,7 @@
             <% } %>
             
             <div class="form-container">
-                <form action="${pageContext.request.contextPath}/quiz" method="POST">
+                <form action="${pageContext.request.contextPath}/instructor/quizes  " method="POST">
                     <input type="hidden" name="action" value="create">
                     
                     <!-- Question Field -->
@@ -115,7 +121,7 @@
                         <button type="submit" class="btn btn-submit">
                             Create Quiz
                         </button>
-                        <a href="${pageContext.request.contextPath}/quiz?action=list" 
+                        <a href="${pageContext.request.contextPath}/instructor/quizes?action=list" 
                            class="btn btn-cancel">
                             Cancel
                         </a>

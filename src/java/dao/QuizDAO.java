@@ -147,27 +147,29 @@ public class QuizDAO extends dao {
      * @return true if deletion was successful, false otherwise
      */
     public boolean deleteQuiz(int id) {
-        String sql = """
-                 DELETE FROM `edulab`.`quiz`
-                 WHERE `id` = ?;
-                 """;
+    String sql = "DELETE FROM `edulab`.`quiz` WHERE `id` = ?";
+    
+    try {
+        con = dbc.getConnection();
+        ps = con.prepareStatement(sql);
         
-        try {
-            con = dbc.getConnection();
-            ps = con.prepareStatement(sql);
-            
-            ps.setInt(1, id);
-            
-            int rows = ps.executeUpdate();
-            return rows > 0;
-            
-        } catch (SQLException e) {
+        ps.setInt(1, id);
+        
+        int rows = ps.executeUpdate();
+        return rows > 0;
+        
+    } catch (SQLException e) {
+        // SQLState "23000" usually refers to Integrity Constraint Violation (Foreign Key)
+        if (e.getSQLState().startsWith("23")) {
+            System.out.println("Cannot delete quiz ID " + id + " because it has linked data.");
+        } else {
             this.log(Level.SEVERE, "Something wrong while deleteQuiz() execute!", e);
-            return false;
-        } finally {
-            this.closeResources();
         }
+        return false;
+    } finally {
+        this.closeResources();
     }
+}
     
     /**
      * Retrieves a quiz by its ID
