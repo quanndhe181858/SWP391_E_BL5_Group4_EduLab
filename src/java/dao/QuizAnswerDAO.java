@@ -4,10 +4,22 @@
  */
 package dao;
 
+import database.dao;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Le Minh Duc
  */
-public class QuizAnswerDAO {
+public class QuizAnswerDAO extends dao {
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
+
+    private void log(Level level, String msg, Throwable e) {
+        this.logger.log(level, msg, e);
+    }
     
+    public static void main(String[] args) {
+
+    }
 }

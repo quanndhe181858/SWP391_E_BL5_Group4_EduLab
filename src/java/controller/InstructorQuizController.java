@@ -1,0 +1,272 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ */
+package controller;
+
+import dao.QuizDAO;
+import model.Quiz;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+/**
+ * Controller for Quiz operations
+ * @author Le Minh Duc
+ */
+@WebServlet(name = "InstructorQuizController", urlPatterns = {"/instructor/quizes"})
+public class InstructorQuizController extends HttpServlet {
+    
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private QuizDAO quizDAO;
+    
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        quizDAO = new QuizDAO();
+    }
+    
+    /**
+     * Handles GET requests - displays quiz list
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        String action = request.getParameter("action");
+        
+        try {
+            if (action == null) {
+                // Default action: show quiz list
+                showQuizList(request, response);
+            } else {
+                switch (action) {
+                    case "list":
+                        showQuizList(request, response);
+                        break;
+                    case "view":
+                        viewQuizDetail(request, response);
+                        break;
+                    case "edit":
+                        showEditForm(request, response);
+                        break;
+                    case "delete":
+                        deleteQuiz(request, response);
+                        break;
+                    case "create":
+                        showCreateForm(request, response);
+                        break;
+                    default:
+                        showQuizList(request, response);
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error in QuizController doGet", e);
+            request.setAttribute("error", "An error occurred: " + e.getMessage());
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
+        }
+    }
+    
+    /**
+     * Handles POST requests - creates or updates quiz
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        String action = request.getParameter("action");
+        
+        try {
+            if (action == null) {
+                showQuizList(request, response);
+            } else {
+                switch (action) {
+                    case "create":
+                        createQuiz(request, response);
+                        break;
+                    case "update":
+                        updateQuiz(request, response);
+                        break;
+                    default:
+                        showQuizList(request, response);
+                        break;
+                }
+            }
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error in QuizController doPost", e);
+            request.setAttribute("error", "An error occurred: " + e.getMessage());
+            request.getRequestDispatcher("/error.jsp").forward(request, response);
+        }
+    }
+    
+    /**
+     * Displays the list of all quizzes
+     */
+    private void showQuizList(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        // Get filter parameters if any
+        String categoryIdParam = request.getParameter("categoryId");
+        String typeParam = request.getParameter("type");
+        
+        List<Quiz> quizList;
+        
+        // Apply filters if provided
+        if (categoryIdParam != null && !categoryIdParam.isEmpty()) {
+            int categoryId = Integer.parseInt(categoryIdParam);
+            quizList = quizDAO.getQuizzesByCategory(categoryId);
+        } else if (typeParam != null && !typeParam.isEmpty()) {
+            quizList = quizDAO.getQuizzesByType(typeParam);
+        } else {
+            quizList = quizDAO.getAllQuizzes();
+        }
+        
+        request.setAttribute("quizList", quizList);
+        request.setAttribute("totalQuizzes", quizList.size());
+        request.getRequestDispatcher("/quizList.jsp").forward(request, response);
+    }
+    
+    /**
+     * Displays details of a specific quiz
+     */
+    private void viewQuizDetail(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        int quizId = Integer.parseInt(request.getParameter("id"));
+        Quiz quiz = quizDAO.getQuizById(quizId);
+        
+        if (quiz != null) {
+            request.setAttribute("quiz", quiz);
+            request.getRequestDispatcher("/quizDetail.jsp").forward(request, response);
+        } else {
+            request.setAttribute("error", "Quiz not found with ID: " + quizId);
+            showQuizList(request, response);
+        }
+    }
+    
+    /**
+     * Shows the form to create a new quiz
+     */
+    private void showCreateForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        request.getRequestDispatcher("/createQuiz.jsp").forward(request, response);
+    }
+    
+    /**
+     * Shows the form to edit an existing quiz
+     */
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        int quizId = Integer.parseInt(request.getParameter("id"));
+        Quiz quiz = quizDAO.getQuizById(quizId);
+        
+        if (quiz != null) {
+            request.setAttribute("quiz", quiz);
+            request.getRequestDispatcher("/editQuiz.jsp").forward(request, response);
+        } else {
+            request.setAttribute("error", "Quiz not found with ID: " + quizId);
+            showQuizList(request, response);
+        }
+    }
+    
+    /**
+     * Creates a new quiz
+     */
+    private void createQuiz(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        // Get form parameters
+        String question = request.getParameter("question");
+        String type = request.getParameter("type");
+        int categoryId = Integer.parseInt(request.getParameter("categoryId"));
+        
+        // Get user ID from session (assuming user is logged in)
+        // For now, using a default value
+        int userId = 1; // TODO: Get from session
+        
+        // Create quiz object
+        Quiz quiz = new Quiz();
+        quiz.setQuestion(question);
+        quiz.setType(type);
+        quiz.setCategory_id(categoryId);
+        
+        // Save to database
+        Quiz createdQuiz = quizDAO.createQuiz(quiz, userId);
+        
+        if (createdQuiz != null) {
+            request.setAttribute("success", "Quiz created successfully!");
+            response.sendRedirect(request.getContextPath() + "/quiz?action=list");
+        } else {
+            request.setAttribute("error", "Failed to create quiz.");
+            request.getRequestDispatcher("/createQuiz.jsp").forward(request, response);
+        }
+    }
+    
+    /**
+     * Updates an existing quiz
+     */
+    private void updateQuiz(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        // Get form parameters
+        int quizId = Integer.parseInt(request.getParameter("id"));
+        String question = request.getParameter("question");
+        String type = request.getParameter("type");
+        int categoryId = Integer.parseInt(request.getParameter("categoryId"));
+        
+        // Get user ID from session
+        int userId = 1; // TODO: Get from session
+        
+        // Create quiz object with updated data
+        Quiz quiz = new Quiz();
+        quiz.setId(quizId);
+        quiz.setQuestion(question);
+        quiz.setType(type);
+        quiz.setCategory_id(categoryId);
+        
+        // Update in database
+        Quiz updatedQuiz = quizDAO.updateQuiz(quiz, userId);
+        
+        if (updatedQuiz != null) {
+            request.setAttribute("success", "Quiz updated successfully!");
+            response.sendRedirect(request.getContextPath() + "/quiz?action=list");
+        } else {
+            request.setAttribute("error", "Failed to update quiz.");
+            request.setAttribute("quiz", quiz);
+            request.getRequestDispatcher("/editQuiz.jsp").forward(request, response);
+        }
+    }
+    
+    /**
+     * Deletes a quiz
+     */
+    private void deleteQuiz(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        int quizId = Integer.parseInt(request.getParameter("id"));
+        
+        boolean deleted = quizDAO.deleteQuiz(quizId);
+        
+        if (deleted) {
+            request.setAttribute("success", "Quiz deleted successfully!");
+        } else {
+            request.setAttribute("error", "Failed to delete quiz.");
+        }
+        
+        response.sendRedirect(request.getContextPath() + "/quiz?action=list");
+    }
+    
+    @Override
+    public String getServletInfo() {
+        return "Quiz Controller - Handles CRUD operations for quizzes";
+    }
+}
