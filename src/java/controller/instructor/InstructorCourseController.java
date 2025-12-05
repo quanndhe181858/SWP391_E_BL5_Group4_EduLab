@@ -16,12 +16,12 @@ import jakarta.servlet.http.HttpSession;
 import model.Course;
 import model.User;
 import service.CategoryServices;
-import service.CourseSectionServices;
 import service.CourseServices;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
 import util.AuthUtils;
+import util.ResponseUtils;
 
 /**
  *
@@ -33,7 +33,6 @@ import util.AuthUtils;
 public class InstructorCourseController extends HttpServlet {
 
     private CategoryServices _categoryService;
-    private CourseSectionServices _courseSectionService;
     private CourseServices _courseService;
     private final String BASE_PATH = "/instructor/courses";
 
@@ -41,24 +40,15 @@ public class InstructorCourseController extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         _categoryService = new CategoryServices();
-        _courseSectionService = new CourseSectionServices();
         _courseService = new CourseServices();
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        HttpSession session = req.getSession(false);
-
-        if (session == null) {
-            resp.sendError(httpStatus.UNAUTHORIZED.getCode(), httpStatus.UNAUTHORIZED.getMessage());
-            return;
-        }
-
         try {
             String qs = req.getQueryString();
-            User user = (User) session.getAttribute("user");
-            AuthUtils.doAuthorize(req, resp, user, 2);
+            User user = AuthUtils.doAuthorize(req, resp, 2);
 
             if (qs == null) {
                 this.getListCourses(req, resp);
@@ -74,43 +64,25 @@ public class InstructorCourseController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        HttpSession session = req.getSession(false);
-
-        if (session == null) {
-            resp.sendError(httpStatus.UNAUTHORIZED.getCode(), httpStatus.UNAUTHORIZED.getMessage());
-            return;
-        }
-
         Map<String, Object> res = new HashMap<>();
 
         try {
-            User user = (User) session.getAttribute("user");
-            AuthUtils.doAuthorize(req, resp, user, 2);
-            
-            
-            
+            User user = AuthUtils.doAuthorize(req, resp, 2);
+
         } catch (ServletException | IOException e) {
             resp.setStatus(500);
             res.put("success", false);
             res.put("message", httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
 
-        sendJsonResponse(resp, res);
+        ResponseUtils.sendJsonResponse(resp, res);
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        HttpSession session = req.getSession(false);
-
-        if (session == null) {
-            resp.sendError(httpStatus.UNAUTHORIZED.getCode(), httpStatus.UNAUTHORIZED.getMessage());
-            return;
-        }
-
         try {
-            User user = (User) session.getAttribute("user");
-            AuthUtils.doAuthorize(req, resp, user, 2);
+            User user = AuthUtils.doAuthorize(req, resp, 2);
 
             String courseIdStr = req.getParameter("cid");
 
@@ -151,25 +123,18 @@ public class InstructorCourseController extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        HttpSession session = req.getSession(false);
-
-        if (session == null) {
-            resp.sendError(httpStatus.UNAUTHORIZED.getCode(), httpStatus.UNAUTHORIZED.getMessage());
-            return;
-        }
-
         Map<String, Object> res = new HashMap<>();
 
         try {
-            User user = (User) session.getAttribute("user");
-            AuthUtils.doAuthorize(req, resp, user, 2);
+            User user = AuthUtils.doAuthorize(req, resp, 2);
+            
         } catch (ServletException | IOException e) {
             resp.setStatus(500);
             res.put("success", false);
             res.put("message", httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
 
-        sendJsonResponse(resp, res);
+        ResponseUtils.sendJsonResponse(resp, res);
     }
 
     protected void getListCourses(HttpServletRequest req, HttpServletResponse resp)
@@ -207,13 +172,4 @@ public class InstructorCourseController extends HttpServlet {
         req.getRequestDispatcher("../View/Instructor/CourseDetail.jsp").forward(req, resp);
     }
 
-    public void sendJsonResponse(HttpServletResponse response, Object data) throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        Gson gson = new Gson();
-        String json = gson.toJson(data);
-
-        response.getWriter().write(json);
-    }
 }

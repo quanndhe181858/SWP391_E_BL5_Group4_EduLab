@@ -8,6 +8,7 @@ import constant.httpStatus;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import model.User;
 
@@ -17,11 +18,22 @@ import model.User;
  */
 public class AuthUtils {
 
-    public static void doAuthorize(HttpServletRequest req, HttpServletResponse resp, User u, int roleAccepted)
+    public static User doAuthorize(HttpServletRequest req, HttpServletResponse resp, int roleAccepted)
             throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+
+        if (session == null) {
+            resp.sendError(httpStatus.UNAUTHORIZED.getCode(), httpStatus.UNAUTHORIZED.getMessage());
+            return null;
+        }
+
+        User u = (User) session.getAttribute("user");
+
         if (u.getRole_id() != roleAccepted) {
             resp.sendError(httpStatus.FORBIDDEN.getCode(), httpStatus.FORBIDDEN.getMessage());
-            return;
+            return null;
         }
+
+        return u;
     }
 }
