@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import model.Category;
+import model.CourseSection;
+import service.CourseSectionServices;
 import util.AuthUtils;
 import util.ResponseUtils;
 
@@ -36,6 +38,7 @@ public class InstructorCourseController extends HttpServlet {
 
     private CategoryServices _categoryService;
     private CourseServices _courseService;
+    private CourseSectionServices _courseSectionService;
     private final String BASE_PATH = "/instructor/courses";
 
     @Override
@@ -43,6 +46,7 @@ public class InstructorCourseController extends HttpServlet {
         super.init(config);
         _categoryService = new CategoryServices();
         _courseService = new CourseServices();
+        _courseSectionService = new CourseSectionServices();
     }
 
     @Override
@@ -253,10 +257,26 @@ public class InstructorCourseController extends HttpServlet {
             resp.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
             return;
         } else {
+            List<Category> categories = _categoryService.getCategories();
+
+            List<Category> parentCategories = categories.stream()
+                    .filter(ct -> ct.getParent_id() == 0)
+                    .collect(Collectors.toList());
+
+            List<Category> childCategories = categories.stream()
+                    .filter(ct -> ct.getParent_id() != 0)
+                    .collect(Collectors.toList());
+
+            List<CourseSection> csList = _courseSectionService.getSectionsByCourseId(c.getId());
+
+            req.setAttribute("parents", parentCategories);
+            req.setAttribute("children", childCategories);
+
             req.setAttribute("course", c);
+            req.setAttribute("courseSections", csList);
         }
 
-        req.getRequestDispatcher("../View/Instructor/CourseDetail.jsp").forward(req, resp);
+        req.getRequestDispatcher("../View/Instructor/CourseCreateUpdate.jsp").forward(req, resp);
     }
 
 }

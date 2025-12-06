@@ -163,16 +163,7 @@ public class CourseDAO extends dao {
     public Course getCourseById(int id) {
         String sql = """
                  SELECT 
-                     id,
-                     uuid,
-                     title,
-                     description,
-                     status,
-                     category_id,
-                     created_at,
-                     updated_at,
-                     created_by,
-                     updated_by
+                     *
                  FROM edulab.course
                  WHERE id = ?;
                  """;
@@ -201,6 +192,7 @@ public class CourseDAO extends dao {
                 course.setUpdated_at(rs.getTimestamp("updated_at"));
                 course.setCreated_by(rs.getInt("created_by"));
                 course.setUpdated_by(rs.getInt("updated_by"));
+                course.setThumbnail(rs.getString("thumbnail"));
                 
                 return course;
             }
