@@ -117,6 +117,35 @@ public class Course {
         this.status = status;
     }
 
+    public String getUpdatedAgo() {
+        if (updated_at == null) {
+            return "no update";
+        }
+
+        long diffMillis = System.currentTimeMillis() - updated_at.getTime();
+
+        long seconds = diffMillis / 1000;
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        long days = hours / 24;
+        long months = days / 30;
+        long years = days / 365;
+
+        if (seconds < 60) {
+            return "updated just now";
+        } else if (minutes < 60) {
+            return "updated " + minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
+        } else if (hours < 24) {
+            return "updated " + hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+        } else if (days < 30) {
+            return "updated " + days + " day" + (days > 1 ? "s" : "") + " ago";
+        } else if (months < 12) {
+            return "updated " + months + " month" + (months > 1 ? "s" : "") + " ago";
+        } else {
+            return "updated " + years + " year" + (years > 1 ? "s" : "") + " ago";
+        }
+    }
+
     @Override
     public String toString() {
         return "Course{" + "id=" + id + ", uuid=" + uuid + ", title=" + title + ", description=" + description + ", status=" + status + ", category_id=" + category_id + ", category=" + category + ", created_at=" + created_at + ", updated_at=" + updated_at + ", created_by=" + created_by + ", updated_by=" + updated_by + '}';
