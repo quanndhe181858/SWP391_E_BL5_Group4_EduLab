@@ -17,6 +17,7 @@ public class Course {
     private String title;
     private String description;
     private String status;
+    private String thumbnail;
 
     private int category_id;
     private Category category;
@@ -115,6 +116,14 @@ public class Course {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
     }
 
     public String getUpdatedAgo() {

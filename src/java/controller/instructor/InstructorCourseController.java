@@ -176,7 +176,9 @@ public class InstructorCourseController extends HttpServlet {
             int offset = (page - 1) * paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE;
 
             List<Course> courseList = _courseService.getListCourseByInstructorId(paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE, offset, search, search, filterCategoryId, status, sortBy, instructorId);
-            int totalCourses = _courseService.countCoursesByInstructorId(search, search, filterCategoryId, status, instructorId);
+            int totalCourses = _courseService.countCoursesByInstructorId(instructorId, "all");
+            int totalActiveCourses = _courseService.countCoursesByInstructorId(instructorId, "Active");
+            int totalInactiveCourses = _courseService.countCoursesByInstructorId(instructorId, "Inactive");
 
             int totalPages = (int) Math.ceil((double) totalCourses / paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE);
 
@@ -210,6 +212,8 @@ public class InstructorCourseController extends HttpServlet {
             req.setAttribute("startItem", startItem);
             req.setAttribute("endItem", endItem);
             req.setAttribute("totalCourses", totalCourses);
+            req.setAttribute("totalActiveCourses", totalActiveCourses);
+            req.setAttribute("totalInactiveCourses", totalInactiveCourses);
 
             req.setAttribute("parents", parentCategories);
             req.setAttribute("children", childCategories);
