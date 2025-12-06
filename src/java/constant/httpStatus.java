@@ -14,7 +14,8 @@ public enum httpStatus {
     UNAUTHORIZED(401, "Bạn không có quyền thực hiện điều này, nếu chưa đăng nhập, hãy thử đăng nhập trước nhé!"),
     FORBIDDEN(403, "Bạn đã bị cấm xem tài nguyên này!"),
     OK(200, "OK"),
-    CREATED(201, "Tài nguyên đã được tạo, lưu thành công");
+    CREATED(201, "Tài nguyên đã được tạo, lưu thành công"),
+    BAD_REQUEST(400, "Úi, có thể bạn hoặc hệ thống rơi rớt data ở đâu đó rồi, vui lòng kiểm tra hoặc thử lại sau!");
 
     private final int code;
     private final String message;

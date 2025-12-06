@@ -5,14 +5,12 @@
 package dao;
 
 import database.dao;
-import java.sql.Timestamp;
 import java.sql.SQLException;
 import model.Course;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.sql.Date;
 import java.util.List;
 
 /**
@@ -53,7 +51,9 @@ public class CourseDAO extends dao {
 //
 //        boolean deleted = dao.deleteCourse(updated.getId());
 //        System.out.println("Deleted? " + deleted);
-        System.out.println(dao.getCourses(0, 0, "", "", 0, "", null, null));
+//        System.out.println(dao.getCoursesByInstructorId(10, 0, "", "", 0, "", "", 1));
+//        System.out.println(dao.countCourses("", "", 0, ""));
+        System.out.println(dao.countCoursesByInstructorId("", "", 0, "", 1));
     }
 
     public Course createCourse(Course course, int uid) {
@@ -273,7 +273,7 @@ public class CourseDAO extends dao {
     }
 
     public List<Course> getCourses(int limit, int offset, String title, String description,
-            int categoryId, String status, Date start, Date end) {
+            int categoryId, String status, String sortBy) {
 
         List<Course> cList = new ArrayList<>();
 
@@ -301,16 +301,6 @@ public class CourseDAO extends dao {
         if (status != null && !status.isEmpty()) {
             sql.append(" AND status = ?");
             params.add(status);
-        }
-
-        if (start != null) {
-            sql.append(" AND created_at >= ?");
-            params.add(start);
-        }
-
-        if (end != null) {
-            sql.append(" AND created_at <= ?");
-            params.add(end);
         }
 
         sql.append(" ORDER BY id DESC");
@@ -354,4 +344,185 @@ public class CourseDAO extends dao {
         return cList;
     }
 
+    public List<Course> getCoursesByInstructorId(int limit, int offset, String title, String description,
+            int categoryId, String status, String sortBy, int instructorId) {
+
+        List<Course> cList = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM edulab.course WHERE created_by = ?"
+        );
+
+        List<Object> params = new ArrayList<>();
+
+        if (title != null && !title.isEmpty()) {
+            sql.append(" AND title LIKE ?");
+            params.add("%" + title + "%");
+        }
+
+        if (description != null && !description.isEmpty()) {
+            sql.append(" AND description LIKE ?");
+            params.add("%" + description + "%");
+        }
+
+        if (categoryId > 0) {
+            sql.append(" AND category_id = ?");
+            params.add(categoryId);
+        }
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND status = ?");
+            params.add(status);
+        }
+
+        sql.append(" ORDER BY id DESC");
+        sql.append(" LIMIT ? OFFSET ?");
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+
+            int index = 1;
+
+            ps.setInt(index++, 1);
+
+            for (Object p : params) {
+                ps.setObject(index++, p);
+            }
+
+            ps.setInt(index++, limit);
+            ps.setInt(index, offset);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Course c = new Course();
+                c.setId(rs.getInt("id"));
+                c.setUuid(rs.getString("uuid"));
+                c.setTitle(rs.getString("title"));
+                c.setDescription(rs.getString("description"));
+                c.setStatus(rs.getString("status"));
+                c.setCategory_id(rs.getInt("category_id"));
+                c.setCreated_at(rs.getTimestamp("created_at"));
+                c.setUpdated_at(rs.getTimestamp("updated_at"));
+                c.setCreated_by(rs.getInt("created_by"));
+                c.setUpdated_by(rs.getInt("updated_by"));
+                cList.add(c);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error in getCourses()", e);
+        } finally {
+            this.closeResources();
+        }
+
+        return cList;
+    }
+
+    public int countCourses(String title, String description,
+            int categoryId, String status) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) FROM edulab.course WHERE 1 = 1"
+        );
+
+        List<Object> params = new ArrayList<>();
+
+        if (title != null && !title.isEmpty()) {
+            sql.append(" AND title LIKE ?");
+            params.add("%" + title + "%");
+        }
+
+        if (description != null && !description.isEmpty()) {
+            sql.append(" AND description LIKE ?");
+            params.add("%" + description + "%");
+        }
+
+        if (categoryId > 0) {
+            sql.append(" AND category_id = ?");
+            params.add(categoryId);
+        }
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND status = ?");
+            params.add(status);
+        }
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+
+            int index = 1;
+            for (Object p : params) {
+                ps.setObject(index++, p);
+            }
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error in getCourses()", e);
+        } finally {
+            this.closeResources();
+        }
+
+        return 0;
+    }
+
+    public int countCoursesByInstructorId(String title, String description,
+            int categoryId, String status, int instructorId) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) FROM edulab.course WHERE created_by = ?"
+        );
+
+        List<Object> params = new ArrayList<>();
+
+        if (title != null && !title.isEmpty()) {
+            sql.append(" AND title LIKE ?");
+            params.add("%" + title + "%");
+        }
+
+        if (description != null && !description.isEmpty()) {
+            sql.append(" AND description LIKE ?");
+            params.add("%" + description + "%");
+        }
+
+        if (categoryId > 0) {
+            sql.append(" AND category_id = ?");
+            params.add(categoryId);
+        }
+
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND status = ?");
+            params.add(status);
+        }
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+
+            int index = 1;
+
+            ps.setInt(index++, instructorId);
+
+            for (Object p : params) {
+                ps.setObject(index++, p);
+            }
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error in getCourses()", e);
+        } finally {
+            this.closeResources();
+        }
+
+        return 0;
+    }
 }
