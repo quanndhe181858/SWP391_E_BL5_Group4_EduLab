@@ -106,6 +106,7 @@ public class CourseDAO extends dao {
                      `description` = ?, 
                      `category_id` = ?, 
                      `status` = ?, 
+                     `thumbnail` = ?,
                      `updated_by` = ?
                  WHERE `id` = ?;
                  """;
@@ -118,8 +119,9 @@ public class CourseDAO extends dao {
             ps.setString(2, course.getDescription());
             ps.setInt(3, course.getCategory_id());
             ps.setString(4, course.getStatus());
-            ps.setInt(5, uid);
-            ps.setInt(6, course.getId());
+            ps.setString(5, course.getThumbnail());
+            ps.setInt(6, uid);
+            ps.setInt(7, course.getId());
 
             int rows = ps.executeUpdate();
 

@@ -14,6 +14,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
 import model.Course;
 import model.User;
 import service.CategoryServices;
@@ -26,13 +27,18 @@ import model.Category;
 import model.CourseSection;
 import service.CourseSectionServices;
 import util.AuthUtils;
+import util.FileUtils;
 import util.ResponseUtils;
 
 /**
  *
  * @author quan
  */
-@MultipartConfig()
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+        maxFileSize = 1024 * 1024 * 100, // 100MB
+        maxRequestSize = 1024 * 1024 * 150 // 150MB
+)
 @WebServlet(name = "InstructorCourseController", urlPatterns = {
     "/instructor/courses"
 })
@@ -159,10 +165,8 @@ public class InstructorCourseController extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Map<String, Object> res = new HashMap<>();
-
         try {
             User user = AuthUtils.doAuthorize(req, resp, 2);
-
             int instructorId = user.getId();
 
             String cidStr = req.getParameter("id");
@@ -170,52 +174,112 @@ public class InstructorCourseController extends HttpServlet {
             String description = req.getParameter("description");
             String categoryIdStr = req.getParameter("categoryId");
             String status = req.getParameter("status");
+            Part filePart = req.getPart("thumbnail");
 
-            if (cidStr == null || cidStr.isBlank()) {
+            if (cidStr == null || cidStr.isBlank() || title == null || title.isBlank()
+                    || description == null || description.isBlank()
+                    || categoryIdStr == null || categoryIdStr.isBlank()
+                    || status == null || status.isBlank()) {
                 resp.setStatus(400);
                 res.put("success", false);
-                res.put("message", httpStatus.BAD_REQUEST.getMessage());
+                res.put("message", "Vui lòng điền đầy đủ thông tin bắt buộc");
                 ResponseUtils.sendJsonResponse(resp, res);
                 return;
             }
 
             int courseId = 0;
             int categoryId = 0;
-
             try {
                 courseId = Integer.parseInt(cidStr);
                 categoryId = Integer.parseInt(categoryIdStr);
             } catch (NumberFormatException e) {
-                resp.setStatus(500);
-                res.put("success", false);
-                res.put("message", httpStatus.INTERNAL_SERVER_ERROR.getMessage());
-                ResponseUtils.sendJsonResponse(resp, res);
-                return;
-            }
-
-            if (cidStr.isBlank()) {
                 resp.setStatus(400);
                 res.put("success", false);
-                res.put("message", httpStatus.BAD_REQUEST.getMessage());
+                res.put("message", "ID không hợp lệ");
                 ResponseUtils.sendJsonResponse(resp, res);
                 return;
             }
 
             Course c = _courseService.getCourseById(courseId);
+            if (c == null) {
+                resp.setStatus(404);
+                res.put("success", false);
+                res.put("message", "Không tìm thấy khoá học");
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
+            if (c.getCreated_by() != instructorId) {
+                resp.setStatus(403);
+                res.put("success", false);
+                res.put("message", "Bạn không có quyền chỉnh sửa khoá học này");
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
             c.setTitle(title);
             c.setDescription(description);
             c.setCategory_id(categoryId);
             c.setStatus(status);
 
+            String thumbnailPath = c.getThumbnail();
+
+            if (filePart != null && filePart.getSize() > 0) {
+                try {
+                    String oldThumbnail = c.getThumbnail();
+
+                    thumbnailPath = FileUtils.updateFile(
+                            filePart,
+                            oldThumbnail,
+                            "image",
+                            getServletContext()
+                    );
+
+                    c.setThumbnail(thumbnailPath);
+
+                } catch (IllegalArgumentException e) {
+                    resp.setStatus(400);
+                    res.put("success", false);
+                    res.put("message", "Lỗi tải ảnh: " + e.getMessage());
+                    ResponseUtils.sendJsonResponse(resp, res);
+                    return;
+                } catch (IOException e) {
+                    resp.setStatus(500);
+                    res.put("success", false);
+                    res.put("message", "Không thể lưu ảnh, vui lòng thử lại");
+                    ResponseUtils.sendJsonResponse(resp, res);
+                    return;
+                }
+            }
+
             if (_courseService.updateCourse(c, instructorId)) {
                 resp.setStatus(200);
                 res.put("success", true);
                 res.put("message", "Cập nhật khoá học thành công!");
+                res.put("data", Map.of(
+                        "id", c.getId(),
+                        "title", c.getTitle(),
+                        "thumbnail", c.getThumbnail()
+                ));
+            } else {
+                if (filePart != null && filePart.getSize() > 0 && thumbnailPath != null) {
+                    FileUtils.deleteFile(thumbnailPath, getServletContext());
+                }
+
+                resp.setStatus(500);
+                res.put("success", false);
+                res.put("message", "Không thể cập nhật khoá học, vui lòng thử lại");
             }
+
+        } catch (NumberFormatException e) {
+            resp.setStatus(400);
+            res.put("success", false);
+            res.put("message", "Dữ liệu không hợp lệ");
         } catch (ServletException | IOException e) {
+            e.printStackTrace();
             resp.setStatus(500);
             res.put("success", false);
-            res.put("message", httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+            res.put("message", "Có lỗi xảy ra: " + e.getMessage());
         }
 
         ResponseUtils.sendJsonResponse(resp, res);

@@ -55,29 +55,31 @@
                     required
                     onchange="handleTypeChange()">
                     <option value="">Chọn thể loại</option>
-                    <option value="text">Text (Văn bản)</option>
-                    <option value="image">Image (Hình ảnh)</option>
-                    <option value="video">Video</option>
+                    <option value="text">Text (Chỉ văn bản)</option>
+                    <option value="image">Image (Văn bản + Hình ảnh)</option>
+                    <option value="video">Video (Văn bản + Video)</option>
                 </select>
             </div>
 
-            <!-- Text Content (Only for Text type) -->
-            <div id="textContentSection" class="hidden">
+            <!-- Content Section - Always visible and required -->
+            <div>
                 <label for="sectionContent" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Nội dung văn bản <span class="text-red-500">*</span>
+                    Nội dung bài học <span class="text-red-500">*</span>
                 </label>
                 <textarea 
                     id="sectionContent" 
                     name="content"
                     rows="6"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                    placeholder="Nhập nội dung bài học..."></textarea>
+                    placeholder="Nhập nội dung chi tiết của bài học..."
+                    required></textarea>
+                <p class="text-xs text-gray-500 mt-1">Nội dung văn bản là bắt buộc cho mọi loại bài học</p>
             </div>
 
             <!-- Image Upload (Only for Image type) -->
             <div id="imageUploadSection" class="hidden">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Tải lên hình ảnh <span class="text-red-500">*</span>
+                    Đính kèm hình ảnh <span class="text-red-500">*</span>
                 </label>
                 <div class="space-y-3">
                     <div id="imagePreviewContainer" class="hidden">
@@ -100,7 +102,7 @@
                     <input 
                         type="file" 
                         id="sectionImage" 
-                        name="image"
+                        name="media"
                         accept="image/*"
                         class="hidden"
                         onchange="handleImageUpload(event)">
@@ -120,7 +122,7 @@
             <!-- Video Upload (Only for Video type) -->
             <div id="videoUploadSection" class="hidden">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Tải lên video <span class="text-red-500">*</span>
+                    Đính kèm video <span class="text-red-500">*</span>
                 </label>
                 <div class="space-y-3">
                     <div id="videoPreviewContainer" class="hidden">
@@ -145,7 +147,7 @@
                     <input 
                         type="file" 
                         id="sectionVideo" 
-                        name="video"
+                        name="media"
                         accept="video/*"
                         class="hidden"
                         onchange="handleVideoUpload(event)">
@@ -232,8 +234,6 @@
 
         document.getElementById('imagePreviewContainer').classList.add('hidden');
         document.getElementById('videoPreviewContainer').classList.add('hidden');
-
-        document.getElementById('textContentSection').classList.add('hidden');
         document.getElementById('imageUploadSection').classList.add('hidden');
         document.getElementById('videoUploadSection').classList.add('hidden');
     }
@@ -241,19 +241,15 @@
     function handleTypeChange() {
         const type = document.getElementById('sectionType').value;
 
-        document.getElementById('textContentSection').classList.add('hidden');
         document.getElementById('imageUploadSection').classList.add('hidden');
         document.getElementById('videoUploadSection').classList.add('hidden');
 
-        document.getElementById('sectionContent').value = '';
         document.getElementById('sectionImage').value = '';
         document.getElementById('sectionVideo').value = '';
         document.getElementById('imagePreviewContainer').classList.add('hidden');
         document.getElementById('videoPreviewContainer').classList.add('hidden');
 
-        if (type === 'text') {
-            document.getElementById('textContentSection').classList.remove('hidden');
-        } else if (type === 'image') {
+        if (type === 'image') {
             document.getElementById('imageUploadSection').classList.remove('hidden');
         } else if (type === 'video') {
             document.getElementById('videoUploadSection').classList.remove('hidden');
@@ -330,30 +326,27 @@
         const type = document.getElementById('sectionType').value;
         const title = document.getElementById('sectionTitle').value.trim();
         const description = document.getElementById('sectionDescription').value.trim();
+        const content = document.getElementById('sectionContent').value.trim();
         const position = document.getElementById('sectionPosition').value;
         const status = document.querySelector('input[name="status"]:checked').value;
+        
+        console.log(title + description + type + content + position);
 
-        if (!title || !description || !type || !position) {
+        if (!title || !description || !type || !content || !position) {
             showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error', 2500);
             return;
         }
 
-        if (type === 'text') {
-            const content = document.getElementById('sectionContent').value.trim();
-            if (!content) {
-                showToast('Vui lòng nhập nội dung văn bản', 'error', 2500);
-                return;
-            }
-        } else if (type === 'image') {
+        if (type === 'image') {
             const imageFile = document.getElementById('sectionImage').files[0];
             if (!imageFile) {
-                showToast('Vui lòng chọn hình ảnh', 'error', 2500);
+                showToast('Vui lòng chọn hình ảnh đính kèm', 'error', 2500);
                 return;
             }
         } else if (type === 'video') {
             const videoFile = document.getElementById('sectionVideo').files[0];
             if (!videoFile) {
-                showToast('Vui lòng chọn video', 'error', 2500);
+                showToast('Vui lòng chọn video đính kèm', 'error', 2500);
                 return;
             }
         }
@@ -362,16 +355,15 @@
         formData.append('courseId', '${course.id}');
         formData.append('title', title);
         formData.append('description', description);
+        formData.append('content', content);
         formData.append('type', type);
         formData.append('position', position);
         formData.append('status', status);
 
-        if (type === 'text') {
-            formData.append('content', document.getElementById('sectionContent').value.trim());
-        } else if (type === 'image') {
-            formData.append('content', document.getElementById('sectionImage').files[0]);
+        if (type === 'image') {
+            formData.append('media', document.getElementById('sectionImage').files[0]);
         } else if (type === 'video') {
-            formData.append('content', document.getElementById('sectionVideo').files[0]);
+            formData.append('media', document.getElementById('sectionVideo').files[0]);
         }
 
         $.ajax({

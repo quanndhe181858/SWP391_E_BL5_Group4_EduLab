@@ -225,7 +225,7 @@
                                             <c:forEach items="${courseList}" var="course">
                                                 <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition">
                                                     <div class="flex flex-col md:flex-row gap-6">
-                                                        <img class="w-full md:w-48 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex-shrink-0" src="${course.thumbnail}" />
+                                                        <img class="w-full md:w-48 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex-shrink-0" src="${pageContext.request.contextPath}/${course.thumbnail}" />
 
                                                         <div class="flex-grow">
                                                             <div class="flex items-start justify-between mb-2">

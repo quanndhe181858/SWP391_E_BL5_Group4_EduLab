@@ -8,31 +8,50 @@ import constant.httpStatus;
 import jakarta.servlet.ServletConfig;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+import java.util.HashMap;
+import java.util.Map;
+import model.Course;
 import model.CourseSection;
+import model.Media;
 import model.User;
 import service.CourseSectionServices;
+import service.CourseServices;
+import service.MediaServices;
 import util.AuthUtils;
+import util.FileUtils;
+import util.ResponseUtils;
 
 /**
  *
  * @author quan
  */
+@MultipartConfig(
+        fileSizeThreshold = 1024 * 1024 * 2, // 2MB
+        maxFileSize = 1024 * 1024 * 100, // 100MB
+        maxRequestSize = 1024 * 1024 * 150 // 150MB
+)
 @WebServlet(name = "CourseSectionsController", urlPatterns = {
     "/instructor/courses/sections"
 })
 public class CourseSectionsController extends HttpServlet {
 
     private CourseSectionServices _courseSectionService;
+    private CourseServices _courseService;
+    private MediaServices _mediaService;
 
     @Override
     public void init(ServletConfig config)
             throws ServletException {
         super.init(config);
         _courseSectionService = new CourseSectionServices();
+        _courseService = new CourseServices();
+        _mediaService = new MediaServices();
     }
 
     @Override
@@ -56,7 +75,168 @@ public class CourseSectionsController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        
+
+        Map<String, Object> res = new HashMap<>();
+
+        try {
+            User user = AuthUtils.doAuthorize(req, resp, 2);
+            int instructorId = user.getId();
+
+            String courseIdStr = req.getParameter("courseId");
+            String title = req.getParameter("title");
+            String description = req.getParameter("description");
+            String content = req.getParameter("content");
+            String type = req.getParameter("type");
+            String positionStr = req.getParameter("position");
+            String status = req.getParameter("status");
+
+            if (courseIdStr == null || courseIdStr.isBlank()
+                    || title == null || title.isBlank()
+                    || description == null || description.isBlank()
+                    || content == null || content.isBlank()
+                    || type == null || type.isBlank()
+                    || positionStr == null || positionStr.isBlank()
+                    || status == null || status.isBlank()) {
+                resp.setStatus(400);
+                res.put("success", false);
+                res.put("message", "Vui lòng điền đầy đủ thông tin bắt buộc");
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
+            int courseId = 0;
+            int position = 0;
+            try {
+                courseId = Integer.parseInt(courseIdStr);
+                position = Integer.parseInt(positionStr);
+            } catch (NumberFormatException e) {
+                resp.setStatus(400);
+                res.put("success", false);
+                res.put("message", "Dữ liệu không hợp lệ");
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
+            if (!type.equals("text") && !type.equals("image") && !type.equals("video")) {
+                resp.setStatus(400);
+                res.put("success", false);
+                res.put("message", "Loại bài học không hợp lệ");
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
+            Course course = _courseService.getCourseById(courseId);
+            if (course == null) {
+                resp.setStatus(404);
+                res.put("success", false);
+                res.put("message", "Không tìm thấy khoá học");
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
+            if (course.getCreated_by() != instructorId) {
+                resp.setStatus(403);
+                res.put("success", false);
+                res.put("message", "Bạn không có quyền thêm bài học vào khoá học này");
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
+            String mediaUrl = null;
+
+            if (type.equals("image") || type.equals("video")) {
+                Part mediaPart = req.getPart("media");
+
+                if (mediaPart == null || mediaPart.getSize() == 0) {
+                    resp.setStatus(400);
+                    res.put("success", false);
+                    res.put("message", "Vui lòng đính kèm " + (type.equals("image") ? "hình ảnh" : "video"));
+                    ResponseUtils.sendJsonResponse(resp, res);
+                    return;
+                }
+
+                try {
+                    mediaUrl = FileUtils.saveFile(mediaPart, type, getServletContext());
+
+                } catch (IllegalArgumentException e) {
+                    resp.setStatus(400);
+                    res.put("success", false);
+                    res.put("message", "Lỗi file: " + e.getMessage());
+                    ResponseUtils.sendJsonResponse(resp, res);
+                    return;
+                } catch (IOException e) {
+                    resp.setStatus(500);
+                    res.put("success", false);
+                    res.put("message", "Không thể lưu file, vui lòng thử lại");
+                    ResponseUtils.sendJsonResponse(resp, res);
+                    return;
+                }
+            }
+
+            CourseSection section = new CourseSection();
+            section.setCourse_id(courseId);
+            section.setTitle(title);
+            section.setDescription(description);
+            section.setContent(content);
+            section.setType(type);
+            section.setPosition(position);
+            section.setStatus(status);
+            section.setCreated_by(instructorId);
+            section.setUpdated_by(instructorId);
+
+            CourseSection createdSection = _courseSectionService.createSection(section);
+
+            if (createdSection != null && createdSection.getId() > 0) {
+                if (mediaUrl != null) {
+                    try {
+                        Media m = new Media();
+                        m.setType("section");
+                        m.setPath(mediaUrl);
+                        m.setObjectId(createdSection.getId());
+
+                        Media createdMedia = _mediaService.createMedia(m, instructorId);
+
+                        if (createdMedia == null || createdMedia.getId() <= 0) {
+                            System.err.println("Warning: Failed to create media record for section " + createdSection.getId());
+                            // FileUtils.deleteFile(mediaUrl, getServletContext());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.err.println("Error creating media record: " + e.getMessage());
+                    }
+                }
+
+                resp.setStatus(200);
+                res.put("success", true);
+                res.put("message", "Thêm bài học thành công!");
+                res.put("data", Map.of(
+                        "id", createdSection.getId(),
+                        "title", createdSection.getTitle(),
+                        "type", createdSection.getType(),
+                        "mediaUrl", mediaUrl != null ? mediaUrl : ""
+                ));
+            } else {
+                if (mediaUrl != null) {
+                    FileUtils.deleteFile(mediaUrl, getServletContext());
+                }
+
+                resp.setStatus(500);
+                res.put("success", false);
+                res.put("message", "Không thể thêm bài học, vui lòng thử lại");
+            }
+
+        } catch (NumberFormatException e) {
+            resp.setStatus(400);
+            res.put("success", false);
+            res.put("message", "Dữ liệu không hợp lệ");
+        } catch (ServletException | IOException e) {
+            e.printStackTrace();
+            resp.setStatus(500);
+            res.put("success", false);
+            res.put("message", "Có lỗi xảy ra: " + e.getMessage());
+        }
+
+        ResponseUtils.sendJsonResponse(resp, res);
     }
 
     @Override
@@ -104,7 +284,7 @@ public class CourseSectionsController extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        
+
     }
 
     protected void getCourseSectionDetail(HttpServletRequest req, HttpServletResponse resp)

@@ -173,7 +173,7 @@
                                 <div class="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
                                     <img 
                                         id="thumbnailPreview" 
-                                        src="${course.thumbnail}" 
+                                        src="${pageContext.request.contextPath}/${course.thumbnail}" 
                                         alt="Course thumbnail"
                                         class="w-full h-full object-cover">
                                     <div id="uploadOverlay" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 hover:opacity-100 transition cursor-pointer">
@@ -338,7 +338,7 @@
                     success: function (response) {
                         formModified = false;
                         showToast("Cập nhật khoá học thành công!", "success", 2500);
-                        setTimeout(() => window.location.reload(), 1500);
+//                        setTimeout(() => window.location.reload(), 1500);
                     },
                     error: function (xhr) {
                         const errorMsg = xhr.responseJSON?.message || "Có lỗi xảy ra trong quá trình cập nhật khoá học, vui lòng thử lại sau";
