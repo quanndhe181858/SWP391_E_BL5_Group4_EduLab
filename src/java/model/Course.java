@@ -17,6 +17,7 @@ public class Course {
     private String title;
     private String description;
     private String status;
+    private String thumbnail;
 
     private int category_id;
     private Category category;
@@ -115,6 +116,43 @@ public class Course {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public String getUpdatedAgo() {
+        if (updated_at == null) {
+            return "Chưa có cập nhật gì";
+        }
+
+        long diffMillis = System.currentTimeMillis() - updated_at.getTime();
+
+        long seconds = diffMillis / 1000;
+        long minutes = seconds / 60;
+        long hours = minutes / 60;
+        long days = hours / 24;
+        long months = days / 30;
+        long years = days / 365;
+
+        if (seconds < 60) {
+            return "Vừa mới cập nhật";
+        } else if (minutes < 60) {
+            return "Cập nhật " + minutes + " phút" + " trước";
+        } else if (hours < 24) {
+            return "Cập nhật " + hours + " giờ" + " trước";
+        } else if (days < 30) {
+            return "Cập nhật " + days + " ngày" + " trước";
+        } else if (months < 12) {
+            return "Cập nhật " + months + " tháng" + " trước";
+        } else {
+            return "Cập nhật " + years + " năm" + " trước";
+        }
     }
 
     @Override
