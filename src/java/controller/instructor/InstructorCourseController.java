@@ -9,6 +9,7 @@ import constant.paging;
 import jakarta.servlet.ServletConfig;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +32,7 @@ import util.ResponseUtils;
  *
  * @author quan
  */
+@MultipartConfig()
 @WebServlet(name = "InstructorCourseController", urlPatterns = {
     "/instructor/courses"
 })
@@ -77,6 +79,31 @@ public class InstructorCourseController extends HttpServlet {
         try {
             User user = AuthUtils.doAuthorize(req, resp, 2);
 
+            String cidStr = req.getParameter("id");
+            String title = req.getParameter("title");
+            String description = req.getParameter("description");
+            String categoryIdStr = req.getParameter("categoryId");
+            String status = req.getParameter("status");
+
+            if (cidStr == null || cidStr.isBlank()) {
+                resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+                return;
+            }
+
+            int courseId = 0;
+
+            try {
+                courseId = Integer.parseInt(cidStr);
+            } catch (NumberFormatException e) {
+                resp.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+                return;
+            }
+
+            if (cidStr.isBlank()) {
+                resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+                return;
+            }
+
         } catch (ServletException | IOException e) {
             resp.setStatus(500);
             res.put("success", false);
@@ -95,7 +122,7 @@ public class InstructorCourseController extends HttpServlet {
             String courseIdStr = req.getParameter("cid");
 
             if (courseIdStr == null || courseIdStr.isBlank()) {
-                resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+                resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
                 return;
             }
 
@@ -136,6 +163,55 @@ public class InstructorCourseController extends HttpServlet {
         try {
             User user = AuthUtils.doAuthorize(req, resp, 2);
 
+            int instructorId = user.getId();
+
+            String cidStr = req.getParameter("id");
+            String title = req.getParameter("title");
+            String description = req.getParameter("description");
+            String categoryIdStr = req.getParameter("categoryId");
+            String status = req.getParameter("status");
+
+            if (cidStr == null || cidStr.isBlank()) {
+                resp.setStatus(400);
+                res.put("success", false);
+                res.put("message", httpStatus.BAD_REQUEST.getMessage());
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
+            int courseId = 0;
+            int categoryId = 0;
+
+            try {
+                courseId = Integer.parseInt(cidStr);
+                categoryId = Integer.parseInt(categoryIdStr);
+            } catch (NumberFormatException e) {
+                resp.setStatus(500);
+                res.put("success", false);
+                res.put("message", httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
+            if (cidStr.isBlank()) {
+                resp.setStatus(400);
+                res.put("success", false);
+                res.put("message", httpStatus.BAD_REQUEST.getMessage());
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
+            Course c = _courseService.getCourseById(courseId);
+            c.setTitle(title);
+            c.setDescription(description);
+            c.setCategory_id(categoryId);
+            c.setStatus(status);
+
+            if (_courseService.updateCourse(c, instructorId)) {
+                resp.setStatus(200);
+                res.put("success", true);
+                res.put("message", "Cập nhật khoá học thành công!");
+            }
         } catch (ServletException | IOException e) {
             resp.setStatus(500);
             res.put("success", false);
@@ -231,49 +307,53 @@ public class InstructorCourseController extends HttpServlet {
     protected void getCourseDetail(HttpServletRequest req, HttpServletResponse resp, User user)
             throws ServletException, IOException {
         String courseIdStr = req.getParameter("cid");
+        String type = req.getParameter("type");
 
-        if (courseIdStr == null || courseIdStr.isBlank()) {
-            resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
-            return;
-        }
+        if (type.endsWith("edit")) {
+            if (courseIdStr == null || courseIdStr.isBlank()) {
+                resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+                return;
+            }
 
-        int courseId = 0;
+            int courseId = 0;
 
-        try {
-            courseId = Integer.parseInt(courseIdStr);
-        } catch (NumberFormatException e) {
-            resp.sendError(400);
-            return;
-        }
+            try {
+                courseId = Integer.parseInt(courseIdStr);
+            } catch (NumberFormatException e) {
+                resp.sendError(400);
+                return;
+            }
 
-        Course c = _courseService.getCourseById(courseId);
+            Course c = _courseService.getCourseById(courseId);
 
-        if (c.getCreated_by() != user.getId()) {
-            resp.sendError(httpStatus.FORBIDDEN.getCode(), httpStatus.FORBIDDEN.getMessage());
-            return;
-        }
+            if (c.getCreated_by() != user.getId()) {
+                resp.sendError(httpStatus.FORBIDDEN.getCode(), httpStatus.FORBIDDEN.getMessage());
+                return;
+            }
 
-        if (c == null || c.getUuid().isBlank()) {
-            resp.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
-            return;
-        } else {
-            List<Category> categories = _categoryService.getCategories();
+            if (c == null || c.getUuid().isBlank()) {
+                resp.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
+                return;
+            } else {
+                List<Category> categories = _categoryService.getCategories();
 
-            List<Category> parentCategories = categories.stream()
-                    .filter(ct -> ct.getParent_id() == 0)
-                    .collect(Collectors.toList());
+                List<Category> parentCategories = categories.stream()
+                        .filter(ct -> ct.getParent_id() == 0)
+                        .collect(Collectors.toList());
 
-            List<Category> childCategories = categories.stream()
-                    .filter(ct -> ct.getParent_id() != 0)
-                    .collect(Collectors.toList());
+                List<Category> childCategories = categories.stream()
+                        .filter(ct -> ct.getParent_id() != 0)
+                        .collect(Collectors.toList());
 
-            List<CourseSection> csList = _courseSectionService.getSectionsByCourseId(c.getId());
+                List<CourseSection> csList = _courseSectionService.getSectionsByCourseId(c.getId());
 
-            req.setAttribute("parents", parentCategories);
-            req.setAttribute("children", childCategories);
+                req.setAttribute("parents", parentCategories);
+                req.setAttribute("children", childCategories);
 
-            req.setAttribute("course", c);
-            req.setAttribute("courseSections", csList);
+                req.setAttribute("type", type);
+                req.setAttribute("course", c);
+                req.setAttribute("sections", csList);
+            }
         }
 
         req.getRequestDispatcher("../View/Instructor/CourseCreateUpdate.jsp").forward(req, resp);

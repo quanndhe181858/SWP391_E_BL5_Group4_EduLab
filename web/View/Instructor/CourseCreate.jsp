@@ -1,6 +1,6 @@
 <%-- 
-    Document   : CourseCreateUpdate
-    Created on : Dec 6, 2025, 2:51:07 PM
+    Document   : CourseCreate
+    Created on : Dec 7, 2025, 2:02:27 PM
     Author     : quan
 --%>
 
@@ -272,9 +272,6 @@
             </form>
         </div>
 
-        <jsp:include page="/View/Instructor/addCourseSectionPopup.jsp" />
-        <jsp:include page="/View/Instructor/editCourseSectionPopup.jsp" />
-
         <jsp:include page="/layout/footer.jsp" />
         <jsp:include page="/layout/importBottom.jsp" />
 
@@ -303,60 +300,34 @@
             });
 
             document.getElementById('editCourseForm').addEventListener('submit', function (e) {
-                e.preventDefault();
-
-                const cid = '${course.id}';
                 const title = document.getElementById('title').value.trim();
                 const description = document.getElementById('description').value.trim();
                 const categoryId = document.getElementById('categoryId').value;
-                const status = document.querySelector('input[name="status"]:checked').value;
-                const thumbnailFile = document.getElementById('thumbnail').files[0];
+                const price = document.getElementById('price').value;
 
-                if (!title || !description || !categoryId) {
-                    showToast('Hãy điền vào các ô cần điền (Không được điền chỉ có khoảng cách)', 'error', 2500);
+                if (!title || !description || !categoryId || price === '') {
+                    e.preventDefault();
+                    showToast('Please fill in all required fields', 'error', 2500);
                     return false;
                 }
 
-                const formData = new FormData();
-                formData.append('action', 'update');
-                formData.append('id', cid);
-                formData.append('title', title);
-                formData.append('description', description);
-                formData.append('categoryId', categoryId);
-                formData.append('status', status);
-
-                if (thumbnailFile) {
-                    formData.append('thumbnail', thumbnailFile);
+                if (parseFloat(price) < 0) {
+                    e.preventDefault();
+                    showToast('Price cannot be negative', 'error', 2500);
+                    return false;
                 }
 
-                $.ajax({
-                    url: "${pageContext.request.contextPath}/instructor/courses",
-                    type: "PUT",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        formModified = false;
-                        showToast("Cập nhật khoá học thành công!", "success", 2500);
-                        setTimeout(() => window.location.reload(), 1500);
-                    },
-                    error: function (xhr) {
-                        const errorMsg = xhr.responseJSON?.message || "Có lỗi xảy ra trong quá trình cập nhật khoá học, vui lòng thử lại sau";
-                        showToast(errorMsg, "error", 2500);
-                    }
-                });
-
-                return false;
+                return true;
             });
 
             function deleteCourse(courseId, courseName) {
                 Swal.fire({
-                    title: "Xoá khoá học này?",
-                    html: `Bạn có chắc chắn muốn xoá khoá học <b>"` + courseName + `"</b>?<br>Hành động này sẽ không thể hoàn tác.`,
+                    title: "Delete Course?",
+                    html: `Are you sure you want to delete <b>"` + courseName + `"</b>?<br>This action cannot be undone.`,
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Có, xoá ngay",
-                    cancelButtonText: "Huỷ",
+                    confirmButtonText: "Yes, delete it",
+                    cancelButtonText: "Cancel",
                     confirmButtonColor: "#d33",
                     reverseButtons: true
                 }).then(result => {
@@ -367,24 +338,32 @@
                         url: "${pageContext.request.contextPath}/instructor/courses?cid=" + courseId,
                         type: "DELETE",
                         success: function (response) {
-                            showToast("Xoá khoá học thành công!", "success", 2500);
+                            showToast("Course deleted successfully!", "success", 2500);
                             setTimeout(() => window.location.href = "courses", 1500);
                         },
                         error: function (xhr) {
-                            showToast("Có lỗi xảy ra trong quá trình xoá khoá học, vui lòng thử lại sau", "error", 2500);
+                            showToast("Error deleting course. Please try again!", "error", 2500);
                         }
                     });
                 });
             }
 
+            function addSection() {
+                window.location.href = "section?action=create&courseId=${course.id}";
+            }
+
+            function editSection(sectionId) {
+                window.location.href = "section?action=edit&id=" + sectionId + "&courseId=${course.id}";
+            }
+
             function removeSection(sectionId, sectionTitle) {
                 Swal.fire({
-                    title: "Xoá bài học?",
-                    html: `Bạn có chắc chắn muốn xoá bài học <b>"` + sectionTitle + `"</b>?<br>Hành động này sẽ không thể hoàn tác.`,
+                    title: "Remove Section?",
+                    html: `Are you sure you want to remove <b>"` + sectionTitle + `"</b>?<br>This action cannot be undone.`,
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Có, xoá ngay",
-                    cancelButtonText: "Huỷ",
+                    confirmButtonText: "Yes, remove it",
+                    cancelButtonText: "Cancel",
                     confirmButtonColor: "#d33",
                     reverseButtons: true
                 }).then(result => {
@@ -395,11 +374,11 @@
                         url: "${pageContext.request.contextPath}/instructor/courses/sections?csid=" + sectionId,
                         type: "DELETE",
                         success: function (response) {
-                            showToast("Xoá bài học thành công!", "success", 2500);
+                            showToast("Section removed successfully!", "success", 2500);
                             setTimeout(() => location.reload(), 1500);
                         },
                         error: function (xhr) {
-                            showToast("Có lỗi trong quá trình xoá bài học, vui lòng thử lại sau!", "error", 2500);
+                            showToast("Error removing section. Please try again!", "error", 2500);
                         }
                     });
                 });

@@ -128,7 +128,7 @@ public class Course {
 
     public String getUpdatedAgo() {
         if (updated_at == null) {
-            return "no update";
+            return "Chưa có cập nhật gì";
         }
 
         long diffMillis = System.currentTimeMillis() - updated_at.getTime();
@@ -141,17 +141,17 @@ public class Course {
         long years = days / 365;
 
         if (seconds < 60) {
-            return "updated just now";
+            return "Vừa mới cập nhật";
         } else if (minutes < 60) {
-            return "updated " + minutes + " minute" + (minutes > 1 ? "s" : "") + " ago";
+            return "Cập nhật " + minutes + " phút" + " trước";
         } else if (hours < 24) {
-            return "updated " + hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+            return "Cập nhật " + hours + " giờ" + " trước";
         } else if (days < 30) {
-            return "updated " + days + " day" + (days > 1 ? "s" : "") + " ago";
+            return "Cập nhật " + days + " ngày" + " trước";
         } else if (months < 12) {
-            return "updated " + months + " month" + (months > 1 ? "s" : "") + " ago";
+            return "Cập nhật " + months + " tháng" + " trước";
         } else {
-            return "updated " + years + " year" + (years > 1 ? "s" : "") + " ago";
+            return "Cập nhật " + years + " năm" + " trước";
         }
     }
 
