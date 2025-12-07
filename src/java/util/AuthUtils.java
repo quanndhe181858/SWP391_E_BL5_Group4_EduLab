@@ -26,14 +26,14 @@ public class AuthUtils {
         HttpSession session = req.getSession(false);
 
         if (session == null) {
-            resp.sendError(httpStatus.UNAUTHORIZED.getCode(), httpStatus.UNAUTHORIZED.getMessage());
+            resp.sendRedirect(req.getContextPath() + "/login");
             return null;
         }
 
         User u = (User) session.getAttribute("user");
 
         if (u == null) {
-            resp.sendError(httpStatus.UNAUTHORIZED.getCode(), httpStatus.UNAUTHORIZED.getMessage());
+            resp.sendRedirect(req.getContextPath() + "/login");
             return null;
         }
 
