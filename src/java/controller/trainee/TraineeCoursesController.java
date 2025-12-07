@@ -49,7 +49,7 @@ public class TraineeCoursesController extends HttpServlet {
         try {
             String qs = req.getQueryString();
 
-            if (qs == null || qs.contains("page")) {
+            if (qs == null || qs.contains("page") || qs.contains("search")) {
                 this.getCourseCatalog(req, resp);
             } else if (qs.contains("id")) {
                 this.getCourseDetail(req, resp);

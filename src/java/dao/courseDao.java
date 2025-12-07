@@ -356,6 +356,7 @@ public class CourseDAO extends dao {
                 c.setUpdated_at(rs.getTimestamp("updated_at"));
                 c.setCreated_by(rs.getInt("created_by"));
                 c.setUpdated_by(rs.getInt("updated_by"));
+                c.setThumbnail(rs.getString("thumbnail"));
                 cList.add(c);
             }
 

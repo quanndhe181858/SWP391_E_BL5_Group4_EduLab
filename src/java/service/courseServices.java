@@ -62,7 +62,12 @@ public class CourseServices {
     public List<Course> getAllCourses(int limit, int offset, String title, String description, int categoryId,
             String status, String sortBy) {
         try {
-            return cDao.getAllCourses(limit, offset, title, description, categoryId, status, sortBy);
+            List<Course> cList = cDao.getAllCourses(limit, offset, title, description, categoryId, status, sortBy);
+            for (Course course : cList) {
+                Category c = categoryDao.getCategoryById(course.getCategory_id());
+                course.setCategory(c);
+            }
+            return cList;
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             return null;
