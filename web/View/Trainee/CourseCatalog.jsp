@@ -32,7 +32,7 @@
                         <select 
                             id="categoryId" 
                             name="categoryId"
-                            class="w-full max-w-[25%] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            class="w-full max-w-[20%] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                             onchange="resetPageAndSubmit()">
                             <option value="">Tất cả các đề mục</option>
                             <c:forEach var="parent" items="${parents}">
@@ -68,7 +68,7 @@
                         <c:otherwise>
                             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                                 <c:forEach items="${courseCatalog}" var="c">
-                                    <a href="courses?id=${c.id}" class="block">
+                                    <a href="courses?id=${c.id}" class="block" target="_blank">
                                         <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-200 h-full">
                                             <div class="relative h-48 overflow-hidden bg-white p-3">
                                                 <c:choose>

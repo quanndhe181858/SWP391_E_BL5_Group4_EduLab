@@ -32,6 +32,11 @@ public class AuthUtils {
 
         User u = (User) session.getAttribute("user");
 
+        if (u == null) {
+            resp.sendError(httpStatus.UNAUTHORIZED.getCode(), httpStatus.UNAUTHORIZED.getMessage());
+            return null;
+        }
+
         if (u.getRole_id() != roleAccepted) {
             resp.sendError(httpStatus.FORBIDDEN.getCode(), httpStatus.FORBIDDEN.getMessage());
             return null;
