@@ -9,7 +9,7 @@
         <!-- Bottom Bar -->
         <div class="flex flex-col md:flex-row justify-between items-center">
             <div class="flex items-center space-x-2 mb-4 md:mb-0">
-                <span class="text-2xl font-bold text-blue-500">LabEdu</span>
+                <a href="${pageContext.request.contextPath}/courses"><span class="text-2xl font-bold text-blue-500">LabEdu</span></a>
             </div>
             <p class="text-sm text-gray-300">© 2025 LabEdu Inc. All rights reserved.</p>
         </div>
