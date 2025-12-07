@@ -60,11 +60,13 @@ public class InstructorCourseController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        AuthUtils.createAndSetDummyUser(req, resp);
-
         try {
             String qs = req.getQueryString();
             User user = AuthUtils.doAuthorize(req, resp, 2);
+
+            if (user == null) {
+                return;
+            }
 
             if (qs == null || qs.contains("page")) {
                 this.getListCourses(req, resp, user);

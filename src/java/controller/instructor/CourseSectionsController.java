@@ -57,8 +57,6 @@ public class CourseSectionsController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        AuthUtils.createAndSetDummyUser(req, resp);
-
         try {
             String qs = req.getQueryString();
             User user = AuthUtils.doAuthorize(req, resp, 2);
