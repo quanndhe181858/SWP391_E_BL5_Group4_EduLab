@@ -22,6 +22,11 @@ public class CourseServices {
     private CourseDAO cDao = new CourseDAO();
     private CategoryDAO categoryDao = new CategoryDAO();
 
+    public static void main(String[] args) {
+        CourseServices c = new CourseServices();
+        System.out.println(c.countCourses("", "", 0, ""));
+    }
+
     public Course createCourse(Course c, int uid) {
         try {
             boolean ok = cDao.isValid(c);
@@ -91,13 +96,31 @@ public class CourseServices {
         }
     }
 
-    public int countCoursesByInstructorId(String title, String description,
+    public int countCoursesByInstructorIdWithFilter(String title, String description,
             int categoryId, String status, int instructorId) {
         try {
-            return cDao.countCoursesByInstructorId(title, description, categoryId, status, instructorId);
+            return cDao.countCoursesByInstructorIdWithFilter(title, description, categoryId, status, instructorId);
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             return 0;
+        }
+    }
+
+    public int countCoursesByInstructorId(int instructorId, String status) {
+        try {
+            return cDao.countCoursesByInstructorId(instructorId, status);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return 0;
+        }
+    }
+
+    public boolean updateCourse(Course c, int uid) {
+        try {
+            return cDao.updateCourse(c, uid);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return false;
         }
     }
 }

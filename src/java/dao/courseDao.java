@@ -20,6 +20,7 @@ import java.util.List;
 public class CourseDAO extends dao {
 
     private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private final CategoryDAO categoryDao = new CategoryDAO();
 
     private void log(Level level, String msg, Throwable e) {
         this.logger.log(level, msg, e);
@@ -53,7 +54,8 @@ public class CourseDAO extends dao {
 //        System.out.println("Deleted? " + deleted);
 //        System.out.println(dao.getCoursesByInstructorId(10, 0, "", "", 0, "", "", 1));
 //        System.out.println(dao.countCourses("", "", 0, ""));
-        System.out.println(dao.countCoursesByInstructorId("", "", 0, "", 1));
+//        System.out.println(dao.getCoursesByInstructorId(10, 0, "", "", 0, "", "", 1).size());
+        System.out.println(dao.countCoursesByInstructorId(1, "active"));
     }
 
     public Course createCourse(Course course, int uid) {
@@ -63,9 +65,10 @@ public class CourseDAO extends dao {
                  `description`,
                  `category_id`,
                  `status`,
-                 `created_by`)
+                 `created_by`,
+                 `thumbnail`)
                  VALUES
-                 (?, ?, ?, ?, ?);
+                 (?, ?, ?, ?, ?, ?);
                  """;
 
         try {
@@ -77,6 +80,7 @@ public class CourseDAO extends dao {
             ps.setInt(3, course.getCategory_id());
             ps.setString(4, course.getStatus());
             ps.setInt(5, uid);
+            ps.setString(6, course.getThumbnail());
 
             ps.executeUpdate();
 
@@ -96,7 +100,7 @@ public class CourseDAO extends dao {
         }
     }
 
-    public Course updateCourse(Course course, int uid) {
+    public boolean updateCourse(Course course, int uid) {
         String sql = """
                  UPDATE `edulab`.`course`
                  SET 
@@ -104,6 +108,7 @@ public class CourseDAO extends dao {
                      `description` = ?, 
                      `category_id` = ?, 
                      `status` = ?, 
+                     `thumbnail` = ?,
                      `updated_by` = ?
                  WHERE `id` = ?;
                  """;
@@ -116,21 +121,21 @@ public class CourseDAO extends dao {
             ps.setString(2, course.getDescription());
             ps.setInt(3, course.getCategory_id());
             ps.setString(4, course.getStatus());
-            ps.setInt(5, uid);
-            ps.setInt(6, course.getId());
+            ps.setString(5, course.getThumbnail());
+            ps.setInt(6, uid);
+            ps.setInt(7, course.getId());
 
             int rows = ps.executeUpdate();
 
-            // If no row updated => course does not exist
             if (rows == 0) {
-                return null;
+                return false;
             }
 
-            return course;
+            return true;
 
         } catch (SQLException e) {
             this.log(Level.SEVERE, "Something wrong while updateCourse() execute!", e);
-            return null;
+            return false;
         } finally {
             this.closeResources();
         }
@@ -162,16 +167,7 @@ public class CourseDAO extends dao {
     public Course getCourseById(int id) {
         String sql = """
                  SELECT 
-                     id,
-                     uuid,
-                     title,
-                     description,
-                     status,
-                     category_id,
-                     created_at,
-                     updated_at,
-                     created_by,
-                     updated_by
+                     *
                  FROM edulab.course
                  WHERE id = ?;
                  """;
@@ -200,6 +196,7 @@ public class CourseDAO extends dao {
                 course.setUpdated_at(rs.getTimestamp("updated_at"));
                 course.setCreated_by(rs.getInt("created_by"));
                 course.setUpdated_by(rs.getInt("updated_by"));
+                course.setThumbnail(rs.getString("thumbnail"));
 
                 return course;
             }
@@ -274,7 +271,6 @@ public class CourseDAO extends dao {
 
     public List<Course> getCourses(int limit, int offset, String title, String description,
             int categoryId, String status, String sortBy) {
-
         List<Course> cList = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
@@ -283,27 +279,54 @@ public class CourseDAO extends dao {
 
         List<Object> params = new ArrayList<>();
 
+        StringBuilder orGroup = new StringBuilder();
+
         if (title != null && !title.isEmpty()) {
-            sql.append(" AND title LIKE ?");
+            orGroup.append(" OR title LIKE ?");
             params.add("%" + title + "%");
         }
 
         if (description != null && !description.isEmpty()) {
-            sql.append(" AND description LIKE ?");
+            orGroup.append(" OR description LIKE ?");
             params.add("%" + description + "%");
         }
 
         if (categoryId > 0) {
-            sql.append(" AND category_id = ?");
-            params.add(categoryId);
+
+            List<Integer> allCategoryIds = new ArrayList<>();
+            allCategoryIds.add(categoryId);
+            allCategoryIds.addAll(categoryDao.getChildCategoryIds(categoryId));
+
+            StringBuilder inClause = new StringBuilder(" AND category_id IN (");
+            for (int i = 0; i < allCategoryIds.size(); i++) {
+                inClause.append("?");
+                if (i < allCategoryIds.size() - 1) {
+                    inClause.append(",");
+                }
+                params.add(allCategoryIds.get(i));
+            }
+            inClause.append(")");
+
+            orGroup.append(inClause);
         }
 
         if (status != null && !status.isEmpty()) {
-            sql.append(" AND status = ?");
+            orGroup.append(" AND status = ?");
             params.add(status);
         }
 
-        sql.append(" ORDER BY id DESC");
+        if (orGroup.length() > 0) {
+            sql.append(" AND (");
+            sql.append(orGroup.substring(4));
+            sql.append(")");
+        }
+
+        if (sortBy != null && !sortBy.isBlank()) {
+            sql.append(" ORDER BY ").append(sortBy);
+        } else {
+            sql.append(" ORDER BY id DESC");
+        }
+
         sql.append(" LIMIT ? OFFSET ?");
 
         try {
@@ -336,7 +359,7 @@ public class CourseDAO extends dao {
             }
 
         } catch (SQLException e) {
-            this.log(Level.SEVERE, "Error in getCourses()", e);
+            this.log(Level.SEVERE, "Error in getCoursesByInstructorId()", e);
         } finally {
             this.closeResources();
         }
@@ -348,50 +371,75 @@ public class CourseDAO extends dao {
             int categoryId, String status, String sortBy, int instructorId) {
 
         List<Course> cList = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
                 "SELECT * FROM edulab.course WHERE created_by = ?"
         );
+        params.add(instructorId);
 
-        List<Object> params = new ArrayList<>();
+        StringBuilder orSearch = new StringBuilder();
 
-        if (title != null && !title.isEmpty()) {
-            sql.append(" AND title LIKE ?");
+        if (title != null && !title.isBlank()) {
+            orSearch.append(" title LIKE ? OR");
             params.add("%" + title + "%");
         }
 
-        if (description != null && !description.isEmpty()) {
-            sql.append(" AND description LIKE ?");
+        if (description != null && !description.isBlank()) {
+            orSearch.append(" description LIKE ? OR");
             params.add("%" + description + "%");
         }
 
-        if (categoryId > 0) {
-            sql.append(" AND category_id = ?");
-            params.add(categoryId);
+        if (orSearch.length() > 0) {
+            sql.append(" AND (");
+            sql.append(orSearch.substring(0, orSearch.length() - 2)); // remove last OR
+            sql.append(")");
         }
 
-        if (status != null && !status.isEmpty()) {
+        if (categoryId > 0) {
+
+            List<Integer> allCategoryIds = new ArrayList<>();
+            allCategoryIds.add(categoryId);
+
+            List<Integer> children = categoryDao.getChildCategoryIds(categoryId);
+            if (children != null && !children.isEmpty()) {
+                allCategoryIds.addAll(children);
+            }
+
+            sql.append(" AND category_id IN (");
+            for (int i = 0; i < allCategoryIds.size(); i++) {
+                sql.append("?");
+                if (i < allCategoryIds.size() - 1) {
+                    sql.append(",");
+                }
+                params.add(allCategoryIds.get(i));
+            }
+            sql.append(")");
+        }
+
+        if (status != null && !status.isBlank() && !status.equalsIgnoreCase("all")) {
             sql.append(" AND status = ?");
             params.add(status);
         }
 
-        sql.append(" ORDER BY id DESC");
+        if (sortBy != null && !sortBy.isBlank()) {
+            sql.append(" ORDER BY ").append(sortBy);
+        } else {
+            sql.append(" ORDER BY id DESC");
+        }
+
         sql.append(" LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
 
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql.toString());
 
-            int index = 1;
-
-            ps.setInt(index++, 1);
-
+            int idx = 1;
             for (Object p : params) {
-                ps.setObject(index++, p);
+                ps.setObject(idx++, p);
             }
-
-            ps.setInt(index++, limit);
-            ps.setInt(index, offset);
 
             rs = ps.executeQuery();
 
@@ -407,11 +455,12 @@ public class CourseDAO extends dao {
                 c.setUpdated_at(rs.getTimestamp("updated_at"));
                 c.setCreated_by(rs.getInt("created_by"));
                 c.setUpdated_by(rs.getInt("updated_by"));
+                c.setThumbnail(rs.getString("thumbnail"));
                 cList.add(c);
             }
 
         } catch (SQLException e) {
-            this.log(Level.SEVERE, "Error in getCourses()", e);
+            this.log(Level.SEVERE, "Error in getCoursesByInstructorId()", e);
         } finally {
             this.closeResources();
         }
@@ -422,27 +471,127 @@ public class CourseDAO extends dao {
     public int countCourses(String title, String description,
             int categoryId, String status) {
         StringBuilder sql = new StringBuilder(
-                "SELECT COUNT(*) FROM edulab.course WHERE 1 = 1"
+                "SELECT COUNT(*) FROM edulab.course"
         );
 
         List<Object> params = new ArrayList<>();
 
+        StringBuilder orGroup = new StringBuilder();
+
         if (title != null && !title.isEmpty()) {
-            sql.append(" AND title LIKE ?");
+            orGroup.append(" OR title LIKE ?");
             params.add("%" + title + "%");
         }
 
         if (description != null && !description.isEmpty()) {
-            sql.append(" AND description LIKE ?");
+            orGroup.append(" OR description LIKE ?");
             params.add("%" + description + "%");
         }
 
         if (categoryId > 0) {
-            sql.append(" AND category_id = ?");
-            params.add(categoryId);
+
+            List<Integer> allCategoryIds = new ArrayList<>();
+            allCategoryIds.add(categoryId);
+            allCategoryIds.addAll(categoryDao.getChildCategoryIds(categoryId));
+
+            StringBuilder inClause = new StringBuilder(" AND category_id IN (");
+            for (int i = 0; i < allCategoryIds.size(); i++) {
+                inClause.append("?");
+                if (i < allCategoryIds.size() - 1) {
+                    inClause.append(",");
+                }
+                params.add(allCategoryIds.get(i));
+            }
+            inClause.append(")");
+
+            orGroup.append(inClause);
         }
 
         if (status != null && !status.isEmpty()) {
+            orGroup.append(" AND status = ?");
+            params.add(status);
+        }
+
+        if (orGroup.length() > 0) {
+            sql.append(" AND (");
+            sql.append(orGroup.substring(4));
+            sql.append(")");
+        }
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+
+            int index = 1;
+            for (Object p : params) {
+                ps.setObject(index++, p);
+            }
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error in countCoursesByInstructorId()", e);
+        } finally {
+            this.closeResources();
+        }
+
+        return 0;
+    }
+
+    public int countCoursesByInstructorIdWithFilter(String title, String description,
+            int categoryId, String status, int instructorId) {
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) FROM edulab.course WHERE created_by = ?"
+        );
+
+        List<Object> params = new ArrayList<>();
+        params.add(instructorId);
+
+        StringBuilder orSearch = new StringBuilder();
+
+        if (title != null && !title.isBlank()) {
+            orSearch.append(" title LIKE ? OR");
+            params.add("%" + title + "%");
+        }
+
+        if (description != null && !description.isBlank()) {
+            orSearch.append(" description LIKE ? OR");
+            params.add("%" + description + "%");
+        }
+
+        if (orSearch.length() > 0) {
+            sql.append(" AND (");
+            sql.append(orSearch.substring(0, orSearch.length() - 2));
+            sql.append(")");
+        }
+
+        if (categoryId > 0) {
+
+            List<Integer> allCategoryIds = new ArrayList<>();
+            allCategoryIds.add(categoryId);
+
+            List<Integer> children = categoryDao.getChildCategoryIds(categoryId);
+            if (children != null && !children.isEmpty()) {
+                allCategoryIds.addAll(children);
+            }
+
+            sql.append(" AND category_id IN (");
+            for (int i = 0; i < allCategoryIds.size(); i++) {
+                sql.append("?");
+                if (i < allCategoryIds.size() - 1) {
+                    sql.append(",");
+                }
+                params.add(allCategoryIds.get(i));
+            }
+            sql.append(")");
+        }
+
+        if (status != null && !status.isBlank() && !status.equalsIgnoreCase("all")) {
             sql.append(" AND status = ?");
             params.add(status);
         }
@@ -463,7 +612,7 @@ public class CourseDAO extends dao {
             }
 
         } catch (SQLException e) {
-            this.log(Level.SEVERE, "Error in getCourses()", e);
+            this.log(Level.SEVERE, "Error in countCoursesByInstructorId()", e);
         } finally {
             this.closeResources();
         }
@@ -471,32 +620,13 @@ public class CourseDAO extends dao {
         return 0;
     }
 
-    public int countCoursesByInstructorId(String title, String description,
-            int categoryId, String status, int instructorId) {
-        StringBuilder sql = new StringBuilder(
-                "SELECT COUNT(*) FROM edulab.course WHERE created_by = ?"
-        );
+    public int countCoursesByInstructorId(int instructorId, String status) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM edulab.course WHERE created_by = ?");
 
-        List<Object> params = new ArrayList<>();
-
-        if (title != null && !title.isEmpty()) {
-            sql.append(" AND title LIKE ?");
-            params.add("%" + title + "%");
-        }
-
-        if (description != null && !description.isEmpty()) {
-            sql.append(" AND description LIKE ?");
-            params.add("%" + description + "%");
-        }
-
-        if (categoryId > 0) {
-            sql.append(" AND category_id = ?");
-            params.add(categoryId);
-        }
-
-        if (status != null && !status.isEmpty()) {
-            sql.append(" AND status = ?");
-            params.add(status);
+        if (status != null && !status.isBlank()) {
+            if (status.equalsIgnoreCase("Active") || status.equalsIgnoreCase("Inactive")) {
+                sql.append(" AND status = ?");
+            }
         }
 
         try {
@@ -507,8 +637,10 @@ public class CourseDAO extends dao {
 
             ps.setInt(index++, instructorId);
 
-            for (Object p : params) {
-                ps.setObject(index++, p);
+            if (status != null && !status.isBlank()) {
+                if (status.equalsIgnoreCase("Active") || status.equalsIgnoreCase("Inactive")) {
+                    ps.setString(index++, status);
+                }
             }
 
             rs = ps.executeQuery();
@@ -518,11 +650,12 @@ public class CourseDAO extends dao {
             }
 
         } catch (SQLException e) {
-            this.log(Level.SEVERE, "Error in getCourses()", e);
+            this.log(Level.SEVERE, "Error in countCoursesByInstructorId()", e);
         } finally {
             this.closeResources();
         }
 
         return 0;
     }
+
 }

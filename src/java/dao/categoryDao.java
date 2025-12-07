@@ -25,7 +25,8 @@ public class CategoryDAO extends dao {
     }
 
     public static void main(String[] args) {
-
+        CategoryDAO dao = new CategoryDAO();
+        System.out.println(dao.getChildCategoryIds(3));
     }
 
     public List<Category> getCategories() {
@@ -105,6 +106,27 @@ public class CategoryDAO extends dao {
         }
 
         return 0;
+    }
+
+    public List<Integer> getChildCategoryIds(int parentId) {
+        List<Integer> ids = new ArrayList<>();
+        String sql = "SELECT id FROM category WHERE parent_id = ?";
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, parentId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int childId = rs.getInt("id");
+                ids.add(childId);
+            }
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return null;
+        }
+        
+        return ids;
     }
 
 }
