@@ -11,7 +11,7 @@
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-8">
                     <div class="flex items-center">
-                        <a href="${pageContext.request.contextPath}/courses">
+                        <a href="${pageContext.request.contextPath}/home">
                             <span class="text-2xl font-bold text-blue-600">LabEdu</span>
                         </a>
                     </div>
@@ -34,9 +34,9 @@
                 <c:choose>
                     <c:when test="${not empty sessionScope.user}">
                         <div class="flex items-center space-x-4">
-                            <a href="${pageContext.request.contextPath}/my-courses" class="text-gray-700 hover:text-blue-600 text-sm font-medium">
+<!--                            <a href="${pageContext.request.contextPath}/my-courses" class="text-gray-700 hover:text-blue-600 text-sm font-medium">
                                 My Courses
-                            </a>
+                            </a>-->
 
                             <div class="relative" id="userDropdown">
                                 <button class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 focus:outline-none" id="userMenuButton">
@@ -65,7 +65,7 @@
                                             <c:out value="${sessionScope.user.email}" />
                                         </p>
                                     </div>
-                                    <a href="${pageContext.request.contextPath}/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+<!--                                    <a href="${pageContext.request.contextPath}/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <div class="flex items-center">
                                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -80,7 +80,7 @@
                                             </svg>
                                             My Learning
                                         </div>
-                                    </a>
+                                    </a>-->
                                     <div class="border-t border-gray-200 mt-2 pt-2">
                                         <form action="${pageContext.request.contextPath}/logout" method="POST">
                                             <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
