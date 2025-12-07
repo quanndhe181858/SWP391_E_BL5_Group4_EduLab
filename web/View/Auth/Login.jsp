@@ -17,8 +17,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                         </svg>
                     </div>
-                    <h1 class="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-                    <p class="text-blue-100">Sign in to continue learning</p>
+                    <h1 class="text-3xl font-bold text-white mb-2">Chào mừng</h1>
+                    <p class="text-blue-100">Đăng nhập để tiếp tục học</p>
                 </div>
 
                 <div class="p-8">
@@ -38,7 +38,7 @@
 
                         <div class="mb-6">
                             <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">
-                                Email Address
+                                Email
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -58,7 +58,7 @@
 
                         <div class="mb-6">
                             <label for="password" class="block text-gray-700 text-sm font-semibold mb-2">
-                                Password
+                                Mật khẩu
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -85,19 +85,25 @@
 
                         <div class="flex items-center justify-between mb-6">
                             <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                                Forgot password?
+                                Quên mật khẩu?
                             </a>
                         </div>
 
                         <button type="submit" 
                                 class="w-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-cyan-700 transform transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg">
-                            Sign In
+                            Đăng nhập
                         </button>
 
                         <p class="text-center text-gray-600 text-sm mt-6">
-                            Don't have an account? 
+                            Không có tài khoản? 
                             <a href="<%= request.getContextPath()%>/register" class="text-blue-600 hover:text-blue-700 font-semibold">
-                                Sign up
+                                Đăng kí
+                            </a>
+                        </p>
+                        <p class="text-center text-gray-600 text-sm mt-6">
+                            Hoặc
+                            <a href="<%= request.getContextPath()%>/home" class="text-blue-600 hover:text-blue-700 font-semibold">
+                                về trang chủ
                             </a>
                         </p>
                     </form>
@@ -105,7 +111,7 @@
             </div>
 
             <p class="text-center text-white text-sm mt-6 opacity-90">
-                © 2025 LabEdu. All rights reserved.
+                Bản quyền thuộc về © 2025 LabEdu.
             </p>
         </div>
 
