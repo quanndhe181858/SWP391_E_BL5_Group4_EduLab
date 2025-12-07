@@ -170,7 +170,7 @@ public class CourseSectionDAO extends dao {
     }
 
     public CourseSection getCourseSectionById(int id) {
-        String sql = "SELECT * FROM `edulab`.`course_section` WHERE id = ?;";
+        String sql = "SELECT * FROM `edulab`.`course_section` WHERE id = ? ORDER BY position;";
 
         try {
             con = dbc.getConnection();

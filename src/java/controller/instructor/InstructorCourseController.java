@@ -68,8 +68,10 @@ public class InstructorCourseController extends HttpServlet {
 
             if (qs == null || qs.contains("page")) {
                 this.getListCourses(req, resp, user);
+            } else if (qs.contains("edit")) {
+                this.getCourseUpdate(req, resp, user);
             } else {
-                this.getCourseDetail(req, resp, user);
+                this.getCourseCreate(req, resp, user);
             }
 
         } catch (ServletException | IOException e) {
@@ -368,59 +370,59 @@ public class InstructorCourseController extends HttpServlet {
         }
     }
 
-    protected void getCourseDetail(HttpServletRequest req, HttpServletResponse resp, User user)
+    protected void getCourseUpdate(HttpServletRequest req, HttpServletResponse resp, User user)
             throws ServletException, IOException {
         String courseIdStr = req.getParameter("cid");
-        String type = req.getParameter("type");
 
-        if (type.endsWith("edit")) {
-            if (courseIdStr == null || courseIdStr.isBlank()) {
-                resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
-                return;
-            }
-
-            int courseId = 0;
-
-            try {
-                courseId = Integer.parseInt(courseIdStr);
-            } catch (NumberFormatException e) {
-                resp.sendError(400);
-                return;
-            }
-
-            Course c = _courseService.getCourseById(courseId);
-
-            if (c.getCreated_by() != user.getId()) {
-                resp.sendError(httpStatus.FORBIDDEN.getCode(), httpStatus.FORBIDDEN.getMessage());
-                return;
-            }
-
-            if (c == null || c.getUuid().isBlank()) {
-                resp.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
-                return;
-            } else {
-                List<Category> categories = _categoryService.getCategories();
-
-                List<Category> parentCategories = categories.stream()
-                        .filter(ct -> ct.getParent_id() == 0)
-                        .collect(Collectors.toList());
-
-                List<Category> childCategories = categories.stream()
-                        .filter(ct -> ct.getParent_id() != 0)
-                        .collect(Collectors.toList());
-
-                List<CourseSection> csList = _courseSectionService.getSectionsByCourseId(c.getId());
-
-                req.setAttribute("parents", parentCategories);
-                req.setAttribute("children", childCategories);
-
-                req.setAttribute("type", type);
-                req.setAttribute("course", c);
-                req.setAttribute("sections", csList);
-            }
+        if (courseIdStr == null || courseIdStr.isBlank()) {
+            resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+            return;
         }
 
-        req.getRequestDispatcher("../View/Instructor/CourseCreateUpdate.jsp").forward(req, resp);
+        int courseId = 0;
+
+        try {
+            courseId = Integer.parseInt(courseIdStr);
+        } catch (NumberFormatException e) {
+            resp.sendError(400);
+            return;
+        }
+
+        Course c = _courseService.getCourseById(courseId);
+
+        if (c.getCreated_by() != user.getId()) {
+            resp.sendError(httpStatus.FORBIDDEN.getCode(), httpStatus.FORBIDDEN.getMessage());
+            return;
+        }
+
+        if (c == null || c.getUuid().isBlank()) {
+            resp.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
+            return;
+        } else {
+            List<Category> categories = _categoryService.getCategories();
+
+            List<Category> parentCategories = categories.stream()
+                    .filter(ct -> ct.getParent_id() == 0)
+                    .collect(Collectors.toList());
+
+            List<Category> childCategories = categories.stream()
+                    .filter(ct -> ct.getParent_id() != 0)
+                    .collect(Collectors.toList());
+
+            List<CourseSection> csList = _courseSectionService.getSectionsByCourseId(c.getId());
+
+            req.setAttribute("parents", parentCategories);
+            req.setAttribute("children", childCategories);
+
+            req.setAttribute("course", c);
+            req.setAttribute("sections", csList);
+        }
+
+        req.getRequestDispatcher("../View/Instructor/CourseUpdate.jsp").forward(req, resp);
     }
 
+    protected void getCourseCreate(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws ServletException, IOException {
+        req.getRequestDispatcher("../View/Instructor/CourseCreate.jsp").forward(req, resp);
+    }
 }

@@ -56,29 +56,29 @@
                     required
                     onchange="handleEditTypeChange()">
                     <option value="">Chọn thể loại</option>
-                    <option value="text">Text (Văn bản)</option>
-                    <option value="image">Image (Hình ảnh)</option>
-                    <option value="video">Video</option>
+                    <option value="text">Text (Chỉ văn bản)</option>
+                    <option value="image">Image (Văn bản + Hình ảnh)</option>
+                    <option value="video">Video (Văn bản + Video)</option>
                 </select>
             </div>
 
-            <!-- Text Content (Only for Text type) -->
-            <div id="editTextContentSection" class="hidden">
+            <div>
                 <label for="editSectionContent" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Nội dung văn bản <span class="text-red-500">*</span>
+                    Nội dung bài học <span class="text-red-500">*</span>
                 </label>
                 <textarea 
                     id="editSectionContent" 
                     name="content"
                     rows="6"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                    placeholder="Nhập nội dung bài học..."></textarea>
+                    placeholder="Nhập nội dung chi tiết của bài học..."
+                    required></textarea>
+                <p class="text-xs text-gray-500 mt-1">Nội dung văn bản là bắt buộc cho mọi loại bài học</p>
             </div>
 
-            <!-- Image Upload (Only for Image type) -->
             <div id="editImageUploadSection" class="hidden">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Hình ảnh hiện tại / Tải lên mới
+                    Đính kèm hình ảnh
                 </label>
                 <div class="space-y-3">
                     <div id="editImagePreviewContainer" class="hidden">
@@ -102,7 +102,7 @@
                     <input 
                         type="file" 
                         id="editSectionImage" 
-                        name="image"
+                        name="media"
                         accept="image/*"
                         class="hidden"
                         onchange="handleEditImageUpload(event)">
@@ -113,16 +113,15 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
-                        <span id="editImageButtonText">Thay đổi hình ảnh</span>
+                        <span id="editImageButtonText">Chọn hình ảnh</span>
                     </button>
                     <p class="text-xs text-gray-500">Khuyến nghị: JPG, PNG hoặc GIF, tối đa 10MB</p>
                 </div>
             </div>
 
-            <!-- Video Upload (Only for Video type) -->
             <div id="editVideoUploadSection" class="hidden">
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Video hiện tại / Tải lên mới
+                    Đính kèm video
                 </label>
                 <div class="space-y-3">
                     <div id="editVideoPreviewContainer" class="hidden">
@@ -148,7 +147,7 @@
                     <input 
                         type="file" 
                         id="editSectionVideo" 
-                        name="video"
+                        name="media"
                         accept="video/*"
                         class="hidden"
                         onchange="handleEditVideoUpload(event)">
@@ -159,7 +158,7 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
                         </svg>
-                        <span id="editVideoButtonText">Thay đổi video</span>
+                        <span id="editVideoButtonText">Chọn video</span>
                     </button>
                     <p class="text-xs text-gray-500">Khuyến nghị: MP4, MOV hoặc AVI, tối đa 100MB</p>
                 </div>
@@ -229,8 +228,8 @@
             url: "${pageContext.request.contextPath}/instructor/courses/sections?csid=" + sectionId,
             type: "GET",
             success: function (response) {
-                editSectionData = response;
-                populateEditForm(response);
+                editSectionData = response.section;
+                populateEditForm(response.section, response.media);
                 document.getElementById('editSectionModal').style.display = 'flex';
                 document.body.style.overflow = 'hidden';
             },
@@ -240,12 +239,13 @@
         });
     }
 
-    function populateEditForm(section) {
+    function populateEditForm(section, media) {
         document.getElementById('editSectionId').value = section.id;
         document.getElementById('editSectionTitle').value = section.title;
         document.getElementById('editSectionDescription').value = section.description;
         document.getElementById('editSectionType').value = section.type;
         document.getElementById('editSectionPosition').value = section.position;
+        document.getElementById('editSectionContent').value = section.content || '';
 
         const statusRadios = document.querySelectorAll('input[name="editStatus"]');
         statusRadios.forEach(radio => {
@@ -254,16 +254,14 @@
 
         handleEditTypeChange();
 
-        if (section.type === 'text') {
-            document.getElementById('editSectionContent').value = section.content || '';
-        } else if (section.type === 'image' && section.content) {
-            document.getElementById('editCurrentImageUrl').value = section.content;
-            document.getElementById('editImagePreview').src = section.content;
+        if (section.type === 'image' && media) {
+            document.getElementById('editCurrentImageUrl').value = media.path;
+            document.getElementById('editImagePreview').src = '${pageContext.request.contextPath}/' + media.path;
             document.getElementById('editImagePreviewContainer').classList.remove('hidden');
             document.getElementById('editImageButtonText').textContent = 'Thay đổi hình ảnh';
-        } else if (section.type === 'video' && section.content) {
-            document.getElementById('editCurrentVideoUrl').value = section.content;
-            document.getElementById('editVideoSource').src = section.content;
+        } else if (section.type === 'video' && media) {
+            document.getElementById('editCurrentVideoUrl').value = media.path;
+            document.getElementById('editVideoSource').src = '${pageContext.request.contextPath}/' + media.path;
             document.getElementById('editVideoPreview').load();
             document.getElementById('editVideoPreviewContainer').classList.remove('hidden');
             document.getElementById('editVideoButtonText').textContent = 'Thay đổi video';
@@ -278,22 +276,27 @@
 
         document.getElementById('editImagePreviewContainer').classList.add('hidden');
         document.getElementById('editVideoPreviewContainer').classList.add('hidden');
-
-        document.getElementById('editTextContentSection').classList.add('hidden');
         document.getElementById('editImageUploadSection').classList.add('hidden');
         document.getElementById('editVideoUploadSection').classList.add('hidden');
+
+        document.getElementById('editCurrentImageUrl').value = '';
+        document.getElementById('editCurrentVideoUrl').value = '';
+        document.getElementById('editSectionImage').value = '';
+        document.getElementById('editSectionVideo').value = '';
     }
 
     function handleEditTypeChange() {
         const type = document.getElementById('editSectionType').value;
 
-        document.getElementById('editTextContentSection').classList.add('hidden');
         document.getElementById('editImageUploadSection').classList.add('hidden');
         document.getElementById('editVideoUploadSection').classList.add('hidden');
 
-        if (type === 'text') {
-            document.getElementById('editTextContentSection').classList.remove('hidden');
-        } else if (type === 'image') {
+        document.getElementById('editSectionImage').value = '';
+        document.getElementById('editSectionVideo').value = '';
+        document.getElementById('editImagePreviewContainer').classList.add('hidden');
+        document.getElementById('editVideoPreviewContainer').classList.add('hidden');
+
+        if (type === 'image') {
             document.getElementById('editImageUploadSection').classList.remove('hidden');
         } else if (type === 'video') {
             document.getElementById('editVideoUploadSection').classList.remove('hidden');
@@ -377,10 +380,11 @@
         const type = document.getElementById('editSectionType').value;
         const title = document.getElementById('editSectionTitle').value.trim();
         const description = document.getElementById('editSectionDescription').value.trim();
+        const content = document.getElementById('editSectionContent').value.trim();
         const position = document.getElementById('editSectionPosition').value;
         const status = document.querySelector('input[name="editStatus"]:checked').value;
 
-        if (!title || !description || !type || !position) {
+        if (!title || !description || !type || !content || !position) {
             showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error', 2500);
             return;
         }
@@ -390,40 +394,28 @@
         formData.append('courseId', '${course.id}');
         formData.append('title', title);
         formData.append('description', description);
+        formData.append('content', content);
         formData.append('type', type);
         formData.append('position', position);
         formData.append('status', status);
 
-        if (type === 'text') {
-            const content = document.getElementById('editSectionContent').value.trim();
-            if (!content) {
-                showToast('Vui lòng nhập nội dung văn bản', 'error', 2500);
-                return;
-            }
-            formData.append('content', content);
-        } else if (type === 'image') {
+        if (type === 'image') {
             const imageFile = document.getElementById('editSectionImage').files[0];
             const currentImageUrl = document.getElementById('editCurrentImageUrl').value;
 
             if (imageFile) {
-                formData.append('content', imageFile);
+                formData.append('media', imageFile);
             } else if (currentImageUrl) {
-                formData.append('currentContent', currentImageUrl);
-            } else {
-                showToast('Vui lòng chọn hình ảnh', 'error', 2500);
-                return;
+                formData.append('currentMedia', currentImageUrl);
             }
         } else if (type === 'video') {
             const videoFile = document.getElementById('editSectionVideo').files[0];
             const currentVideoUrl = document.getElementById('editCurrentVideoUrl').value;
 
             if (videoFile) {
-                formData.append('content', videoFile);
+                formData.append('media', videoFile);
             } else if (currentVideoUrl) {
-                formData.append('currentContent', currentVideoUrl);
-            } else {
-                showToast('Vui lòng chọn video', 'error', 2500);
-                return;
+                formData.append('currentMedia', currentVideoUrl);
             }
         }
 

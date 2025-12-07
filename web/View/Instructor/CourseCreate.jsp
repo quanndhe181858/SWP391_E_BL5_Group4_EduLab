@@ -10,7 +10,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Chỉnh sửa khoá học - Giảng viên</title>
+        <title>Tạo khoá học - Giảng viên</title>
         <jsp:include page="/layout/import.jsp" />
     </head>
     <body class="bg-gray-50">
@@ -24,9 +24,9 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
                     </a>
-                    <h1 class="text-3xl font-bold text-gray-900">Chỉnh sửa khoá học</h1>
+                    <h1 class="text-3xl font-bold text-gray-900">Tạo khoá học</h1>
                 </div>
-                <p class="text-lg text-gray-600 ml-9">Cập nhật thông tin khoá học</p>
+                <p class="text-lg text-gray-600 ml-9">Tạo khoá học mới</p>
             </div>
 
             <form id="editCourseForm" method="post" action="courses" enctype="multipart/form-data">

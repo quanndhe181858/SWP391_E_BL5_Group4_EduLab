@@ -19,7 +19,7 @@ public class CourseSectionServices {
 
     private final Logger logger = Logger.getLogger(this.getClass().getName());
     private final CourseSectionDAO csDao = new CourseSectionDAO();
-
+    
     public CourseSection createSection(CourseSection cs) {
         try {
             return csDao.createCourseSection(cs);

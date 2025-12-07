@@ -25,11 +25,12 @@ public class MediaDAO extends dao {
 
     public static void main(String[] args) {
         MediaDAO dao = new MediaDAO();
-        Media m = new Media();
-        m.setType("section");
-        m.setPath("test");
-        m.setObjectId(1);
-        System.out.println(dao.createMedia(m, 1));
+//        Media m = new Media();
+//        m.setType("section");
+//        m.setPath("test");
+//        m.setObjectId(1);
+//        System.out.println(dao.createMedia(m, 1));
+        System.out.println(dao.getMediaByIdAndType("section", 176));
     }
 
     public Media createMedia(Media m, int uid) {
@@ -71,5 +72,88 @@ public class MediaDAO extends dao {
         }
 
         return null;
+    }
+
+    public Media getMediaByIdAndType(String type, int objectid) {
+        Media m = null;
+        String sql = """
+                     SELECT * FROM media WHERE type = ? AND objectid = ?;
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, type);
+            ps.setInt(2, objectid);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                m = new Media();
+                m.setId(rs.getInt("id"));
+                m.setObjectId(rs.getInt("objectid"));
+                m.setType(rs.getString("type"));
+                m.setMime_type(rs.getString("mime_type"));
+                m.setPath(rs.getString("path"));
+                m.setCreated_at(rs.getTimestamp("created_at"));
+                m.setCreated_by(rs.getInt("created_by"));
+            }
+
+            return m;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return null;
+        } finally {
+            this.closeResources();
+        }
+    }
+
+    public boolean deleteMedia(int id) {
+        String sql = "DELETE FROM `edulab`.`media` WHERE id = ?;";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, id);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        } finally {
+            this.closeResources();
+        }
+    }
+
+    public boolean updateMedia(Media m) {
+        String sql = """
+                     UPDATE `edulab`.`media`
+                     SET
+                     `type` = ?,
+                     `mime_type` = ?,
+                     `path` = ?
+                     WHERE `id` = ?;
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, m.getType());
+            ps.setString(2, m.getMime_type());
+            ps.setString(3, m.getPath());
+            ps.setInt(4, m.getId());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        } finally {
+            this.closeResources();
+        }
     }
 }
