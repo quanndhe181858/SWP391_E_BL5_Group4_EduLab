@@ -138,7 +138,7 @@
 
                                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                     <div>
-                                        <p class="text-sm text-gray-600">Hiển thị ${startItem}-${endItem} của ${totalCourses} khoá học</p>
+                                        <p class="text-sm text-gray-600">Hiển thị ${startItem}-${endItem} của ${totalCoursesPaging} khoá học</p>
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <label class="text-sm text-gray-700">Sắp xếp (asc):</label>

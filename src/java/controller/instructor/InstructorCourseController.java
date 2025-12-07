@@ -406,21 +406,22 @@ public class InstructorCourseController extends HttpServlet {
             int offset = (page - 1) * paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE;
 
             List<Course> courseList = _courseService.getListCourseByInstructorId(paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE, offset, search, search, filterCategoryId, status, sortBy, instructorId);
+            int totalCoursesPaging = _courseService.countCoursesByInstructorIdWithFilter(search, search, filterCategoryId, status, instructorId);
             int totalCourses = _courseService.countCoursesByInstructorId(instructorId, "all");
             int totalActiveCourses = _courseService.countCoursesByInstructorId(instructorId, "Active");
             int totalInactiveCourses = _courseService.countCoursesByInstructorId(instructorId, "Inactive");
 
-            int totalPages = (int) Math.ceil((double) totalCourses / paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE);
+            int totalPages = (int) Math.ceil((double) totalCoursesPaging / paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE);
 
             int startItem = ++offset;
             int endItem = startItem + paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE - 1;
 
-            if (endItem > totalCourses) {
-                endItem = totalCourses;
+            if (endItem > totalCoursesPaging) {
+                endItem = totalCoursesPaging;
             }
 
-            if (totalCourses <= 0) {
-                startItem = totalCourses;
+            if (totalCoursesPaging <= 0) {
+                startItem = totalCoursesPaging;
             }
 
             List<Category> categories = _categoryService.getCategories();
@@ -441,6 +442,7 @@ public class InstructorCourseController extends HttpServlet {
             req.setAttribute("totalPages", totalPages);
             req.setAttribute("startItem", startItem);
             req.setAttribute("endItem", endItem);
+            req.setAttribute("totalCoursesPaging", totalCoursesPaging);
             req.setAttribute("totalCourses", totalCourses);
             req.setAttribute("totalActiveCourses", totalActiveCourses);
             req.setAttribute("totalInactiveCourses", totalInactiveCourses);

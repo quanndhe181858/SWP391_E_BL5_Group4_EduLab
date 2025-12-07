@@ -26,7 +26,7 @@ public class CategoryDAO extends dao {
 
     public static void main(String[] args) {
         CategoryDAO dao = new CategoryDAO();
-        System.out.println(dao.getChildCategoryIds(1));
+        System.out.println(dao.getChildCategoryIds(3));
     }
 
     public List<Category> getCategories() {

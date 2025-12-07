@@ -297,7 +297,7 @@ public class CourseDAO extends dao {
             allCategoryIds.add(categoryId);
             allCategoryIds.addAll(categoryDao.getChildCategoryIds(categoryId));
 
-            StringBuilder inClause = new StringBuilder(" OR category_id IN (");
+            StringBuilder inClause = new StringBuilder(" AND category_id IN (");
             for (int i = 0; i < allCategoryIds.size(); i++) {
                 inClause.append("?");
                 if (i < allCategoryIds.size() - 1) {
@@ -371,53 +371,55 @@ public class CourseDAO extends dao {
             int categoryId, String status, String sortBy, int instructorId) {
 
         List<Course> cList = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
                 "SELECT * FROM edulab.course WHERE created_by = ?"
         );
+        params.add(instructorId);
 
-        List<Object> params = new ArrayList<>();
-
-        StringBuilder orGroup = new StringBuilder();
+        StringBuilder orSearch = new StringBuilder();
 
         if (title != null && !title.isBlank()) {
-            orGroup.append(" OR title LIKE ?");
+            orSearch.append(" title LIKE ? OR");
             params.add("%" + title + "%");
         }
 
         if (description != null && !description.isBlank()) {
-            orGroup.append(" OR description LIKE ?");
+            orSearch.append(" description LIKE ? OR");
             params.add("%" + description + "%");
+        }
+
+        if (orSearch.length() > 0) {
+            sql.append(" AND (");
+            sql.append(orSearch.substring(0, orSearch.length() - 2)); // remove last OR
+            sql.append(")");
         }
 
         if (categoryId > 0) {
 
             List<Integer> allCategoryIds = new ArrayList<>();
             allCategoryIds.add(categoryId);
-            allCategoryIds.addAll(categoryDao.getChildCategoryIds(categoryId));
 
-            StringBuilder inClause = new StringBuilder(" OR category_id IN (");
+            List<Integer> children = categoryDao.getChildCategoryIds(categoryId);
+            if (children != null && !children.isEmpty()) {
+                allCategoryIds.addAll(children);
+            }
+
+            sql.append(" AND category_id IN (");
             for (int i = 0; i < allCategoryIds.size(); i++) {
-                inClause.append("?");
+                sql.append("?");
                 if (i < allCategoryIds.size() - 1) {
-                    inClause.append(",");
+                    sql.append(",");
                 }
                 params.add(allCategoryIds.get(i));
             }
-            inClause.append(")");
-
-            orGroup.append(inClause);
-        }
-
-        if (status != null && !status.isEmpty()) {
-            orGroup.append(" AND status = ?");
-            params.add(status);
-        }
-
-        if (orGroup.length() > 0) {
-            sql.append(" AND (");
-            sql.append(orGroup.substring(4));
             sql.append(")");
+        }
+
+        if (status != null && !status.isBlank() && !status.equalsIgnoreCase("all")) {
+            sql.append(" AND status = ?");
+            params.add(status);
         }
 
         if (sortBy != null && !sortBy.isBlank()) {
@@ -427,20 +429,17 @@ public class CourseDAO extends dao {
         }
 
         sql.append(" LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
 
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql.toString());
 
-            int index = 1;
-            ps.setInt(index++, instructorId);
-
+            int idx = 1;
             for (Object p : params) {
-                ps.setObject(index++, p);
+                ps.setObject(idx++, p);
             }
-
-            ps.setInt(index++, limit);
-            ps.setInt(index, offset);
 
             rs = ps.executeQuery();
 
@@ -472,7 +471,7 @@ public class CourseDAO extends dao {
     public int countCourses(String title, String description,
             int categoryId, String status) {
         StringBuilder sql = new StringBuilder(
-                "SELECT COUNT(*) FROM edulab.course WHERE created_by = ?"
+                "SELECT COUNT(*) FROM edulab.course"
         );
 
         List<Object> params = new ArrayList<>();
@@ -495,7 +494,7 @@ public class CourseDAO extends dao {
             allCategoryIds.add(categoryId);
             allCategoryIds.addAll(categoryDao.getChildCategoryIds(categoryId));
 
-            StringBuilder inClause = new StringBuilder(" OR category_id IN (");
+            StringBuilder inClause = new StringBuilder(" AND category_id IN (");
             for (int i = 0; i < allCategoryIds.size(); i++) {
                 inClause.append("?");
                 if (i < allCategoryIds.size() - 1) {
@@ -551,47 +550,50 @@ public class CourseDAO extends dao {
         );
 
         List<Object> params = new ArrayList<>();
+        params.add(instructorId);
 
-        StringBuilder orGroup = new StringBuilder();
+        StringBuilder orSearch = new StringBuilder();
 
-        if (title != null && !title.isEmpty()) {
-            orGroup.append(" OR title LIKE ?");
+        if (title != null && !title.isBlank()) {
+            orSearch.append(" title LIKE ? OR");
             params.add("%" + title + "%");
         }
 
-        if (description != null && !description.isEmpty()) {
-            orGroup.append(" OR description LIKE ?");
+        if (description != null && !description.isBlank()) {
+            orSearch.append(" description LIKE ? OR");
             params.add("%" + description + "%");
+        }
+
+        if (orSearch.length() > 0) {
+            sql.append(" AND (");
+            sql.append(orSearch.substring(0, orSearch.length() - 2));
+            sql.append(")");
         }
 
         if (categoryId > 0) {
 
             List<Integer> allCategoryIds = new ArrayList<>();
             allCategoryIds.add(categoryId);
-            allCategoryIds.addAll(categoryDao.getChildCategoryIds(categoryId));
 
-            StringBuilder inClause = new StringBuilder(" OR category_id IN (");
+            List<Integer> children = categoryDao.getChildCategoryIds(categoryId);
+            if (children != null && !children.isEmpty()) {
+                allCategoryIds.addAll(children);
+            }
+
+            sql.append(" AND category_id IN (");
             for (int i = 0; i < allCategoryIds.size(); i++) {
-                inClause.append("?");
+                sql.append("?");
                 if (i < allCategoryIds.size() - 1) {
-                    inClause.append(",");
+                    sql.append(",");
                 }
                 params.add(allCategoryIds.get(i));
             }
-            inClause.append(")");
-
-            orGroup.append(inClause);
-        }
-
-        if (status != null && !status.isEmpty()) {
-            orGroup.append(" AND status = ?");
-            params.add(status);
-        }
-
-        if (orGroup.length() > 0) {
-            sql.append(" AND (");
-            sql.append(orGroup.substring(4));
             sql.append(")");
+        }
+
+        if (status != null && !status.isBlank() && !status.equalsIgnoreCase("all")) {
+            sql.append(" AND status = ?");
+            params.add(status);
         }
 
         try {
@@ -599,9 +601,6 @@ public class CourseDAO extends dao {
             ps = con.prepareStatement(sql.toString());
 
             int index = 1;
-
-            ps.setInt(index++, instructorId);
-
             for (Object p : params) {
                 ps.setObject(index++, p);
             }
