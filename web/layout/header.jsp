@@ -10,7 +10,7 @@
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-8">
                     <div class="flex items-center">
-                        <span class="text-2xl font-bold text-blue-600">LabEdu</span>
+                        <a href="${pageContext.request.contextPath}/courses"><span class="text-2xl font-bold text-blue-600">LabEdu</span></a>
                     </div>
                     <div class="">
                         <div class="relative w-[500px]">
