@@ -338,28 +338,10 @@
                                                                                     </svg>
                                                                                     Edit
                                                                                 </button>
-                                                                                <a href="${pageContext.request.contextPath}/instructor/quizes?action=view&id=<%= quiz.getId() %>"
-                                                                                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">
-                                                                                    <svg class="w-4 h-4 mr-1"
-                                                                                        fill="none"
-                                                                                        stroke="currentColor"
-                                                                                        viewBox="0 0 24 24">
-                                                                                        <path stroke-linecap="round"
-                                                                                            stroke-linejoin="round"
-                                                                                            stroke-width="2"
-                                                                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
-                                                                                        </path>
-                                                                                        <path stroke-linecap="round"
-                                                                                            stroke-linejoin="round"
-                                                                                            stroke-width="2"
-                                                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                                                                        </path>
-                                                                                    </svg>
-                                                                                    View
-                                                                                </a>
-                                                                                <button
-                                                                                    onclick="deleteQuiz(<%= quiz.getId() %>, '<%= quiz.getQuestion().replace("'", "\\'") %>')"
-                                                                                    class="inline-flex items-center px-4 py-2 bg-white border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition">
+                                                                                <button type="button"
+                                                                                    class="delete-quiz-btn inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition"
+                                                                                    data-id="<%= quiz.getId() %>"
+                                                                                    data-question="<%= safeQuestion %>">
                                                                                     <svg class="w-4 h-4 mr-1"
                                                                                         fill="none"
                                                                                         stroke="currentColor"
@@ -534,13 +516,6 @@
                                         window.location.href = '${pageContext.request.contextPath}/instructor/quizes?action=list';
                                     }
 
-                                    // Delete quiz confirmation
-                                    function deleteQuiz(quizId, question) {
-                                        const truncatedQuestion = question.length > 50 ? question.substring(0, 50) + '...' : question;
-                                        if (confirm('Are you sure you want to delete this quiz?\n\n"' + truncatedQuestion + '"\n\nThis action cannot be undone.')) {
-                                            window.location.href = '${pageContext.request.contextPath}/instructor/quizes?action=delete&id=' + quizId;
-                                        }
-                                    }
 
                                     // Search on Enter key
                                     document.getElementById('search').addEventListener('keypress', function (e) {
@@ -577,18 +552,47 @@
                                     }
 
                                     // Close modal when clicking outside
-                                    document.getElementById('editModal').addEventListener('click', function (e) {
-                                        if (e.target === this) {
-                                            closeEditModal();
-                                        }
-                                    });
+                                    var editModalEl = document.getElementById('editModal');
+                                    if (editModalEl) {
+                                        editModalEl.addEventListener('click', function (e) {
+                                            if (e.target === this) {
+                                                closeEditModal();
+                                            }
+                                        });
+                                    }
 
                                     // Close modal on Escape key
                                     document.addEventListener('keydown', function (e) {
                                         if (e.key === 'Escape') {
                                             closeEditModal();
+                                            closeDeleteModal();
                                         }
                                     });
+
+                                    // Delete Quiz functionality
+                                    document.querySelectorAll('.delete-quiz-btn').forEach(function (btn) {
+                                        btn.addEventListener('click', function (e) {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+
+                                            var id = this.getAttribute('data-id');
+                                            var question = this.getAttribute('data-question');
+
+                                            document.getElementById('deleteQuizId').value = id;
+                                            document.getElementById('deleteQuizQuestion').textContent = question;
+                                            document.getElementById('deleteModal').classList.remove('hidden');
+                                            document.body.style.overflow = 'hidden';
+                                        });
+                                    });
+
+                                    // Close Delete Modal
+                                    function closeDeleteModal() {
+                                        var modal = document.getElementById('deleteModal');
+                                        if (modal) {
+                                            modal.classList.add('hidden');
+                                            document.body.style.overflow = 'auto';
+                                        }
+                                    }
                                 </script>
 
                                 <!-- Edit Quiz Modal -->
@@ -691,6 +695,88 @@
                                         </form>
                                     </div>
                                 </div>
+
+                                <!-- Delete Quiz Confirmation Modal -->
+                                <div id="deleteModal"
+                                    class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex items-center justify-center p-4">
+                                    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+                                        <!-- Modal Header -->
+                                        <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                                            <h2 class="text-xl font-bold text-gray-900">Delete Quiz</h2>
+                                            <button onclick="closeDeleteModal()"
+                                                class="text-gray-400 hover:text-gray-600 transition">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <!-- Modal Body -->
+                                        <div class="p-6">
+                                            <div
+                                                class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+                                                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                                    </path>
+                                                </svg>
+                                            </div>
+                                            <h3 class="text-lg font-medium text-gray-900 text-center mb-2">Are you sure
+                                                you want to delete this quiz?</h3>
+                                            <p class="text-sm text-gray-500 text-center mb-4">This action cannot be
+                                                undone.</p>
+                                            <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                                                <p class="text-sm text-gray-700 font-medium">Question:</p>
+                                                <p id="deleteQuizQuestion"
+                                                    class="text-sm text-gray-600 mt-1 line-clamp-3"></p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Modal Footer -->
+                                        <form action="${pageContext.request.contextPath}/instructor/quizes"
+                                            method="POST">
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="id" id="deleteQuizId">
+                                            <div
+                                                class="flex flex-col sm:flex-row gap-3 p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+                                                <button type="submit"
+                                                    class="inline-flex items-center justify-center px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition shadow-sm">
+                                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                        </path>
+                                                    </svg>
+                                                    Delete Quiz
+                                                </button>
+                                                <button type="button" onclick="closeDeleteModal()"
+                                                    class="inline-flex items-center justify-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">
+                                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                    </svg>
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <!-- Script for delete modal click-outside -->
+                                <script>
+                                    // Close delete modal when clicking outside
+                                    document.getElementById('deleteModal').addEventListener('click', function (e) {
+                                        if (e.target === this) {
+                                            closeDeleteModal();
+                                        }
+                                    });
+                                </script>
                     </body>
 
                     </html>

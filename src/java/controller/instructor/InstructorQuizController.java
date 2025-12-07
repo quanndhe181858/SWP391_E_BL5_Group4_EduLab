@@ -57,12 +57,6 @@ public class InstructorQuizController extends HttpServlet {
                     case "list":
                         showQuizList(request, response);
                         break;
-                    case "view":
-                        viewQuizDetail(request, response);
-                        break;
-                    case "delete":
-                        deleteQuiz(request, response);
-                        break;
                     case "add":
                         showCreateForm(request, response);
                         break;
@@ -100,6 +94,9 @@ public class InstructorQuizController extends HttpServlet {
                         break;
                     case "update":
                         updateQuiz(request, response);
+                        break;
+                    case "delete":
+                        deleteQuiz(request, response);
                         break;
                     default:
                         showQuizList(request, response);
@@ -269,83 +266,11 @@ public class InstructorQuizController extends HttpServlet {
     }
 
     /**
-     * Views the details of a single quiz
-     */
-    private void viewQuizDetail(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        String idParam = request.getParameter("id");
-        if (idParam == null || idParam.isEmpty()) {
-            HttpSession session = request.getSession();
-            session.setAttribute("notification", "Quiz ID is required.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
-            return;
-        }
-
-        try {
-            int quizId = Integer.parseInt(idParam);
-            Quiz quiz = quizDAO.getQuizById(quizId);
-
-            if (quiz != null) {
-                request.setAttribute("quiz", quiz);
-                request.getRequestDispatcher("../View/Instructor/viewQuiz.jsp").forward(request, response);
-            } else {
-                HttpSession session = request.getSession();
-                session.setAttribute("notification", "Quiz not found.");
-                session.setAttribute("notificationType", "error");
-                response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
-            }
-        } catch (NumberFormatException e) {
-            HttpSession session = request.getSession();
-            session.setAttribute("notification", "Invalid Quiz ID.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
-        }
-    }
-
-    /**
      * Shows the form to create a new quiz
      */
     private void showCreateForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
-    }
-
-    /**
-     * Shows the form to edit an existing quiz
-     */
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        String idParam = request.getParameter("id");
-        if (idParam == null || idParam.isEmpty()) {
-            HttpSession session = request.getSession();
-            session.setAttribute("notification", "Quiz ID is required.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
-            return;
-        }
-
-        try {
-            int quizId = Integer.parseInt(idParam);
-            Quiz quiz = quizDAO.getQuizById(quizId);
-
-            if (quiz != null) {
-                request.setAttribute("quiz", quiz);
-                request.getRequestDispatcher("../View/Instructor/editQuiz.jsp").forward(request, response);
-            } else {
-                HttpSession session = request.getSession();
-                session.setAttribute("notification", "Quiz not found.");
-                session.setAttribute("notificationType", "error");
-                response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
-            }
-        } catch (NumberFormatException e) {
-            HttpSession session = request.getSession();
-            session.setAttribute("notification", "Invalid Quiz ID.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
-        }
     }
 
     /**
@@ -410,6 +335,42 @@ public class InstructorQuizController extends HttpServlet {
         } else {
             request.setAttribute("error", "Failed to create quiz. Please try again.");
             request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
+        }
+    }
+
+    /**
+     * Shows the form to edit an existing quiz
+     */
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.isEmpty()) {
+            HttpSession session = request.getSession();
+            session.setAttribute("notification", "Quiz ID is required.");
+            session.setAttribute("notificationType", "error");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            return;
+        }
+
+        try {
+            int quizId = Integer.parseInt(idParam);
+            Quiz quiz = quizDAO.getQuizById(quizId);
+
+            if (quiz != null) {
+                request.setAttribute("quiz", quiz);
+                request.getRequestDispatcher("../View/Instructor/editQuiz.jsp").forward(request, response);
+            } else {
+                HttpSession session = request.getSession();
+                session.setAttribute("notification", "Quiz not found.");
+                session.setAttribute("notificationType", "error");
+                response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            }
+        } catch (NumberFormatException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("notification", "Invalid Quiz ID.");
+            session.setAttribute("notificationType", "error");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
         }
     }
 
@@ -506,8 +467,11 @@ public class InstructorQuizController extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
+
+        // Get quiz ID parameter
         String idParam = request.getParameter("id");
 
+        // Validate quiz ID
         if (idParam == null || idParam.isEmpty()) {
             session.setAttribute("notification", "Quiz ID is required.");
             session.setAttribute("notificationType", "error");
@@ -525,15 +489,14 @@ public class InstructorQuizController extends HttpServlet {
             return;
         }
 
-        // Attempt to delete
+        // Delete from database
         boolean deleted = quizDAO.deleteQuiz(quizId);
 
         if (deleted) {
             session.setAttribute("notification", "Quiz deleted successfully!");
             session.setAttribute("notificationType", "success");
         } else {
-            session.setAttribute("notification",
-                    "Unable to delete: This quiz may be linked to existing tests or student results.");
+            session.setAttribute("notification", "Failed to delete quiz. It may have linked data.");
             session.setAttribute("notificationType", "error");
         }
 
