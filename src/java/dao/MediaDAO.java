@@ -7,6 +7,8 @@ package dao;
 import database.dao;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Media;
@@ -156,4 +158,33 @@ public class MediaDAO extends dao {
             this.closeResources();
         }
     }
+
+    public List<Media> getMediaBySectionId(int sectionId) {
+        List<Media> list = new ArrayList<>();
+
+        String sql = "SELECT * FROM media WHERE objectId = ? AND type = 'section'";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, sectionId);
+
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Media m = new Media();
+                m.setId(rs.getInt("id"));
+                m.setObjectId(rs.getInt("objectId"));
+                m.setType(rs.getString("type"));
+                m.setPath(rs.getString("path"));
+                list.add(m);
+            }
+
+        } catch (SQLException e) {
+        } finally {
+            closeResources();
+        }
+
+        return list;
+    }
+
 }

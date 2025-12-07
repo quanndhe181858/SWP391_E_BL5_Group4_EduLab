@@ -1,188 +1,145 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>${course.title} - Learning</title>
+<head>
+    <title>${course.title} - Learning</title>
 
-        <style>
-            body {
-                margin: 0;
-                font-family: Arial, sans-serif;
-                background: #f9f9f9;
-            }
+    <style>
+        body { margin: 0; font-family: Arial; background: #f3f4f7; }
+        .wrapper { display: flex; height: 100vh; }
 
-            .wrapper {
-                display: flex;
-                height: 100vh;
-            }
+        .sidebar {
+            width: 300px; background: #fff; border-right: 1px solid #ddd;
+            padding: 20px; overflow-y: auto;
+        }
+        .lesson-item { display: block; padding: 10px; border-radius: 6px; 
+                       margin-bottom: 8px; color:#333; text-decoration:none; }
+        .lesson-item:hover { background: #eee; }
+        .active { background:#d1f5e0; border-left:5px solid #2ecc71; }
+        .done-icon { float:right; color:#28a745; }
 
-            /* Sidebar */
-            .sidebar {
-                width: 300px;
-                background: #ffffff;
-                border-right: 1px solid #ddd;
-                padding: 20px;
-                overflow-y: auto;
-            }
+        .content { flex:1; padding:30px; overflow-y:auto; }
+        .lesson-title { font-size:26px; font-weight:bold; }
 
-            .sidebar h3 {
-                margin-top: 0;
-            }
+        .image-frame { width:70%; margin-top:10px; border-radius:6px; }
+        .video-frame { width:80%; margin-top:10px; border-radius:6px; }
 
-            .lesson-item {
-                padding: 10px 12px;
-                margin-bottom: 8px;
-                border-radius: 6px;
-                display: block;
-                text-decoration: none;
-                color: #333;
-            }
+        .complete-btn {
+            margin-top:20px; padding:10px 20px;
+            background:#2ecc71; color:white;
+            border-radius:6px; border:none; cursor:pointer;
+        }
+        .complete-btn:hover { background:#27b864; }
+    </style>
+</head>
 
-            .lesson-item:hover {
-                background: #eee;
-            }
+<body>
 
-            .active {
-                background: #d1f5e0 !important;
-                border-left: 5px solid #2ecc71;
-            }
+<div class="wrapper">
 
-            .done-icon {
-                float: right;
-                font-weight: bold;
-                color: #27ae60;
-            }
+    <!-- SIDEBAR -->
+    <div class="sidebar">
 
-            /* Content */
-            .content {
-                flex: 1;
-                padding: 30px;
-                overflow-y: auto;
-            }
+        <h3>${course.title}</h3>
+        <c:set var="total" value="${fn:length(sections)}"/>
+        <c:set var="completed" value="0"/>
 
-            .complete-btn {
-                margin-top: 20px;
-                padding: 10px 20px;
-                background: #2ecc71;
-                border: none;
-                color: white;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 15px;
-            }
+        <c:forEach var="sec" items="${sections}">
+            <c:if test="${progressMap[sec.id] != null && progressMap[sec.id].status == 'Completed'}">
+                <c:set var="completed" value="${completed + 1}"/>
+            </c:if>
+        </c:forEach>
 
-            .complete-btn:hover {
-                background: #25b863;
-            }
+        <c:set var="percent" value="${total == 0 ? 0 : (completed * 100 / total)}"/>
 
-            .video-frame {
-                width: 80%;
-                border-radius: 6px;
-            }
-
-            .lesson-title {
-                font-size: 24px;
-                margin-bottom: 10px;
-                font-weight: bold;
-            }
-
-        </style>
-    </head>
-
-    <body>
-
-        <div class="wrapper">
-
-            <!-- Sidebar: Danh sách bài học -->
-            <div class="sidebar">
-
-                <h3>${course.title}</h3>
-                <p style="color: gray;">Tiến độ khóa học</p>
-
-                <!-- thanh progress -->
-                <c:set var="total" value="${sections.size()}" />
-                <c:set var="completed" value="0" />
-
-                <c:forEach var="s" items="${sections}">
-                    <c:if test="${progressMap[s.id] != null && progressMap[s.id].status == 'Completed'}">
-                        <c:set var="completed" value="${completed + 1}" />
-                    </c:if>
-                </c:forEach>
-
-                <c:set var="percent" value="${total == 0 ? 0 : (completed * 100 / total)}" />
-
-
-                <div>
-                    <b>${percent}% hoàn thành</b>
-                    <div style="background:#ddd; height:8px; border-radius:4px;">
-                        <div style="background:#2ecc71; height:8px; width:${percent}%"></div>
-                    </div>
-                </div>
-
-
-                <hr>
-
-                <!-- List lessons -->
-                <c:forEach var="s" items="${sections}">
-                    <c:set var="p" value="${progressMap[s.id]}" />
-
-                    <a class="lesson-item ${s.id == current.id ? 'active' : ''}"
-                       href="${pageContext.request.contextPath}/learn?courseId=${course.id}&sectionId=${s.id}"
->
-
-                        ${s.position}. ${s.title}
-
-                        <c:if test="${p != null && p.status == 'Completed'}">
-                            <span class="done-icon">✔</span>
-                        </c:if>
-
-                    </a>
-                </c:forEach>
-
+        <div>
+            <b>${percent}% hoàn thành</b>
+            <div style="background:#ddd; height:8px; border-radius:4px;">
+                <div style="background:#2ecc71; width:${percent}%; height:8px;"></div>
             </div>
-
-            <!-- Main Content -->
-            <div class="content">
-
-                <h1 class="lesson-title">${current.title}</h1>
-                <p style="color: gray;">${current.description}</p>
-
-                <hr>
-
-                <!-- Render nội dung theo loại -->
-                <c:choose>
-
-                    <c:when test="${current.type == 'text'}">
-                        <div style="font-size: 17px; line-height: 1.6;">
-                            ${current.content}
-                        </div>
-                    </c:when>
-
-                    <c:when test="${current.type == 'image'}">
-                        <img src="${current.content}" style="width: 70%; border-radius: 6px;">
-                    </c:when>
-
-                    <c:when test="${current.type == 'video'}">
-                        <video controls class="video-frame">
-                            <source src="${current.content}">
-                        </video>
-                    </c:when>
-
-                </c:choose>
-
-                <!-- Nút đánh dấu hoàn thành -->
-                <br><br>
-               <form method="POST" action="${pageContext.request.contextPath}/learn">
-                    <input type="hidden" name="courseId" value="${course.id}">
-                    <input type="hidden" name="sectionId" value="${current.id}">
-                    <button class="complete-btn">✔ Đánh dấu hoàn thành</button>
-                </form>
-
-            </div>
-
         </div>
 
-    </body>
+        <hr>
+
+        <!-- DANH SÁCH BÀI HỌC -->
+        <c:forEach var="s" items="${sections}">
+            <a class="lesson-item ${s.id == current.id ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/learn?courseId=${course.id}&sectionId=${s.id}">
+                ${s.position}. ${s.title}
+
+                <c:if test="${progressMap[s.id] != null && progressMap[s.id].status == 'Completed'}">
+                    <span class="done-icon">✔</span>
+                </c:if>
+            </a>
+        </c:forEach>
+
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="content">
+
+        <h1 class="lesson-title">${current.title}</h1>
+        <p style="color:gray;">${current.description}</p>
+        <p>Loại bài học: <b>${current.type}</b></p>
+        <hr>
+
+        <!-- NỘI DUNG TEXT LUÔN HIỂN THỊ -->
+        <div style="font-size:17px; line-height:1.6; margin-bottom:20px;">
+            ${current.content}
+        </div>
+
+        <!-- MEDIA TABLE CONTROL -->
+        <c:if test="${not empty mediaList}">
+            <h3 style="margin-top:20px;">Tài nguyên đính kèm</h3>
+
+            <c:forEach var="m" items="${mediaList}">
+
+                <!-- IMAGE -->
+                <c:if test="${fn:endsWith(m.path,'.jpg') 
+                             || fn:endsWith(m.path,'.jpeg')
+                             || fn:endsWith(m.path,'.png')}">
+                    <img class="image-frame" 
+                         src="${pageContext.request.contextPath}/${m.path}">
+                </c:if>
+
+                <!-- MP4 VIDEO -->
+                <c:if test="${fn:endsWith(m.path,'.mp4')}">
+                    <video controls class="video-frame">
+                        <source src="${pageContext.request.contextPath}/${m.path}">
+                    </video>
+                </c:if>
+
+                <!-- YOUTUBE LINK -->
+                <c:if test="${fn:contains(m.path,'youtube.com')}">
+                    <iframe width="80%" height="420"
+                            src="https://www.youtube.com/embed/${fn:substringAfter(m.path,'v=')}"
+                            frameborder="0" allowfullscreen></iframe>
+                </c:if>
+
+                <!-- PDF -->
+                <c:if test="${fn:endsWith(m.path,'.pdf')}">
+                    <a href="${pageContext.request.contextPath}/${m.path}" target="_blank">
+                        📄 Tải file PDF
+                    </a>
+                </c:if>
+
+            </c:forEach>
+
+        </c:if>
+
+        <!-- BUTTON COMPLETE -->
+        <form method="POST" action="${pageContext.request.contextPath}/learn">
+            <input type="hidden" name="courseId" value="${course.id}">
+            <input type="hidden" name="sectionId" value="${current.id}">
+            <button class="complete-btn">✔ Đánh dấu hoàn thành</button>
+        </form>
+
+    </div>
+
+</div>
+
+</body>
 </html>

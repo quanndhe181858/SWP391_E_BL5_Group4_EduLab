@@ -7,6 +7,8 @@ package controller.trainee;
 import dao.CourseDAO;
 import dao.CourseProgressDAO;
 import dao.CourseSectionDAO;
+import dao.EnrollmentDAO;
+import dao.MediaDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -14,12 +16,15 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import model.Course;
 import model.CourseProgress;
 import model.CourseSection;
+import model.Media;
+import model.User;
 
 @WebServlet(name = "LearnCourseController", urlPatterns = {"/learn"})
 public class LearnCourseController extends HttpServlet {
@@ -43,60 +48,57 @@ public class LearnCourseController extends HttpServlet {
     private final CourseDAO courseDAO = new CourseDAO();
     private final CourseSectionDAO sectionDAO = new CourseSectionDAO();
     private final CourseProgressDAO progressDAO = new CourseProgressDAO();
+    private final EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
+    private final MediaDAO mediaDAO = new MediaDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int userId = 1; // hardcode cho test
+//        User u = util.AuthUtils.doAuthorize(request, response, 3);
+//
+//        if (u == null) {
+//            return;
+//        }
 
-        // Hardcode courseId = 4
-        int courseId = 4;
+//        int uid = u.getId();
+       int uid = 1;
 
-        // Lấy danh sách toàn bộ bài học trong khóa này
-        List<CourseSection> sections = sectionDAO.getAllCourseSectionsByCourseId(courseId);
+        int courseId = Integer.parseInt(request.getParameter("courseId"));
 
-        if (sections == null || sections.isEmpty()) {
-            response.sendError(404, "This course has no lessons.");
+        if (!enrollmentDAO.isEnrolled(uid, courseId)) {
+            response.sendError(403, "Bạn chưa đăng ký khóa học này.");
             return;
         }
 
-        // Lấy sectionId trên URL
+        List<CourseSection> sections = sectionDAO.getAllCourseSectionsByCourseId(courseId);
+
+        if (sections.isEmpty()) {
+            response.sendError(404, "Khóa học chưa có bài học nào.");
+            return;
+        }
+
         String rawSectionId = request.getParameter("sectionId");
-        int sectionId;
+        int sectionId = (rawSectionId == null)
+                ? sections.get(0).getId()
+                : Integer.parseInt(rawSectionId);
 
-        // 🔥 Nếu không có sectionId trên URL → chọn bài học đầu tiên
-        if (rawSectionId == null) {
-            sectionId = sections.get(0).getId();
-        } else {
-            sectionId = Integer.parseInt(rawSectionId);
-        }
+        CourseSection current = sectionDAO.getCourseSectionById(sectionId);
 
-        // Lấy thông tin khóa học
-        Course course = courseDAO.getCourseById(courseId);
+        List<Media> mediaList = mediaDAO.getMediaBySectionId(sectionId);
 
-        // Lấy section hiện tại
-        CourseSection currentSection = sectionDAO.getCourseSectionById(sectionId);
-        if (currentSection == null) {
-            currentSection = sections.get(0); // fallback
-            sectionId = currentSection.getId();
-        }
+        progressDAO.createOrUpdateProgress(uid, courseId, sectionId);
 
-        // Ghi lại tiến trình
-        progressDAO.createOrUpdateProgress(userId, courseId, sectionId);
-
-        // Load tiến độ
         Map<Integer, CourseProgress> progressMap = new HashMap<>();
         for (CourseSection s : sections) {
-            CourseProgress p = progressDAO.getProgress(userId, courseId, s.getId());
-            progressMap.put(s.getId(), p);
+            progressMap.put(s.getId(), progressDAO.getProgress(uid, courseId, s.getId()));
         }
 
-        // Set attribute sang JSP
-        request.setAttribute("course", course);
+        request.setAttribute("course", courseDAO.getCourseById(courseId));
         request.setAttribute("sections", sections);
-        request.setAttribute("current", currentSection);
+        request.setAttribute("current", current);
         request.setAttribute("progressMap", progressMap);
+        request.setAttribute("mediaList", mediaList);
 
         request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
     }
@@ -104,16 +106,15 @@ public class LearnCourseController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int userId = 1; // hardcode test
-    int courseId = Integer.parseInt(request.getParameter("courseId"));
-    int sectionId = Integer.parseInt(request.getParameter("sectionId"));
+        int userId = 1;
+        int courseId = Integer.parseInt(request.getParameter("courseId"));
+        int sectionId = Integer.parseInt(request.getParameter("sectionId"));
 
-    // đánh dấu hoàn thành
-    progressDAO.markCompleted(userId, courseId, sectionId);
+        progressDAO.markCompleted(userId, courseId, sectionId);
 
-    // Redirect về lại học bài
-    response.sendRedirect(request.getContextPath()
-        + "/learn?courseId=" + courseId + "&sectionId=" + sectionId);
+        response.sendRedirect(
+                request.getContextPath() + "/learn?courseId=" + courseId + "&sectionId=" + sectionId
+        );
     }
 
     @Override
