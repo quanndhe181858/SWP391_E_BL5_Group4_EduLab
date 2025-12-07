@@ -86,36 +86,120 @@ public class InstructorCourseController extends HttpServlet {
 
         try {
             User user = AuthUtils.doAuthorize(req, resp, 2);
+            int instructorId = user.getId();
 
-            String cidStr = req.getParameter("id");
             String title = req.getParameter("title");
             String description = req.getParameter("description");
             String categoryIdStr = req.getParameter("categoryId");
             String status = req.getParameter("status");
+            Part filePart = req.getPart("thumbnail");
 
-            if (cidStr == null || cidStr.isBlank()) {
-                resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+            if (title == null || title.trim().isEmpty()
+                    || description == null || description.trim().isEmpty()
+                    || categoryIdStr == null || categoryIdStr.trim().isEmpty()
+                    || status == null || status.trim().isEmpty()) {
+                resp.setStatus(400);
+                res.put("success", false);
+                res.put("message", "Vui lòng điền đầy đủ thông tin bắt buộc");
+                ResponseUtils.sendJsonResponse(resp, res);
                 return;
             }
 
-            int courseId = 0;
-
+            int categoryId = 0;
             try {
-                courseId = Integer.parseInt(cidStr);
+                categoryId = Integer.parseInt(categoryIdStr);
             } catch (NumberFormatException e) {
-                resp.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+                resp.setStatus(400);
+                res.put("success", false);
+                res.put("message", "Category ID không hợp lệ");
+                ResponseUtils.sendJsonResponse(resp, res);
                 return;
             }
 
-            if (cidStr.isBlank()) {
-                resp.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+            Category category = _categoryService.getCategorybyId(categoryId);
+            if (category == null) {
+                resp.setStatus(400);
+                res.put("success", false);
+                res.put("message", "Đề mục không tồn tại");
+                ResponseUtils.sendJsonResponse(resp, res);
                 return;
             }
 
+            String thumbnailPath = "/media/image/default-course-image.webp";
+
+            if (filePart != null && filePart.getSize() > 0) {
+                try {
+                    String contentType = filePart.getContentType();
+                    if (!contentType.startsWith("image/")) {
+                        resp.setStatus(400);
+                        res.put("success", false);
+                        res.put("message", "File tải lên phải là hình ảnh");
+                        ResponseUtils.sendJsonResponse(resp, res);
+                        return;
+                    }
+
+                    if (filePart.getSize() > 5 * 1024 * 1024) {
+                        resp.setStatus(400);
+                        res.put("success", false);
+                        res.put("message", "Kích thước file phải nhỏ hơn 5MB");
+                        ResponseUtils.sendJsonResponse(resp, res);
+                        return;
+                    }
+
+                    thumbnailPath = FileUtils.saveFile(
+                            filePart,
+                            "image",
+                            getServletContext()
+                    );
+
+                } catch (IllegalArgumentException e) {
+                    resp.setStatus(400);
+                    res.put("success", false);
+                    res.put("message", "Lỗi tải ảnh: " + e.getMessage());
+                    ResponseUtils.sendJsonResponse(resp, res);
+                    return;
+                } catch (IOException e) {
+                    resp.setStatus(500);
+                    res.put("success", false);
+                    res.put("message", "Không thể lưu ảnh, vui lòng thử lại");
+                    ResponseUtils.sendJsonResponse(resp, res);
+                    return;
+                }
+            }
+
+            Course newCourse = new Course();
+            newCourse.setTitle(title.trim());
+            newCourse.setDescription(description.trim());
+            newCourse.setCategory_id(categoryId);
+            newCourse.setStatus(status);
+            newCourse.setThumbnail(thumbnailPath);
+            newCourse.setCreated_by(instructorId);
+
+            Course createdCourse = _courseService.createCourse(newCourse, instructorId);
+
+            if (createdCourse != null && createdCourse.getId() > 0) {
+                resp.setStatus(200);
+                res.put("success", true);
+                res.put("message", "Tạo khoá học thành công!");
+            } else {
+                if (!thumbnailPath.equals("/media/image/default-course-image.webp")) {
+                    FileUtils.deleteFile(thumbnailPath, getServletContext());
+                }
+
+                resp.setStatus(500);
+                res.put("success", false);
+                res.put("message", "Không thể tạo khoá học, vui lòng thử lại");
+            }
+
+        } catch (NumberFormatException e) {
+            resp.setStatus(400);
+            res.put("success", false);
+            res.put("message", "Dữ liệu không hợp lệ");
         } catch (ServletException | IOException e) {
+            e.printStackTrace();
             resp.setStatus(500);
             res.put("success", false);
-            res.put("message", httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+            res.put("message", "Có lỗi xảy ra: " + e.getMessage());
         }
 
         ResponseUtils.sendJsonResponse(resp, res);
@@ -423,6 +507,18 @@ public class InstructorCourseController extends HttpServlet {
 
     protected void getCourseCreate(HttpServletRequest req, HttpServletResponse resp, User user)
             throws ServletException, IOException {
+        List<Category> categories = _categoryService.getCategories();
+
+        List<Category> parentCategories = categories.stream()
+                .filter(ct -> ct.getParent_id() == 0)
+                .collect(Collectors.toList());
+
+        List<Category> childCategories = categories.stream()
+                .filter(ct -> ct.getParent_id() != 0)
+                .collect(Collectors.toList());
+
+        req.setAttribute("parents", parentCategories);
+        req.setAttribute("children", childCategories);
         req.getRequestDispatcher("../View/Instructor/CourseCreate.jsp").forward(req, resp);
     }
 }
