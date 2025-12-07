@@ -8,6 +8,6 @@ package service;
  *
  * @author quan
  */
-public class CategoryServices {
+public class categoryServices {
     
 }

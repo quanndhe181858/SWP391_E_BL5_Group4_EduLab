@@ -11,6 +11,7 @@ import java.security.Timestamp;
  * @author nguye
  */
 public class Test {
+
     private int id;
     private String code;
     private String title;
@@ -23,8 +24,26 @@ public class Test {
     private Timestamp updatedAt;
     private int createdBy;
     private int updatedBy;
+    private int numberOfQuizzes;
 
-    //gettter setter
+    public Test() {
+
+    }
+
+    public Test(String code, String title, String description, int timeInterval, int courseId, int createdBy, int numberOfQuizzes) {
+        this.code = code;
+        this.title = title;
+        this.description = description;
+        this.timeInterval = timeInterval;
+        this.courseId = courseId;
+        this.createdBy = createdBy;
+        this.numberOfQuizzes = numberOfQuizzes;
+        this.courseSectionId = 0; // Đặt mặc định
+        this.minGrade = 0; // Đặt mặc định
+    }
+    
+       //gettter setter
+
     public int getId() {
         return id;
     }
@@ -120,6 +139,19 @@ public class Test {
     public void setUpdatedBy(int updatedBy) {
         this.updatedBy = updatedBy;
     }
-    
+
+    public int getNumberOfQuizzes() {
+        return numberOfQuizzes;
+    }
+
+    public void setNumberOfQuizzes(int numberOfQuizzes) {
+        this.numberOfQuizzes = numberOfQuizzes;
+    }
+
+    @Override
+    public String toString() {
+        return "Test{" + "id=" + id + ", code=" + code + ", title=" + title + ", description=" + description + ", timeInterval=" + timeInterval + ", minGrade=" + minGrade + ", courseId=" + courseId + ", courseSectionId=" + courseSectionId + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", createdBy=" + createdBy + ", updatedBy=" + updatedBy + ", numberOfQuizzes=" + numberOfQuizzes + '}';
+    }
+
     
 }
