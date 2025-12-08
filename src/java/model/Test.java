@@ -4,7 +4,7 @@
  */
 package model;
 
-import java.security.Timestamp;
+import java.sql.Timestamp;
 
 /**
  *
@@ -42,8 +42,23 @@ public class Test {
         this.minGrade = 0; // Đặt mặc định
     }
     
-       //gettter setter
+    public Test(int id, String code, String title, String description, int timeInterval, int minGrade, int courseId, int courseSectionId, Timestamp createdAt, Timestamp updatedAt, int createdBy, int updatedBy) {
+        this.id = id;
+        this.code = code;
+        this.title = title;
+        this.description = description;
+        this.timeInterval = timeInterval;
+        this.minGrade = minGrade;
+        this.courseId = courseId;
+        this.courseSectionId = courseSectionId;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.createdBy = createdBy;
+        this.updatedBy = updatedBy;
+    }
 
+    
+  
     public int getId() {
         return id;
     }

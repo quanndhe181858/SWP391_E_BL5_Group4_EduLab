@@ -60,10 +60,15 @@ public class CourseServices {
         }
     }
 
-    public List<Course> getListCourse(int limit, int offset, String title, String description, int categoryId,
+    public List<Course> getAllCourses(int limit, int offset, String title, String description, int categoryId,
             String status, String sortBy) {
         try {
-            return cDao.getCourses(limit, offset, title, description, categoryId, status, sortBy);
+            List<Course> cList = cDao.getAllCourses(limit, offset, title, description, categoryId, status, sortBy);
+            for (Course course : cList) {
+                Category c = categoryDao.getCategoryById(course.getCategory_id());
+                course.setCategory(c);
+            }
+            return cList;
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             return null;
@@ -122,6 +127,34 @@ public class CourseServices {
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             return false;
+        }
+    }
+
+    public List<Course> getCourseCatalog(int limit, int offset, String title, String description,
+            int categoryId) {
+        try {
+
+            List<Course> cList = cDao.getCourseCatalog(limit, offset, title, description, categoryId);
+
+            for (Course course : cList) {
+                Category c = categoryDao.getCategoryById(course.getCategory_id());
+                course.setCategory(c);
+            }
+
+            return cList;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public int countCourseCatalog(String title, String description,
+            int categoryId) {
+        try {
+            return cDao.countCoursesCatalog(title, description, categoryId);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return 0;
         }
     }
 }

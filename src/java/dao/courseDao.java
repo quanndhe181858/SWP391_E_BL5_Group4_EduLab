@@ -55,7 +55,8 @@ public class CourseDAO extends dao {
 //        System.out.println(dao.getCoursesByInstructorId(10, 0, "", "", 0, "", "", 1));
 //        System.out.println(dao.countCourses("", "", 0, ""));
 //        System.out.println(dao.getCoursesByInstructorId(10, 0, "", "", 0, "", "", 1).size());
-        System.out.println(dao.countCoursesByInstructorId(1, "active"));
+//        System.out.println(dao.countCoursesByInstructorId(1, "active"));
+        System.out.println(dao.getCourseCatalog(1000, 0, "", "", 0).size());
     }
 
     public Course createCourse(Course course, int uid) {
@@ -269,7 +270,7 @@ public class CourseDAO extends dao {
         }
     }
 
-    public List<Course> getCourses(int limit, int offset, String title, String description,
+    public List<Course> getAllCourses(int limit, int offset, String title, String description,
             int categoryId, String status, String sortBy) {
         List<Course> cList = new ArrayList<>();
 
@@ -355,6 +356,7 @@ public class CourseDAO extends dao {
                 c.setUpdated_at(rs.getTimestamp("updated_at"));
                 c.setCreated_by(rs.getInt("created_by"));
                 c.setUpdated_by(rs.getInt("updated_by"));
+                c.setThumbnail(rs.getString("thumbnail"));
                 cList.add(c);
             }
 
@@ -658,4 +660,162 @@ public class CourseDAO extends dao {
         return 0;
     }
 
+    public List<Course> getCourseCatalog(int limit, int offset, String title, String description,
+            int categoryId) {
+        List<Course> cList = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM edulab.course WHERE status = 'Active'"
+        );
+
+        StringBuilder orSearch = new StringBuilder();
+
+        if (title != null && !title.isBlank()) {
+            orSearch.append(" title LIKE ? OR");
+            params.add("%" + title + "%");
+        }
+
+        if (description != null && !description.isBlank()) {
+            orSearch.append(" description LIKE ? OR");
+            params.add("%" + description + "%");
+        }
+
+        if (orSearch.length() > 0) {
+            sql.append(" AND (");
+            sql.append(orSearch.substring(0, orSearch.length() - 2)); // remove last OR
+            sql.append(")");
+        }
+
+        if (categoryId > 0) {
+            List<Integer> allCategoryIds = new ArrayList<>();
+            allCategoryIds.add(categoryId);
+
+            List<Integer> children = categoryDao.getChildCategoryIds(categoryId);
+            if (children != null && !children.isEmpty()) {
+                allCategoryIds.addAll(children);
+            }
+
+            sql.append(" AND category_id IN (");
+            for (int i = 0; i < allCategoryIds.size(); i++) {
+                sql.append("?");
+                if (i < allCategoryIds.size() - 1) {
+                    sql.append(",");
+                }
+                params.add(allCategoryIds.get(i));
+            }
+            sql.append(")");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+
+            int idx = 1;
+            for (Object p : params) {
+                ps.setObject(idx++, p);
+            }
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Course c = new Course();
+                c.setId(rs.getInt("id"));
+                c.setUuid(rs.getString("uuid"));
+                c.setTitle(rs.getString("title"));
+                c.setDescription(rs.getString("description"));
+                c.setStatus(rs.getString("status"));
+                c.setCategory_id(rs.getInt("category_id"));
+                c.setCreated_at(rs.getTimestamp("created_at"));
+                c.setUpdated_at(rs.getTimestamp("updated_at"));
+                c.setCreated_by(rs.getInt("created_by"));
+                c.setUpdated_by(rs.getInt("updated_by"));
+                c.setThumbnail(rs.getString("thumbnail"));
+                cList.add(c);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error in getCoursesByInstructorId()", e);
+        } finally {
+            this.closeResources();
+        }
+
+        return cList;
+    }
+
+    public int countCoursesCatalog(String title, String description,
+            int categoryId) {
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) FROM edulab.course WHERE status = 'Active'"
+        );
+
+        List<Object> params = new ArrayList<>();
+
+        StringBuilder orSearch = new StringBuilder();
+
+        if (title != null && !title.isBlank()) {
+            orSearch.append(" title LIKE ? OR");
+            params.add("%" + title + "%");
+        }
+
+        if (description != null && !description.isBlank()) {
+            orSearch.append(" description LIKE ? OR");
+            params.add("%" + description + "%");
+        }
+
+        if (orSearch.length() > 0) {
+            sql.append(" AND (");
+            sql.append(orSearch.substring(0, orSearch.length() - 2));
+            sql.append(")");
+        }
+
+        if (categoryId > 0) {
+
+            List<Integer> allCategoryIds = new ArrayList<>();
+            allCategoryIds.add(categoryId);
+
+            List<Integer> children = categoryDao.getChildCategoryIds(categoryId);
+            if (children != null && !children.isEmpty()) {
+                allCategoryIds.addAll(children);
+            }
+
+            sql.append(" AND category_id IN (");
+            for (int i = 0; i < allCategoryIds.size(); i++) {
+                sql.append("?");
+                if (i < allCategoryIds.size() - 1) {
+                    sql.append(",");
+                }
+                params.add(allCategoryIds.get(i));
+            }
+            sql.append(")");
+        }
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+
+            int index = 1;
+            for (Object p : params) {
+                ps.setObject(index++, p);
+            }
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+
+        return 0;
+    }
 }
