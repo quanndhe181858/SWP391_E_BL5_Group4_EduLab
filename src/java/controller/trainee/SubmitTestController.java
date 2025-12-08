@@ -11,8 +11,8 @@ package controller.trainee;
 
 
 
+import dao.TestDAO;
 import dao.testAttemptDao;
-import dao.testDao;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -41,7 +41,7 @@ public class SubmitTestController extends HttpServlet {
         int testId = Integer.parseInt(req.getParameter("testId"));
 
         testAttemptDao attemptDao = new testAttemptDao();
-        testDao dao = new testDao();
+        TestDAO dao = new TestDAO();
 
         int currentAttempt = attemptDao.getCurrentAttempt(userId, testId);
         if (currentAttempt >= MAX_ATTEMPT) {
