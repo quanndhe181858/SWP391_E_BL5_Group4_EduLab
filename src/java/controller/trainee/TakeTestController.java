@@ -10,7 +10,7 @@ package controller.trainee;
  * @author vomin
  */
 
-import dao.testDao;
+import dao.TestDAO;
 import model.Question;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
@@ -27,7 +27,7 @@ public class TakeTestController extends HttpServlet {
 
         int testId = Integer.parseInt(req.getParameter("testId"));
 
-        testDao dao = new testDao();
+        TestDAO dao = new TestDAO();
         List<Question> questions = dao.getQuestionsByTest(testId);
 
         req.setAttribute("questions", questions);
