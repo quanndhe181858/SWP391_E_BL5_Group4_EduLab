@@ -5,14 +5,23 @@
 package dao;
 
 import database.dao;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import model.Answer;
 import model.Question;
 import model.Test;
 
-public class TestDAO extends dao {
+public class TestsDAO extends dao {
+
+    public static void main(String[] args) {
+        TestsDAO t = new TestsDAO();
+        System.out.println(t.getQuestionsByTest(1));
+    }
 
     // Lấy danh sách test theo instructor
     public List<Test> getTestsByInstructor(int instructorId) {
@@ -145,7 +154,7 @@ public class TestDAO extends dao {
         List<Question> list = new ArrayList<>();
 
         String sql = """
-            SELECT q.id, q.content
+            SELECT q.id, q.question
             FROM quiz q
             JOIN quiz_test qt ON q.id = qt.quiz_id
             WHERE qt.test_id = ?
@@ -159,7 +168,7 @@ public class TestDAO extends dao {
             while (rs.next()) {
                 Question q = new Question();
                 q.setId(rs.getInt("id"));
-                q.setContent(rs.getString("content"));
+                q.setContent(rs.getString("question"));
 
                 q.setAnswers(getAnswersByQuiz(q.getId(), conn));
                 list.add(q);

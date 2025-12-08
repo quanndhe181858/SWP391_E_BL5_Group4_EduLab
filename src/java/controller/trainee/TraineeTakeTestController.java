@@ -1,25 +1,25 @@
-package controller.trainee;
-
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
  */
+package controller.trainee;
+
+import dao.TestsDAO;
+import java.io.IOException;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
+import model.Question;
 
 /**
  *
- * @author vomin
+ * @author quan
  */
-
-import dao.TestsDAO;
-import model.Question;
-import jakarta.servlet.*;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
-import java.io.IOException;
-import java.util.List;
-
-@WebServlet("/trainee/taketests")
-public class TakeTestController extends HttpServlet {
+@WebServlet(name = "TraineeTakeTestController", urlPatterns = {"/trainee/taketest"})
+public class TraineeTakeTestController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
