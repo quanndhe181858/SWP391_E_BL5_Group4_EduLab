@@ -62,6 +62,30 @@ public class CourseSectionDAO extends dao {
         CourseSection afterDelete = dao.getCourseSectionById(testId);
     }
 
+    public List<CourseSection> getSectionsByCourseId(int courseId) {
+        List<CourseSection> list = new ArrayList<>();
+
+        String sql = "SELECT id, title FROM course_section WHERE course_id = ? ORDER BY position ASC";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, courseId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                CourseSection cs = new CourseSection();
+                cs.setId(rs.getInt("id"));
+                cs.setTitle(rs.getString("title"));
+                list.add(cs);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
     public CourseSection createCourseSection(CourseSection cs) {
         String sql = """
                  INSERT INTO `edulab`.`course_section`
@@ -242,6 +266,37 @@ public class CourseSectionDAO extends dao {
 
         } catch (SQLException e) {
             this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+
+        return list;
+    }
+
+    public List<CourseSection> getAllCourseSections() {
+        List<CourseSection> list = new ArrayList<>();
+
+        String sql = """
+        SELECT id, course_id, title 
+        FROM course_section 
+        ORDER BY course_id, position ASC
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                CourseSection cs = new CourseSection();
+                cs.setId(rs.getInt("id"));
+                cs.setCourse_id(rs.getInt("course_id"));
+                cs.setTitle(rs.getString("title"));
+                list.add(cs);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             this.closeResources();
         }

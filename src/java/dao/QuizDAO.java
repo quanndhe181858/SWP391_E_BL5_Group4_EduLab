@@ -14,10 +14,11 @@ import java.util.logging.Level;
 
 /**
  * Data Access Object for Quiz table operations
+ *
  * @author Le Minh Duc
  */
 public class QuizDAO extends dao {
-    
+
     private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     private void log(Level level, String msg, Throwable e) {
@@ -53,6 +54,7 @@ public class QuizDAO extends dao {
 
     /**
      * Creates a new quiz in the database
+     *
      * @param quiz Quiz object to create
      * @param uid User ID of the creator
      * @return Quiz object with generated ID, or null if creation fails
@@ -68,27 +70,27 @@ public class QuizDAO extends dao {
                  VALUES
                  (?, ?, ?, ?, ?);
                  """;
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            
+
             ps.setString(1, quiz.getQuestion());
             ps.setString(2, quiz.getType());
             ps.setInt(3, quiz.getCategory_id());
             ps.setInt(4, uid);
             ps.setInt(5, uid);
-            
+
             ps.executeUpdate();
-            
+
             rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 int generatedId = rs.getInt(1);
                 quiz.setId(generatedId);
             }
-            
+
             return quiz;
-            
+
         } catch (SQLException e) {
             this.log(Level.SEVERE, "Something wrong while createQuiz() execute!", e);
             return null;
@@ -96,9 +98,10 @@ public class QuizDAO extends dao {
             this.closeResources();
         }
     }
-    
+
     /**
      * Updates an existing quiz in the database
+     *
      * @param quiz Quiz object with updated information
      * @param uid User ID of the updater
      * @return Quiz object if update was successful, null otherwise
@@ -113,26 +116,26 @@ public class QuizDAO extends dao {
                      `updated_by` = ?
                  WHERE `id` = ?;
                  """;
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
-            
+
             ps.setString(1, quiz.getQuestion());
             ps.setString(2, quiz.getType());
             ps.setInt(3, quiz.getCategory_id());
             ps.setInt(4, uid);
             ps.setInt(5, quiz.getId());
-            
+
             int rows = ps.executeUpdate();
-            
+
             // If no row updated => quiz does not exist
             if (rows == 0) {
                 return null;
             }
-            
+
             return quiz;
-            
+
         } catch (SQLException e) {
             this.log(Level.SEVERE, "Something wrong while updateQuiz() execute!", e);
             return null;
@@ -140,39 +143,41 @@ public class QuizDAO extends dao {
             this.closeResources();
         }
     }
-    
+
     /**
      * Deletes a quiz from the database
+     *
      * @param id ID of the quiz to delete
      * @return true if deletion was successful, false otherwise
      */
     public boolean deleteQuiz(int id) {
-    String sql = "DELETE FROM `edulab`.`quiz` WHERE `id` = ?";
-    
-    try {
-        con = dbc.getConnection();
-        ps = con.prepareStatement(sql);
-        
-        ps.setInt(1, id);
-        
-        int rows = ps.executeUpdate();
-        return rows > 0;
-        
-    } catch (SQLException e) {
-        // SQLState "23000" usually refers to Integrity Constraint Violation (Foreign Key)
-        if (e.getSQLState().startsWith("23")) {
-            System.out.println("Cannot delete quiz ID " + id + " because it has linked data.");
-        } else {
-            this.log(Level.SEVERE, "Something wrong while deleteQuiz() execute!", e);
+        String sql = "DELETE FROM `edulab`.`quiz` WHERE `id` = ?";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, id);
+
+            int rows = ps.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            // SQLState "23000" usually refers to Integrity Constraint Violation (Foreign Key)
+            if (e.getSQLState().startsWith("23")) {
+                System.out.println("Cannot delete quiz ID " + id + " because it has linked data.");
+            } else {
+                this.log(Level.SEVERE, "Something wrong while deleteQuiz() execute!", e);
+            }
+            return false;
+        } finally {
+            this.closeResources();
         }
-        return false;
-    } finally {
-        this.closeResources();
     }
-}
-    
+
     /**
      * Retrieves a quiz by its ID
+     *
      * @param id ID of the quiz to retrieve
      * @return Quiz object if found, null otherwise
      */
@@ -190,17 +195,17 @@ public class QuizDAO extends dao {
                  FROM edulab.quiz
                  WHERE id = ?;
                  """;
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
             ps.setInt(1, id);
-            
+
             rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 Quiz quiz = new Quiz();
-                
+
                 quiz.setId(rs.getInt("id"));
                 quiz.setQuestion(rs.getString("question"));
                 quiz.setType(rs.getString("type"));
@@ -209,12 +214,12 @@ public class QuizDAO extends dao {
                 quiz.setUpdated_at(rs.getTimestamp("updated_at"));
                 quiz.setCreated_by(rs.getInt("created_by"));
                 quiz.setUpdated_by(rs.getInt("updated_by"));
-                
+
                 return quiz;
             }
-            
+
             return null;
-            
+
         } catch (SQLException e) {
             this.log(Level.SEVERE, "Something wrong while getQuizById() execute!", e);
             return null;
@@ -222,9 +227,10 @@ public class QuizDAO extends dao {
             this.closeResources();
         }
     }
-    
+
     /**
      * Retrieves all quizzes from the database
+     *
      * @return List of all Quiz objects
      */
     public List<Quiz> getAllQuizzes() {
@@ -241,12 +247,12 @@ public class QuizDAO extends dao {
                  FROM edulab.quiz;
                  """;
         List<Quiz> quizzes = new ArrayList<>();
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 Quiz quiz = new Quiz();
                 quiz.setId(rs.getInt("id"));
@@ -257,21 +263,22 @@ public class QuizDAO extends dao {
                 quiz.setUpdated_at(rs.getTimestamp("updated_at"));
                 quiz.setCreated_by(rs.getInt("created_by"));
                 quiz.setUpdated_by(rs.getInt("updated_by"));
-                
+
                 quizzes.add(quiz);
             }
-            
+
         } catch (SQLException e) {
             this.log(Level.SEVERE, "Something wrong while getAllQuizzes() execute!", e);
         } finally {
             this.closeResources();
         }
-        
+
         return quizzes;
     }
-    
+
     /**
      * Retrieves quizzes by category ID
+     *
      * @param categoryId Category ID to filter by
      * @return List of Quiz objects in the specified category
      */
@@ -290,14 +297,14 @@ public class QuizDAO extends dao {
                  WHERE category_id = ?;
                  """;
         List<Quiz> quizzes = new ArrayList<>();
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
             ps.setInt(1, categoryId);
-            
+
             rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 Quiz quiz = new Quiz();
                 quiz.setId(rs.getInt("id"));
@@ -308,21 +315,22 @@ public class QuizDAO extends dao {
                 quiz.setUpdated_at(rs.getTimestamp("updated_at"));
                 quiz.setCreated_by(rs.getInt("created_by"));
                 quiz.setUpdated_by(rs.getInt("updated_by"));
-                
+
                 quizzes.add(quiz);
             }
-            
+
         } catch (SQLException e) {
             this.log(Level.SEVERE, "Something wrong while getQuizzesByCategory() execute!", e);
         } finally {
             this.closeResources();
         }
-        
+
         return quizzes;
     }
-    
+
     /**
      * Retrieves quizzes by type
+     *
      * @param type Quiz type to filter by
      * @return List of Quiz objects of the specified type
      */
@@ -341,14 +349,14 @@ public class QuizDAO extends dao {
                  WHERE type = ?;
                  """;
         List<Quiz> quizzes = new ArrayList<>();
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
             ps.setString(1, type);
-            
+
             rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 Quiz quiz = new Quiz();
                 quiz.setId(rs.getInt("id"));
@@ -359,16 +367,51 @@ public class QuizDAO extends dao {
                 quiz.setUpdated_at(rs.getTimestamp("updated_at"));
                 quiz.setCreated_by(rs.getInt("created_by"));
                 quiz.setUpdated_by(rs.getInt("updated_by"));
-                
+
                 quizzes.add(quiz);
             }
-            
+
         } catch (SQLException e) {
             this.log(Level.SEVERE, "Something wrong while getQuizzesByType() execute!", e);
         } finally {
             this.closeResources();
         }
-        
+
         return quizzes;
     }
+
+    public List<Quiz> getRandomQuizzesByCourse(int courseId, int amount) {
+        String sql = """
+        SELECT q.* FROM quiz q
+        JOIN course c ON c.category_id = q.category_id
+        WHERE c.id = ?
+        ORDER BY RAND()
+        LIMIT ?
+    """;
+
+        List<Quiz> list = new ArrayList<>();
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, courseId);
+            ps.setInt(2, amount);
+
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Quiz q = new Quiz();
+                q.setId(rs.getInt("id"));
+                q.setQuestion(rs.getString("question"));
+                q.setType(rs.getString("type"));
+                q.setCategory_id(rs.getInt("category_id"));
+                list.add(q);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
 }
