@@ -4,6 +4,7 @@
     Author     : quan
 --%>
 
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
@@ -21,11 +22,28 @@
                     <h1 class="text-5xl font-bold text-gray-900 mb-8">
                         ${course.title}
                     </h1>
-                    <div>
-                        <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-12 py-4 rounded-lg transition-colors">
-                            Học ngay
-                        </button>
-                    </div>
+                    <c:choose>
+                        <c:when test="${isEnrolled == false}">
+                            <div>
+                                <form action="${pageContext.request.contextPath}/courses" method="POST">
+                                    <input type="hidden" name="cid" value="${course.id}" />
+                                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-12 py-4 rounded-lg transition-colors">
+                                        Tham gia khoá học
+                                    </button>
+                                </form>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div>
+                                <form action="${pageContext.request.contextPath}/courses" method="POST">
+                                    <input type="hidden" name="cid" value="${course.id}" />
+                                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-12 py-4 rounded-lg transition-colors">
+                                        Học ngay
+                                    </button>
+                                </form>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
         </div>
