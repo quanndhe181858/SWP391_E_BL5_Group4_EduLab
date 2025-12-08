@@ -26,9 +26,17 @@ public class Course {
     private Timestamp updated_at;
     private int created_by;
     private int updated_by;
+    
 
     public Course() {
     }
+
+//    public Course(int id, String title, String code, int categoryId) {
+//        this.id = id;
+//        this.title = title;
+//        this.code = code;
+//        this.categoryId = categoryId;
+//    }
 
     public int getId() {
         return id;

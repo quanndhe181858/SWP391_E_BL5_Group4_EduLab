@@ -39,4 +39,5 @@ public class TestDetailDTO {
 public String toString() {
     return "TestDetailDTO{" + "id=" + id + ", title=" + title + ", courseName=" + courseName + ", instructorName=" + instructorName + ", categoryName=" + categoryName + ", dateCreated=" + dateCreated + '}';
 }
+
 }

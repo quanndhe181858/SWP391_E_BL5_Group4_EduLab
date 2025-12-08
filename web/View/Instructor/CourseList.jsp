@@ -1,15 +1,10 @@
-<%-- 
-    Document   : CourseList.jsp
-    Created on : Dec 4, 2025, 10:39:47 PM
-    Author     : quan
---%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Khoá học của tôi - Giảng viên</title>
+        <title>Bài Test của tôi - Giảng viên</title>
         <jsp:include page="/layout/import.jsp" />
     </head>
     <body class="bg-gray-50">
@@ -19,19 +14,19 @@
             <div class="mb-8">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 class="text-3xl font-bold text-gray-900">Khoá học của tôi</h1>
-                        <p class="text-lg text-gray-600 mt-1">Quản lí khoá học</p>
+                        <h1 class="text-3xl font-bold text-gray-900">Bài Test của tôi</h1>
+                        <p class="text-lg text-gray-600 mt-1">Quản lí bài test</p>
                     </div>
-                    <a href="courses?type=create" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-sm">
+                    <a href="${pageContext.request.contextPath}/instructor/test?type=create" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-sm">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>
-                        Tạo khoá học mới
+                        Tạo Bài Test mới
                     </a>
                 </div>
             </div>
 
-            <form id="filterForm" method="get" action="courses">
+            <form id="filterForm" method="get" action="${pageContext.request.contextPath}/instructor/test">
                 <input type="hidden" name="page" id="pageInput" value="${param.page != null ? param.page : 1}">
 
                 <div class="flex flex-col lg:flex-row gap-6">
@@ -39,13 +34,14 @@
                         <div class="bg-white p-6 rounded-lg shadow-sm sticky top-4">
                             <h2 class="text-xl font-bold text-gray-900 mb-6">Bộ lọc</h2>
 
+                            <%-- Tìm kiếm --%>
                             <div class="mb-6">
                                 <label for="search" class="block text-sm font-semibold text-gray-700 mb-2">Tìm kiếm</label>
                                 <div class="relative">
                                     <input 
                                         class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         type="text" 
-                                        placeholder="Tìm kiếm khoá học ..." 
+                                        placeholder="Tìm kiếm bài test ..." 
                                         id="search"
                                         name="search"
                                         value="${param.search != null ? param.search : ''}"
@@ -57,10 +53,11 @@
                                 </div>
                             </div>
 
+                            <%-- Đề mục/Danh mục (Category) --%>
                             <div class="mb-6">
                                 <label class="block text-sm font-semibold text-gray-700 mb-3">Đề mục</label>
 
-                                <c:forEach var="parent" items="${parents}">
+                                <c:forEach var="parent" items="${parentCategories}">
                                     <div class="mb-2">
                                         <div class="flex items-center justify-between p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100"
                                              onclick="toggleCategory(${parent.id})">
@@ -80,7 +77,7 @@
                                         </div>
 
                                         <div id="subcategories-${parent.id}" class="ml-4 mt-1 space-y-1 hidden">
-                                            <c:forEach var="child" items="${children}">
+                                            <c:forEach var="child" items="${childCategories}">
                                                 <c:if test="${child.parent_id == parent.id}">
                                                     <label class="flex items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
                                                         <input type="radio" name="filterCategoryId" value="${child.id}"
@@ -96,6 +93,7 @@
                                 </c:forEach>
                             </div>
 
+                            <%-- Trạng thái --%>
                             <div class="mb-6">
                                 <label for="status" class="block text-sm font-semibold text-gray-700 mb-2">Trạng thái</label>
                                 <select id="status" name="status" 
@@ -115,38 +113,51 @@
 
                     <main class="w-full lg:w-3/4">
                         <div class="bg-white rounded-lg shadow-sm">
-                            <!-- Header with Stats -->
+                            
+                            <%-- Thông báo (Nếu có) --%>
+                            <c:if test="${not empty sessionScope.successMessage}">
+                                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4" role="alert">
+                                    <p class="font-bold">Thành công</p>
+                                    <p>${sessionScope.successMessage}</p>
+                                    <c:remove var="successMessage" scope="session"/>
+                                </div>
+                            </c:if>
+                            <c:if test="${not empty sessionScope.errorMessage}">
+                                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+                                    <p class="font-bold">Lỗi</p>
+                                    <p>${sessionScope.errorMessage}</p>
+                                    <c:remove var="errorMessage" scope="session"/>
+                                </div>
+                            </c:if>
+
+                            <%-- Header with Stats --%>
                             <div class="p-6 border-b border-gray-200">
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                                     <div class="bg-blue-50 p-4 rounded-lg">
-                                        <p class="text-sm text-blue-600 font-semibold">Số lượng khoá học</p>
-                                        <p class="text-2xl font-bold text-gray-900 mt-1">${totalCourses}</p>
+                                        <p class="text-sm text-blue-600 font-semibold">Số lượng Bài Test</p>
+                                        <p class="text-2xl font-bold text-gray-900 mt-1">${totalTests}</p>
                                     </div>
                                     <div class="bg-green-50 p-4 rounded-lg">
                                         <p class="text-sm text-green-600 font-semibold">Hoạt động</p>
-                                        <p class="text-2xl font-bold text-gray-900 mt-1">${totalActiveCourses}</p>
+                                        <p class="text-2xl font-bold text-gray-900 mt-1">${totalActiveTests}</p>
                                     </div>
                                     <div class="bg-yellow-50 p-4 rounded-lg">
                                         <p class="text-sm text-yellow-600 font-semibold">Không hoạt động</p>
-                                        <p class="text-2xl font-bold text-gray-900 mt-1">${totalInactiveCourses}</p>
+                                        <p class="text-2xl font-bold text-gray-900 mt-1">${totalInactiveTests}</p>
                                     </div>
-                                    <!--                                    <div class="bg-purple-50 p-4 rounded-lg">
-                                                                            <p class="text-sm text-purple-600 font-semibold">Total Students</p>
-                                                                            <p class="text-2xl font-bold text-gray-900 mt-1">1,247</p>
-                                                                        </div>-->
                                 </div>
 
                                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                                     <div>
-                                        <p class="text-sm text-gray-600">Hiển thị ${startItem}-${endItem} của ${totalCoursesPaging} khoá học</p>
+                                        <p class="text-sm text-gray-600">Hiển thị ${startItem}-${endItem} của ${totalTestsPaging} bài test</p>
                                     </div>
                                     <div class="flex items-center gap-3">
-                                        <label class="text-sm text-gray-700">Sắp xếp (asc):</label>
+                                        <label class="text-sm text-gray-700">Sắp xếp:</label>
                                         <select name="sortBy" 
                                                 class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
                                                 onchange="submitFilter()">
                                             <option value="updated_at desc" ${param.sortBy == 'updated_at desc' || param.sortBy == null ? 'selected' : ''}>Vừa cập nhật</option>
-                                            <option value="title asc" ${param.sortBy == 'title asc' ? 'selected' : ''}>Tên khoá học (A-Z)</option>
+                                            <option value="title asc" ${param.sortBy == 'title asc' ? 'selected' : ''}>Tên Test (A-Z)</option>
                                             <option value="created_at desc" ${param.sortBy == 'created_at desc' ? 'selected' : ''}>Mới nhất</option>
                                             <option value="created_at asc" ${param.sortBy == 'created_at asc' ? 'selected' : ''}>Cũ nhất</option>
                                         </select>
@@ -155,11 +166,10 @@
                             </div>
 
                             <div class="p-6">
-                                <!-- Pagination -->
+                                <%-- Pagination --%>
                                 <c:if test="${totalPages > 1}">
                                     <div class="mb-6 flex justify-center">
                                         <nav class="inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                            <!-- Previous Button -->
                                             <c:choose>
                                                 <c:when test="${page > 1}">
                                                     <a href="javascript:void(0)" onclick="goToPage(${page - 1})" 
@@ -179,7 +189,6 @@
                                                 </c:otherwise>
                                             </c:choose>
 
-                                            <!-- Page Numbers -->
                                             <c:forEach begin="1" end="${totalPages}" var="i">
                                                 <c:choose>
                                                     <c:when test="${i == page}">
@@ -196,7 +205,6 @@
                                                 </c:choose>
                                             </c:forEach>
 
-                                            <!-- Next Button -->
                                             <c:choose>
                                                 <c:when test="${page < totalPages}">
                                                     <a href="javascript:void(0)" onclick="goToPage(${page + 1})" 
@@ -221,70 +229,68 @@
 
                                 <div class="space-y-4">
                                     <c:choose>
-                                        <c:when test="${not empty courseList}">
-                                            <c:forEach items="${courseList}" var="course">
+                                        <c:when test="${not empty testList}">
+                                            <c:forEach items="${testList}" var="test">
                                                 <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition">
                                                     <div class="flex flex-col md:flex-row gap-6">
-                                                        <img class="w-full md:w-48 h-32 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex-shrink-0" src="${pageContext.request.contextPath}/${course.thumbnail}" />
+                                                        <div class="w-full md:w-48 h-32 bg-gray-200 rounded-lg flex-shrink-0 flex items-center justify-center">
+                                                            <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                            </svg>
+                                                        </div>
 
                                                         <div class="flex-grow">
                                                             <div class="flex items-start justify-between mb-2">
                                                                 <div>
                                                                     <div class="flex items-center gap-2 mb-2">
-                                                                        <span class="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 rounded">${course.category.name}</span>
-                                                                        <span class="px-2 py-1 text-xs font-semibold ${course.status == 'Active' ? 'text-green-600 bg-green-100' : 'text-yellow-600 bg-yellow-100'} rounded">${course.status == "Active" ? "Hoạt động" : "Không hoạt động"}</span>
+                                                                        <span class="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 rounded">${test.category.name}</span>
+                                                                        <span class="px-2 py-1 text-xs font-semibold ${test.status == 'Active' ? 'text-green-600 bg-green-100' : 'text-yellow-600 bg-yellow-100'} rounded">${test.status == "Active" ? "Hoạt động" : "Không hoạt động"}</span>
                                                                     </div>
-                                                                    <h3 class="text-xl font-bold text-gray-900 mb-2">${course.title}</h3>
-                                                                    <p class="text-sm text-gray-600 mb-3">${course.description}</p>
+                                                                    <h3 class="text-xl font-bold text-gray-900 mb-2">${test.title}</h3>
+                                                                    <p class="text-sm text-gray-600 mb-3">${test.description}</p>
                                                                 </div>
                                                             </div>
 
                                                             <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
-                                                                <!--                                                                <div class="flex items-center">
-                                                                                                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                                                                                                                    </svg>
-                                                                                                                                    <span>256 students</span>
-                                                                                                                                </div>-->
-                                                                <div class="flex items-center">
+                                                                <div class="flex items-center" title="Số lượng câu hỏi">
                                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 4v-4z"></path>
                                                                     </svg>
-                                                                    <span>24 Bài học</span>
+                                                                    <span>${test.numberOfQuestions} Câu hỏi</span>
                                                                 </div>
-                                                                <div class="flex items-center">
+                                                                <div class="flex items-center" title="Thời gian làm bài">
                                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                                     </svg>
-                                                                    <span>${course.getUpdatedAgo()}</span>
+                                                                    <span>${test.duration} phút</span>
+                                                                </div>
+                                                                <div class="flex items-center" title="Điểm tối thiểu để đạt">
+                                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.21a2 2 0 00-2.288-1.748L7.003 4.382a2 2 0 00-1.748 2.288l1.727 6.495-4.14 4.14a1 1 0 00.707 1.707l4.14-4.14 6.495 1.727a2 2 0 002.288-1.748l1.748-6.495z"></path>
+                                                                    </svg>
+                                                                    <span>Min Grade: ${test.minGrade}%</span>
                                                                 </div>
                                                             </div>
 
-                                                            <!-- Action Buttons -->
+                                                            <%-- Action Buttons --%>
                                                             <div class="flex flex-wrap gap-2">
-                                                                <a href="courses?cid=${course.id}&type=edit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
+                                                                <a href="${pageContext.request.contextPath}/instructor/test?tid=${test.id}&type=edit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
                                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                                                     </svg>
-                                                                    Edit
+                                                                    Chỉnh sửa
                                                                 </a>
-<!--                                                                <a href="course?action=content&id=${course.id}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">
+                                                                <a href="${pageContext.request.contextPath}/instructor/test?tid=${test.id}&type=manage_questions" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">
                                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.21a2 2 0 00-2.288-1.748L7.003 4.382a2 2 0 00-1.748 2.288l1.727 6.495-4.14 4.14a1 1 0 00.707 1.707l4.14-4.14 6.495 1.727a2 2 0 002.288-1.748l1.748-6.495z"></path>
                                                                     </svg>
-                                                                    Content
-                                                                </a>-->
-<!--                                                                <a href="course?action=students&id=${course.id}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">
-                                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                                                    </svg>
-                                                                    Students
-                                                                </a>-->
-                                                                <button type="button" onclick="deleteCourse(${course.id}, '${course.title}')" class="inline-flex items-center px-4 py-2 bg-white border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition">
+                                                                    Quản lý Câu hỏi
+                                                                </a>
+                                                                <button type="button" onclick="deleteTest(${test.id}, '${test.title}')" class="inline-flex items-center px-4 py-2 bg-white border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition">
                                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                                                     </svg>
-                                                                    Delete
+                                                                    Xóa
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -295,16 +301,16 @@
                                         <c:otherwise>
                                             <div class="text-center py-12">
                                                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.21a2 2 0 00-2.288-1.748L7.003 4.382a2 2 0 00-1.748 2.288l1.727 6.495-4.14 4.14a1 1 0 00.707 1.707l4.14-4.14 6.495 1.727a2 2 0 002.288-1.748l1.748-6.495z"></path>
                                                 </svg>
-                                                <h3 class="mt-2 text-sm font-medium text-gray-900">No courses found</h3>
-                                                <p class="mt-1 text-sm text-gray-500">Get started by creating a new course.</p>
+                                                <h3 class="mt-2 text-sm font-medium text-gray-900">Không tìm thấy bài test nào</h3>
+                                                <p class="mt-1 text-sm text-gray-500">Hãy bắt đầu bằng cách tạo một bài test mới.</p>
                                                 <div class="mt-6">
-                                                    <a href="course?action=create" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                                    <a href="${pageContext.request.contextPath}/instructor/test?type=create" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                                         </svg>
-                                                        Create New Course
+                                                        Tạo Bài Test Mới
                                                     </a>
                                                 </div>
                                             </div>
@@ -346,49 +352,78 @@
             }
 
             function clearFilters() {
-                window.location.href = 'courses';
+                window.location.href = '${pageContext.request.contextPath}/instructor/test';
             }
 
-            function deleteCourse(courseId, courseName) {
+            function deleteTest(testId, testName) {
 
                 Swal.fire({
-                    title: "Delete Course?",
-                    html: `Are you sure you want to delete <b>"` + courseName + `"</b>"?<br>This action cannot be undone.`,
+                    title: "Xóa Bài Test?",
+                    html: `Bạn có chắc chắn muốn xóa bài test <b>"` + testName + `"</b>"?<br>Hành động này không thể hoàn tác.`,
                     icon: "warning",
                     showCancelButton: true,
-                    confirmButtonText: "Yes, delete it",
-                    cancelButtonText: "Cancel",
+                    confirmButtonText: "Vâng, xóa nó",
+                    cancelButtonText: "Hủy",
                     confirmButtonColor: "#d33",
                     reverseButtons: true
                 }).then(result => {
                     if (!result.isConfirmed)
                         return;
 
+                    // Sử dụng AJAX DELETE để xóa bài test
                     $.ajax({
-                        url: "${pageContext.request.contextPath}/instructor/courses?cid=" + courseId,
-                        type: "DELETE",
+                        url: "${pageContext.request.contextPath}/instructor/test?tid=" + testId,
+                        type: "POST", // Sử dụng POST và gửi tham số _method=DELETE
+                        data: {
+                            _method: 'DELETE' // Giả định Controller của bạn hỗ trợ Method Override
+                        },
                         success: function (response) {
-                            showToast("Course deleted successfully!", "success", 2500);
+                            showToast("Bài Test đã được xóa thành công!", "success", 2500);
                             setTimeout(() => location.reload(), 1500);
                         },
                         error: function (xhr) {
-                            showToast("Error deleting course. Please try again!", "error", 2500);
+                            showToast("Lỗi khi xóa bài test. Vui lòng thử lại!", "error", 2500);
                         }
                     });
                 });
             }
 
+            // Mở rộng danh mục đã chọn khi tải trang
             document.addEventListener('DOMContentLoaded', function () {
                 const selectedCategory = document.querySelector('input[name="filterCategoryId"]:checked');
                 if (selectedCategory) {
-                    const parentDiv = selectedCategory.closest('[id^="subcategories-"]');
+                    // Lấy parentDiv bằng cách tìm tổ tiên có id bắt đầu bằng 'subcategories-'
+                    let parentDiv = selectedCategory.parentElement.parentElement.parentElement;
+                    while (parentDiv && !parentDiv.id.startsWith('subcategories-')) {
+                        parentDiv = parentDiv.parentElement;
+                    }
+                    
                     if (parentDiv) {
                         const parentId = parentDiv.id.replace('subcategories-', '');
-                        const subcategories = document.getElementById('subcategories-' + parentId);
+                        // Mở rộng parent category (nếu là child category được chọn)
+                        const parentContainer = document.getElementById('subcategories-' + parentId);
                         const icon = document.getElementById('icon-' + parentId);
-                        if (subcategories) {
-                            subcategories.classList.remove('hidden');
-                            icon.style.transform = 'rotate(180deg)';
+                        
+                        if (parentContainer) {
+                           parentContainer.classList.remove('hidden');
+                           icon.style.transform = 'rotate(180deg)';
+                        }
+                        
+                        // Nếu là parent category được chọn, thì parentDiv chính là div chứa các subcategories.
+                        if(selectedCategory.value === parentId) {
+                            toggleCategory(parentId); // Mở chính nó
+                        }
+                    } else {
+                        // Nếu là parent category được chọn (không có parentDiv), thì phải tìm đúng id của nó
+                        const checkedRadio = document.querySelector('input[name="filterCategoryId"]:checked');
+                        if (checkedRadio) {
+                             const checkedId = checkedRadio.value;
+                             const subcategories = document.getElementById('subcategories-' + checkedId);
+                             const icon = document.getElementById('icon-' + checkedId);
+                             if (subcategories && subcategories.children.length > 0) {
+                                subcategories.classList.remove('hidden');
+                                icon.style.transform = 'rotate(180deg)';
+                            }
                         }
                     }
                 }
