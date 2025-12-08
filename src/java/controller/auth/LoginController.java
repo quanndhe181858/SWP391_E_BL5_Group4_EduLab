@@ -59,7 +59,7 @@ public class LoginController extends HttpServlet {
         User user = uDao.getAuthUser(email, hash_password);
 
         if (user == null) {
-            request.setAttribute("error", "Invalid email or password.");
+            request.setAttribute("error", "Sai email hoặc mật khẩu.");
             request.getRequestDispatcher("View/Auth/Login.jsp").forward(request, response);
         } else {
             HttpSession session = request.getSession();
