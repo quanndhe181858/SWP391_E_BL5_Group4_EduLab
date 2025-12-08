@@ -8,6 +8,7 @@ import dao.QuizAnswerDAO;
 import dao.QuizDAO;
 import model.Quiz;
 import model.QuizAnswer;
+import model.User;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,6 +22,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import util.AuthUtils;
 
 /**
  * Controller for Quiz Answer operations
@@ -50,6 +52,12 @@ public class InstructorQuizAnswerController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // Authorization check - only instructors (role_id = 2) can access
+        User user = AuthUtils.doAuthorize(request, response, 2);
+        if (user == null) {
+            return; // AuthUtils handles the redirect/error response
+        }
 
         String action = request.getParameter("action");
 
@@ -85,6 +93,12 @@ public class InstructorQuizAnswerController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        // Authorization check - only instructors (role_id = 2) can access
+        User user = AuthUtils.doAuthorize(request, response, 2);
+        if (user == null) {
+            return; // AuthUtils handles the redirect/error response
+        }
 
         String action = request.getParameter("action");
 
@@ -289,6 +303,9 @@ public class InstructorQuizAnswerController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
+        // Get authorized user - we know this exists because authorization was checked in doPost
+        User user = (User) session.getAttribute("user");
+
         // Get form parameters
         String quizIdParam = request.getParameter("quizId");
         String isTrueParam = request.getParameter("isTrue");
@@ -321,12 +338,6 @@ public class InstructorQuizAnswerController extends HttpServlet {
             return;
         }
 
-        // Get user ID from session
-        Integer userId = (Integer) session.getAttribute("userId");
-        if (userId == null) {
-            userId = 1; // Default fallback for testing
-        }
-
         // Create quiz answer object
         QuizAnswer answer = new QuizAnswer();
         answer.setQuiz_id(quizId);
@@ -334,8 +345,8 @@ public class InstructorQuizAnswerController extends HttpServlet {
         answer.setType(type != null ? type : "text");
         answer.setContent(content.trim());
 
-        // Save to database
-        QuizAnswer createdAnswer = quizAnswerDAO.createQuizAnswer(answer, userId);
+        // Save to database using the authorized user's ID
+        QuizAnswer createdAnswer = quizAnswerDAO.createQuizAnswer(answer, user.getId());
 
         if (createdAnswer != null) {
             session.setAttribute("notification", "Quiz answer created successfully!");
@@ -394,6 +405,9 @@ public class InstructorQuizAnswerController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
+        // Get authorized user - we know this exists because authorization was checked in doPost
+        User user = (User) session.getAttribute("user");
+
         // Get form parameters
         String idParam = request.getParameter("id");
         String quizIdParam = request.getParameter("quizId");
@@ -438,12 +452,6 @@ public class InstructorQuizAnswerController extends HttpServlet {
             return;
         }
 
-        // Get user ID from session
-        Integer userId = (Integer) session.getAttribute("userId");
-        if (userId == null) {
-            userId = 1; // Default fallback for testing
-        }
-
         // Create quiz answer object with updated data
         QuizAnswer answer = new QuizAnswer();
         answer.setId(answerId);
@@ -452,8 +460,8 @@ public class InstructorQuizAnswerController extends HttpServlet {
         answer.setType(type != null ? type : "text");
         answer.setContent(content.trim());
 
-        // Update in database
-        QuizAnswer updatedAnswer = quizAnswerDAO.updateQuizAnswer(answer, userId);
+        // Update in database using the authorized user's ID
+        QuizAnswer updatedAnswer = quizAnswerDAO.updateQuizAnswer(answer, user.getId());
 
         if (updatedAnswer != null) {
             session.setAttribute("notification", "Quiz answer updated successfully!");
