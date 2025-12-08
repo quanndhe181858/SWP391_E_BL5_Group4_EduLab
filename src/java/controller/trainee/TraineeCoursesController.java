@@ -6,6 +6,7 @@ package controller.trainee;
 
 import constant.httpStatus;
 import constant.paging;
+import dao.EnrollmentDAO;
 import jakarta.servlet.ServletConfig;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -13,11 +14,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import java.util.stream.Collectors;
 import model.Category;
 import model.Course;
 import model.CourseSection;
+import model.User;
 import service.CategoryServices;
 import service.CourseSectionServices;
 import service.CourseServices;
@@ -34,6 +37,7 @@ public class TraineeCoursesController extends HttpServlet {
     private CourseServices _courseService;
     private CategoryServices _categoryService;
     private CourseSectionServices _courseSectionService;
+    private EnrollmentDAO _enrollDao;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -41,6 +45,7 @@ public class TraineeCoursesController extends HttpServlet {
         _courseService = new CourseServices();
         _categoryService = new CategoryServices();
         _courseSectionService = new CourseSectionServices();
+        _enrollDao = new EnrollmentDAO();
     }
 
     @Override
@@ -64,9 +69,53 @@ public class TraineeCoursesController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+        if (session == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+        User u = (User) session.getAttribute("user");
+        if (u == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
         try {
+            String cidStr = req.getParameter("cid");
+            Integer courseIdAttr = (Integer) req.getAttribute("courseId");
 
-        } catch (Exception e) {
+            int userId = u.getId();
+            int courseId = 0;
+
+            if (courseIdAttr != null) {
+                courseId = courseIdAttr;
+            } else if (cidStr != null && !cidStr.isBlank()) {
+                try {
+                    courseId = Integer.parseInt(cidStr);
+                } catch (NumberFormatException e) {
+                    resp.sendError(400, "Invalid course ID format");
+                    return;
+                }
+            } else {
+                resp.sendError(httpStatus.BAD_REQUEST.getCode(), "Course ID is required");
+                return;
+            }
+
+            boolean isEnrolled = _enrollDao.isEnrolled(userId, courseId);
+
+            if (isEnrolled) {
+                resp.sendRedirect(req.getContextPath() + "/learn?courseId=" + courseId); 
+            } else {
+                boolean ok = _enrollDao.enrollCourse(courseId, userId, "Learning");
+                if (ok) {
+                    resp.sendRedirect(req.getContextPath() + "/learn?courseId=" + courseId); 
+                } else {
+                    resp.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(),
+                            userId + " " + isEnrolled);
+                }
+            }
+        } catch (IOException e) {
+            resp.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(),
+                    httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
     }
 
@@ -158,6 +207,8 @@ public class TraineeCoursesController extends HttpServlet {
     }
 
     protected void getCourseDetail(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+
         try {
             String courseIdStr = req.getParameter("id");
 
@@ -167,6 +218,14 @@ public class TraineeCoursesController extends HttpServlet {
             }
 
             int courseId = 0;
+            int userId = 0;
+
+            if (session != null) {
+                User u = (User) session.getAttribute("user");
+                if (u != null) {
+                    userId = u.getId();
+                }
+            }
 
             try {
                 courseId = Integer.parseInt(courseIdStr);
@@ -182,11 +241,13 @@ public class TraineeCoursesController extends HttpServlet {
                 return;
             } else {
                 List<CourseSection> csList = _courseSectionService.getSectionsByCourseId(c.getId());
+                boolean isEnrolled = _enrollDao.isEnrolled(userId, courseId);
 
+                req.setAttribute("isEnrolled", isEnrolled);
                 req.setAttribute("course", c);
                 req.setAttribute("sections", csList);
             }
-            
+
             req.getRequestDispatcher("/View/Trainee/CourseDetail.jsp").forward(req, resp);
         } catch (IOException e) {
             resp.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());

@@ -5,7 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<footer class="bg-gray-900 text-gray-300 mt-4">
+<footer class="bg-gray-900 text-gray-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <!-- Bottom Bar -->
         <div class="flex flex-col md:flex-row justify-between items-center">

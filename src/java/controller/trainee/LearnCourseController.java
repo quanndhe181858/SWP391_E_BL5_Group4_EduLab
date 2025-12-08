@@ -16,11 +16,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import model.Course;
 import model.CourseProgress;
 import model.CourseSection;
 import model.Media;
@@ -29,22 +27,6 @@ import model.User;
 @WebServlet(name = "LearnCourseController", urlPatterns = {"/learn"})
 public class LearnCourseController extends HttpServlet {
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet LearnCourseController</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet LearnCourseController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
     private final CourseDAO courseDAO = new CourseDAO();
     private final CourseSectionDAO sectionDAO = new CourseSectionDAO();
     private final CourseProgressDAO progressDAO = new CourseProgressDAO();
@@ -55,14 +37,13 @@ public class LearnCourseController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-//        User u = util.AuthUtils.doAuthorize(request, response, 3);
-//
-//        if (u == null) {
-//            return;
-//        }
+        User u = util.AuthUtils.doAuthorize(request, response, 3);
 
-//        int uid = u.getId();
-       int uid = 1;
+        if (u == null) {
+            return;
+        }
+
+        int uid = u.getId();
 
         int courseId = Integer.parseInt(request.getParameter("courseId"));
 
@@ -106,7 +87,13 @@ public class LearnCourseController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int userId = 1;
+        User u = util.AuthUtils.doAuthorize(request, response, 3);
+
+        if (u == null) {
+            return;
+        }
+
+        int userId = u.getId();
         int courseId = Integer.parseInt(request.getParameter("courseId"));
         int sectionId = Integer.parseInt(request.getParameter("sectionId"));
 
@@ -116,10 +103,5 @@ public class LearnCourseController extends HttpServlet {
                 request.getContextPath() + "/learn?courseId=" + courseId + "&sectionId=" + sectionId
         );
     }
-
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
 
 }
