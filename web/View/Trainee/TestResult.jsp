@@ -82,18 +82,28 @@
 
         <!-- BUTTON LOGIC -->
         <% if (allowRetake) { %>
-            <form action="<%= request.getContextPath() %>/trainee/taketest" method="get">
-                <input type="hidden" name="testId" value="<%= testId %>">
-                <button class="main-btn btn-retake">Retake Test</button>
-            </form>
+        <form action="<%= request.getContextPath() %>/trainee/taketest" method="get">
+            <input type="hidden" name="testId" value="<%= testId %>">
+            <button class="main-btn btn-retake">Retake Test</button>
+        </form>
         <% } %>
 
         <% if (passed) { %>
-            <a href="<%= request.getContextPath() %>/trainee/lesson-detail?testId=<%= testId %>"
-               class="main-btn btn-back">
-                Back to Lesson
-            </a>
+
+        <!-- VIEW CERTIFICATE -->
+        <a href="<%= request.getContextPath() %>/trainee/view-certificate?courseId=<%= testId %>"
+           class="main-btn btn-back">
+            View Certificate
+        </a>
+
+        <!-- BACK -->
+        <a href="<%= request.getContextPath() %>/trainee/lesson-detail?testId=<%= testId %>"
+           class="main-btn btn-back">
+            Back to Lesson
+        </a>
+
         <% } %>
+
 
     </div>
 </div>
