@@ -6,13 +6,17 @@ package controller.instructor;
 
 import constant.httpStatus;
 import dao.QuizDAO;
+import dao.CategoryDAO;
 import model.Quiz;
 import model.User;
+import model.Category;
 import util.AuthUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -35,12 +39,14 @@ public class InstructorQuizController extends HttpServlet {
 
     private final Logger logger = Logger.getLogger(this.getClass().getName());
     private QuizDAO quizDAO;
+    private CategoryDAO categoryDAO;
     private static final int ITEMS_PER_PAGE = 10;
 
     @Override
     public void init() throws ServletException {
         super.init();
         quizDAO = new QuizDAO();
+        categoryDAO = new CategoryDAO();
     }
 
     /**
@@ -135,6 +141,17 @@ public class InstructorQuizController extends HttpServlet {
             String searchParam = request.getParameter("search");
             String sortBy = request.getParameter("sortBy");
             String pageParam = request.getParameter("page");
+
+            // Fetch all categories for filter dropdown
+            List<Category> categories = categoryDAO.getCategories();
+
+            // Create a map of category IDs to names for easy lookup in JSP
+            Map<Integer, String> categoryMap = new HashMap<>();
+            if (categories != null) {
+                for (Category category : categories) {
+                    categoryMap.put(category.getId(), category.getName());
+                }
+            }
 
             // Get all quizzes first
             List<Quiz> allQuizzes = quizDAO.getAllQuizzes();
@@ -277,6 +294,8 @@ public class InstructorQuizController extends HttpServlet {
             request.setAttribute("totalPages", totalPages);
             request.setAttribute("startItem", startItem);
             request.setAttribute("endItem", endItem);
+            request.setAttribute("categories", categories);
+            request.setAttribute("categoryMap", categoryMap);
 
             request.getRequestDispatcher("../View/Instructor/QuizList.jsp").forward(request, response);
 
@@ -291,6 +310,10 @@ public class InstructorQuizController extends HttpServlet {
      */
     private void showCreateForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Fetch categories for dropdown
+        List<Category> categories = categoryDAO.getCategories();
+        request.setAttribute("categories", categories);
+
         request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
     }
 

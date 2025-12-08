@@ -201,36 +201,12 @@
                                                         <select id="categoryId" name="categoryId" required
                                                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
                                                             <option value="">-- Select Category --</option>
-                                                            <option value="1" <%="1"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                Programming
-                                                            </option>
-                                                            <option value="2" <%="2"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                Mathematics
-                                                            </option>
-                                                            <option value="3" <%="3"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                Science
-                                                            </option>
-                                                            <option value="4" <%="4"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                History
-                                                            </option>
-                                                            <option value="5" <%="5"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                Language Arts
-                                                            </option>
-                                                            <option value="6" <%="6"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                Business
-                                                            </option>
+                                                            <c:forEach var="cat" items="${categories}">
+                                                                <option value="${cat.id}" 
+                                                                    <c:if test="${cat.id == param.categoryId}">selected</c:if>>
+                                                                    ${cat.name}
+                                                                </option>
+                                                            </c:forEach>
                                                         </select>
                                                         <p class="mt-2 text-xs text-gray-500">Choose the category for
                                                             organization.</p>
