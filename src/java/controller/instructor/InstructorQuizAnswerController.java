@@ -4,6 +4,7 @@
  */
 package controller.instructor;
 
+import constant.httpStatus;
 import dao.QuizAnswerDAO;
 import dao.QuizDAO;
 import model.Quiz;
@@ -53,15 +54,15 @@ public class InstructorQuizAnswerController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Authorization check - only instructors (role_id = 2) can access
-        User user = AuthUtils.doAuthorize(request, response, 2);
-        if (user == null) {
-            return; // AuthUtils handles the redirect/error response
-        }
-
-        String action = request.getParameter("action");
-
         try {
+            // Authorization check - only instructors (role_id = 2) can access
+            User user = AuthUtils.doAuthorize(request, response, 2);
+            if (user == null) {
+                return; // AuthUtils handles the redirect/error response
+            }
+
+            String action = request.getParameter("action");
+
             if (action == null || action.isEmpty()) {
                 showQuizAnswerList(request, response);
             } else {
@@ -80,10 +81,9 @@ public class InstructorQuizAnswerController extends HttpServlet {
                         break;
                 }
             }
-        } catch (Exception e) {
+        } catch (ServletException | IOException e) {
             logger.log(Level.SEVERE, "Error in QuizAnswerController doGet", e);
-            request.setAttribute("error", "An error occurred: " + e.getMessage());
-            request.getRequestDispatcher("../Error/error.jsp").forward(request, response);
+            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
     }
 
@@ -94,15 +94,15 @@ public class InstructorQuizAnswerController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Authorization check - only instructors (role_id = 2) can access
-        User user = AuthUtils.doAuthorize(request, response, 2);
-        if (user == null) {
-            return; // AuthUtils handles the redirect/error response
-        }
-
-        String action = request.getParameter("action");
-
         try {
+            // Authorization check - only instructors (role_id = 2) can access
+            User user = AuthUtils.doAuthorize(request, response, 2);
+            if (user == null) {
+                return; // AuthUtils handles the redirect/error response
+            }
+
+            String action = request.getParameter("action");
+
             if (action == null) {
                 showQuizAnswerList(request, response);
             } else {
@@ -121,10 +121,9 @@ public class InstructorQuizAnswerController extends HttpServlet {
                         break;
                 }
             }
-        } catch (Exception e) {
+        } catch (ServletException | IOException e) {
             logger.log(Level.SEVERE, "Error in QuizAnswerController doPost", e);
-            request.setAttribute("error", "An error occurred: " + e.getMessage());
-            request.getRequestDispatcher("../Error/error.jsp").forward(request, response);
+            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
     }
 
@@ -135,154 +134,164 @@ public class InstructorQuizAnswerController extends HttpServlet {
     private void showQuizAnswerList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Get filter parameters
-        String quizIdParam = request.getParameter("quizId");
-        String isTrueParam = request.getParameter("isTrue");
-        String searchParam = request.getParameter("search");
-        String sortBy = request.getParameter("sortBy");
-        String pageParam = request.getParameter("page");
+        try {
+            // Get filter parameters
+            String quizIdParam = request.getParameter("quizId");
+            String isTrueParam = request.getParameter("isTrue");
+            String searchParam = request.getParameter("search");
+            String sortBy = request.getParameter("sortBy");
+            String pageParam = request.getParameter("page");
 
-        // Get all quiz answers first
-        List<QuizAnswer> allAnswers = quizAnswerDAO.getAllQuizAnswers();
-        List<QuizAnswer> filteredAnswers = new ArrayList<>(allAnswers);
+            // Get all quiz answers first
+            List<QuizAnswer> allAnswers = quizAnswerDAO.getAllQuizAnswers();
+            List<QuizAnswer> filteredAnswers = new ArrayList<>(allAnswers);
 
-        // Apply quiz ID filter
-        if (quizIdParam != null && !quizIdParam.isEmpty()) {
-            try {
-                int quizId = Integer.parseInt(quizIdParam);
+            // Apply quiz ID filter with validation
+            if (quizIdParam != null && !quizIdParam.isEmpty()) {
+                try {
+                    int quizId = Integer.parseInt(quizIdParam);
+                    filteredAnswers = filteredAnswers.stream()
+                            .filter(a -> a.getQuiz_id() == quizId)
+                            .collect(Collectors.toList());
+                } catch (NumberFormatException e) {
+                    logger.log(Level.WARNING, "Invalid quizId: " + quizIdParam);
+                    response.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+                    return;
+                }
+            }
+
+            // Apply isTrue filter
+            if (isTrueParam != null && !isTrueParam.isEmpty()) {
+                boolean isTrue = "true".equalsIgnoreCase(isTrueParam);
                 filteredAnswers = filteredAnswers.stream()
-                        .filter(a -> a.getQuiz_id() == quizId)
+                        .filter(a -> a.isIs_true() == isTrue)
                         .collect(Collectors.toList());
-            } catch (NumberFormatException e) {
-                logger.log(Level.WARNING, "Invalid quizId: " + quizIdParam);
             }
-        }
 
-        // Apply isTrue filter
-        if (isTrueParam != null && !isTrueParam.isEmpty()) {
-            boolean isTrue = "true".equalsIgnoreCase(isTrueParam);
-            filteredAnswers = filteredAnswers.stream()
-                    .filter(a -> a.isIs_true() == isTrue)
-                    .collect(Collectors.toList());
-        }
-
-        // Apply search filter
-        if (searchParam != null && !searchParam.trim().isEmpty()) {
-            String searchLower = searchParam.trim().toLowerCase();
-            filteredAnswers = filteredAnswers.stream()
-                    .filter(a -> a.getContent() != null &&
-                            a.getContent().toLowerCase().contains(searchLower))
-                    .collect(Collectors.toList());
-        }
-
-        // Apply sorting
-        if (sortBy != null && !sortBy.isEmpty()) {
-            switch (sortBy) {
-                case "content_asc":
-                    filteredAnswers.sort(Comparator.comparing(
-                            QuizAnswer::getContent,
-                            Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
-                    break;
-                case "quiz_id_asc":
-                    filteredAnswers.sort(Comparator.comparingInt(QuizAnswer::getQuiz_id));
-                    break;
-                case "created_desc":
-                    filteredAnswers.sort((a1, a2) -> {
-                        if (a2.getCreated_at() == null)
-                            return -1;
-                        if (a1.getCreated_at() == null)
-                            return 1;
-                        return a2.getCreated_at().compareTo(a1.getCreated_at());
-                    });
-                    break;
-                case "created_asc":
-                    filteredAnswers.sort((a1, a2) -> {
-                        if (a1.getCreated_at() == null)
-                            return -1;
-                        if (a2.getCreated_at() == null)
-                            return 1;
-                        return a1.getCreated_at().compareTo(a2.getCreated_at());
-                    });
-                    break;
-                case "updated_desc":
-                default:
-                    filteredAnswers.sort((a1, a2) -> {
-                        if (a2.getUpdated_at() == null)
-                            return -1;
-                        if (a1.getUpdated_at() == null)
-                            return 1;
-                        return a2.getUpdated_at().compareTo(a1.getUpdated_at());
-                    });
-                    break;
+            // Apply search filter
+            if (searchParam != null && !searchParam.trim().isEmpty()) {
+                String searchLower = searchParam.trim().toLowerCase();
+                filteredAnswers = filteredAnswers.stream()
+                        .filter(a -> a.getContent() != null &&
+                                a.getContent().toLowerCase().contains(searchLower))
+                        .collect(Collectors.toList());
             }
-        } else {
-            // Default sort by updated_at desc
-            filteredAnswers.sort((a1, a2) -> {
-                if (a2.getUpdated_at() == null)
-                    return -1;
-                if (a1.getUpdated_at() == null)
-                    return 1;
-                return a2.getUpdated_at().compareTo(a1.getUpdated_at());
-            });
-        }
 
-        // Calculate statistics from all answers (before pagination)
-        int totalAnswers = filteredAnswers.size();
-        long correctAnswerCount = allAnswers.stream()
-                .filter(QuizAnswer::isIs_true)
-                .count();
-        long incorrectAnswerCount = allAnswers.stream()
-                .filter(a -> !a.isIs_true())
-                .count();
-
-        // Pagination
-        int currentPage = 1;
-        if (pageParam != null && !pageParam.isEmpty()) {
-            try {
-                currentPage = Integer.parseInt(pageParam);
-                if (currentPage < 1)
-                    currentPage = 1;
-            } catch (NumberFormatException e) {
-                currentPage = 1;
+            // Apply sorting
+            if (sortBy != null && !sortBy.isEmpty()) {
+                switch (sortBy) {
+                    case "content_asc":
+                        filteredAnswers.sort(Comparator.comparing(
+                                QuizAnswer::getContent,
+                                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
+                        break;
+                    case "quiz_id_asc":
+                        filteredAnswers.sort(Comparator.comparingInt(QuizAnswer::getQuiz_id));
+                        break;
+                    case "created_desc":
+                        filteredAnswers.sort((a1, a2) -> {
+                            if (a2.getCreated_at() == null)
+                                return -1;
+                            if (a1.getCreated_at() == null)
+                                return 1;
+                            return a2.getCreated_at().compareTo(a1.getCreated_at());
+                        });
+                        break;
+                    case "created_asc":
+                        filteredAnswers.sort((a1, a2) -> {
+                            if (a1.getCreated_at() == null)
+                                return -1;
+                            if (a2.getCreated_at() == null)
+                                return 1;
+                            return a1.getCreated_at().compareTo(a2.getCreated_at());
+                        });
+                        break;
+                    case "updated_desc":
+                    default:
+                        filteredAnswers.sort((a1, a2) -> {
+                            if (a2.getUpdated_at() == null)
+                                return -1;
+                            if (a1.getUpdated_at() == null)
+                                return 1;
+                            return a2.getUpdated_at().compareTo(a1.getUpdated_at());
+                        });
+                        break;
+                }
+            } else {
+                // Default sort by updated_at desc
+                filteredAnswers.sort((a1, a2) -> {
+                    if (a2.getUpdated_at() == null)
+                        return -1;
+                    if (a1.getUpdated_at() == null)
+                        return 1;
+                    return a2.getUpdated_at().compareTo(a1.getUpdated_at());
+                });
             }
+
+            // Calculate statistics from all answers (before pagination)
+            int totalAnswers = filteredAnswers.size();
+            long correctAnswerCount = allAnswers.stream()
+                    .filter(QuizAnswer::isIs_true)
+                    .count();
+            long incorrectAnswerCount = allAnswers.stream()
+                    .filter(a -> !a.isIs_true())
+                    .count();
+
+            // Pagination with validation
+            int currentPage = 1;
+            if (pageParam != null && !pageParam.isEmpty()) {
+                try {
+                    currentPage = Integer.parseInt(pageParam);
+                    if (currentPage < 1)
+                        currentPage = 1;
+                } catch (NumberFormatException e) {
+                    logger.log(Level.WARNING, "Invalid page parameter: " + pageParam);
+                    response.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+                    return;
+                }
+            }
+
+            int totalItems = filteredAnswers.size();
+            int totalPages = (int) Math.ceil((double) totalItems / ITEMS_PER_PAGE);
+            if (totalPages < 1)
+                totalPages = 1;
+            if (currentPage > totalPages)
+                currentPage = totalPages;
+
+            int startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+
+            List<QuizAnswer> paginatedAnswers;
+            if (startIndex < totalItems) {
+                paginatedAnswers = filteredAnswers.subList(startIndex, endIndex);
+            } else {
+                paginatedAnswers = new ArrayList<>();
+            }
+
+            // Calculate display items
+            int startItem = totalItems > 0 ? startIndex + 1 : 0;
+            int endItem = endIndex;
+
+            // Get quizzes for dropdown
+            List<Quiz> quizzes = quizDAO.getAllQuizzes();
+
+            // Set request attributes for the view
+            request.setAttribute("answerList", paginatedAnswers);
+            request.setAttribute("quizzes", quizzes);
+            request.setAttribute("totalAnswers", totalAnswers);
+            request.setAttribute("correctAnswerCount", correctAnswerCount);
+            request.setAttribute("incorrectAnswerCount", incorrectAnswerCount);
+            request.setAttribute("page", currentPage);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("startItem", startItem);
+            request.setAttribute("endItem", endItem);
+
+            request.getRequestDispatcher("../View/Instructor/QuizAnswerList.jsp").forward(request, response);
+
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error in showQuizAnswerList", e);
+            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
-
-        int totalItems = filteredAnswers.size();
-        int totalPages = (int) Math.ceil((double) totalItems / ITEMS_PER_PAGE);
-        if (totalPages < 1)
-            totalPages = 1;
-        if (currentPage > totalPages)
-            currentPage = totalPages;
-
-        int startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
-
-        List<QuizAnswer> paginatedAnswers;
-        if (startIndex < totalItems) {
-            paginatedAnswers = filteredAnswers.subList(startIndex, endIndex);
-        } else {
-            paginatedAnswers = new ArrayList<>();
-        }
-
-        // Calculate display items
-        int startItem = totalItems > 0 ? startIndex + 1 : 0;
-        int endItem = endIndex;
-
-        // Get quizzes for dropdown
-        List<Quiz> quizzes = quizDAO.getAllQuizzes();
-
-        // Set request attributes for the view
-        request.setAttribute("answerList", paginatedAnswers);
-        request.setAttribute("quizzes", quizzes);
-        request.setAttribute("totalAnswers", totalAnswers);
-        request.setAttribute("correctAnswerCount", correctAnswerCount);
-        request.setAttribute("incorrectAnswerCount", incorrectAnswerCount);
-        request.setAttribute("page", currentPage);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("startItem", startItem);
-        request.setAttribute("endItem", endItem);
-
-        request.getRequestDispatcher("../View/Instructor/QuizAnswerList.jsp").forward(request, response);
     }
 
     /**
@@ -314,9 +323,7 @@ public class InstructorQuizAnswerController extends HttpServlet {
 
         // Validate quiz ID
         if (quizIdParam == null || quizIdParam.trim().isEmpty()) {
-            session.setAttribute("notification", "Quiz ID is required.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Quiz ID is required.");
             return;
         }
 
@@ -324,17 +331,21 @@ public class InstructorQuizAnswerController extends HttpServlet {
         try {
             quizId = Integer.parseInt(quizIdParam);
         } catch (NumberFormatException e) {
-            session.setAttribute("notification", "Invalid Quiz ID.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            logger.log(Level.WARNING, "Invalid Quiz ID: " + quizIdParam);
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Invalid Quiz ID.");
             return;
         }
 
         // Validate content
         if (content == null || content.trim().isEmpty()) {
-            session.setAttribute("notification", "Answer content is required.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Answer content is required.");
+            return;
+        }
+
+        // Check if quiz exists
+        Quiz existingQuiz = quizDAO.getQuizById(quizId);
+        if (existingQuiz == null) {
+            response.sendError(httpStatus.NOT_FOUND.getCode(), "Quiz not found.");
             return;
         }
 
@@ -351,12 +362,11 @@ public class InstructorQuizAnswerController extends HttpServlet {
         if (createdAnswer != null) {
             session.setAttribute("notification", "Quiz answer created successfully!");
             session.setAttribute("notificationType", "success");
+            response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
         } else {
-            session.setAttribute("notification", "Failed to create quiz answer. Please try again.");
-            session.setAttribute("notificationType", "error");
+            logger.log(Level.SEVERE, "Failed to create quiz answer for user: " + user.getId());
+            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
-
-        response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
     }
 
     /**
@@ -367,10 +377,7 @@ public class InstructorQuizAnswerController extends HttpServlet {
 
         String idParam = request.getParameter("id");
         if (idParam == null || idParam.isEmpty()) {
-            HttpSession session = request.getSession();
-            session.setAttribute("notification", "Answer ID is required.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
             return;
         }
 
@@ -384,16 +391,11 @@ public class InstructorQuizAnswerController extends HttpServlet {
                 request.setAttribute("quizzes", quizzes);
                 request.getRequestDispatcher("../View/Instructor/EditQuizAnswer.jsp").forward(request, response);
             } else {
-                HttpSession session = request.getSession();
-                session.setAttribute("notification", "Answer not found.");
-                session.setAttribute("notificationType", "error");
-                response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+                response.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
             }
         } catch (NumberFormatException e) {
-            HttpSession session = request.getSession();
-            session.setAttribute("notification", "Invalid Answer ID.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            logger.log(Level.WARNING, "Invalid Answer ID: " + idParam);
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
         }
     }
 
@@ -417,9 +419,7 @@ public class InstructorQuizAnswerController extends HttpServlet {
 
         // Validate answer ID
         if (idParam == null || idParam.isEmpty()) {
-            session.setAttribute("notification", "Answer ID is required.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Answer ID is required.");
             return;
         }
 
@@ -427,9 +427,8 @@ public class InstructorQuizAnswerController extends HttpServlet {
         try {
             answerId = Integer.parseInt(idParam);
         } catch (NumberFormatException e) {
-            session.setAttribute("notification", "Invalid Answer ID.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            logger.log(Level.WARNING, "Invalid Answer ID: " + idParam);
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Invalid Answer ID.");
             return;
         }
 
@@ -438,17 +437,32 @@ public class InstructorQuizAnswerController extends HttpServlet {
         try {
             quizId = Integer.parseInt(quizIdParam);
         } catch (NumberFormatException e) {
+            logger.log(Level.WARNING, "Invalid Quiz ID: " + quizIdParam);
             session.setAttribute("notification", "Invalid Quiz ID.");
             session.setAttribute("notificationType", "error");
             response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
             return;
         }
 
-        // Validate content
+        // Validate content - redirect back to list with error for inline editing
         if (content == null || content.trim().isEmpty()) {
             session.setAttribute("notification", "Answer content is required.");
             session.setAttribute("notificationType", "error");
             response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            return;
+        }
+
+        // Check if answer exists
+        QuizAnswer existingAnswer = quizAnswerDAO.getQuizAnswerById(answerId);
+        if (existingAnswer == null) {
+            response.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
+            return;
+        }
+
+        // Check if quiz exists
+        Quiz existingQuiz = quizDAO.getQuizById(quizId);
+        if (existingQuiz == null) {
+            response.sendError(httpStatus.NOT_FOUND.getCode(), "Quiz not found.");
             return;
         }
 
@@ -467,6 +481,7 @@ public class InstructorQuizAnswerController extends HttpServlet {
             session.setAttribute("notification", "Quiz answer updated successfully!");
             session.setAttribute("notificationType", "success");
         } else {
+            logger.log(Level.SEVERE, "Failed to update quiz answer ID: " + answerId + " for user: " + user.getId());
             session.setAttribute("notification", "Failed to update quiz answer. Please try again.");
             session.setAttribute("notificationType", "error");
         }
@@ -487,9 +502,7 @@ public class InstructorQuizAnswerController extends HttpServlet {
 
         // Validate answer ID
         if (idParam == null || idParam.isEmpty()) {
-            session.setAttribute("notification", "Answer ID is required.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Answer ID is required.");
             return;
         }
 
@@ -497,9 +510,15 @@ public class InstructorQuizAnswerController extends HttpServlet {
         try {
             answerId = Integer.parseInt(idParam);
         } catch (NumberFormatException e) {
-            session.setAttribute("notification", "Invalid Answer ID.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            logger.log(Level.WARNING, "Invalid Answer ID: " + idParam);
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Invalid Answer ID.");
+            return;
+        }
+
+        // Check if answer exists before attempting to delete
+        QuizAnswer existingAnswer = quizAnswerDAO.getQuizAnswerById(answerId);
+        if (existingAnswer == null) {
+            response.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
             return;
         }
 
@@ -510,6 +529,7 @@ public class InstructorQuizAnswerController extends HttpServlet {
             session.setAttribute("notification", "Quiz answer deleted successfully!");
             session.setAttribute("notificationType", "success");
         } else {
+            logger.log(Level.SEVERE, "Failed to delete quiz answer ID: " + answerId);
             session.setAttribute("notification", "Failed to delete quiz answer.");
             session.setAttribute("notificationType", "error");
         }
