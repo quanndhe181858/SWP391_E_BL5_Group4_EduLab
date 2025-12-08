@@ -6,6 +6,8 @@ package controller.instructor;
 
 import dao.QuizDAO;
 import model.Quiz;
+import model.User;
+import util.AuthUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,6 +49,11 @@ public class InstructorQuizController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        User authResult = AuthUtils.doAuthorize(request, response, 2);
+        if (authResult == null) {
+            return;
+        }
+
         String action = request.getParameter("action");
 
         try {
@@ -81,6 +88,11 @@ public class InstructorQuizController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        User authResult = AuthUtils.doAuthorize(request, response, 2);
+        if (authResult == null) {
+            return;
+        }
 
         String action = request.getParameter("action");
 
