@@ -1,7 +1,6 @@
 package controller.instructor;
 
-import dao.CourseDAO;
-import dao.CourseSectionDAO;
+
 import dao.QuizDAO;
 import dao.QuizTestDAO;
 import dao.TestDAO;
@@ -22,8 +21,8 @@ public class InstructorTestController extends HttpServlet {
     private final TestDAO testDAO = new TestDAO();
     private final QuizDAO quizDAO = new QuizDAO();
     private final QuizTestDAO quizTestDAO = new QuizTestDAO();
-    private final CourseDAO courseDAO = new CourseDAO();
-    private final CourseSectionDAO sectionDAO = new CourseSectionDAO();
+    private final courseDAO courseDAO = new courseDAO();
+    private final courseSectionDAO sectionDAO = new courseSectionDAO();
 
     private Integer getInt(HttpServletRequest req, String name) {
         String raw = req.getParameter(name);

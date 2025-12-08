@@ -1,4 +1,3 @@
-
 package dao;
 
 import DTO.TestDetailDTO;
@@ -196,4 +195,86 @@ public class TestDAO extends dao {
         }
         return false;
     }
+
+    public boolean deleteTest(int id) {
+        try {
+            con = dbc.getConnection();
+
+            // 1. Xóa test_attempt trước
+            String sql1 = "DELETE FROM test_attempt WHERE test_id = ?";
+            ps = con.prepareStatement(sql1);
+            ps.setInt(1, id);
+            ps.executeUpdate();
+
+            // 2. Xóa test
+            String sql2 = "DELETE FROM test WHERE id = ?";
+            ps = con.prepareStatement(sql2);
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    public List<String> getAllCategoryNames() {
+    List<String> list = new ArrayList<>();
+    String sql = "SELECT name FROM category ORDER BY name";
+
+    try {
+        con = dbc.getConnection();
+        ps = con.prepareStatement(sql);
+        rs = ps.executeQuery();
+
+        while (rs.next()) {
+            list.add(rs.getString("name"));
+        }
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+    } finally {
+        closeResources();
+    }
+    return list;
+}
+
+public static void main(String[] args) {
+    TestDAO dao = new TestDAO();
+
+    int instructorId = 2;                 // Lọc theo instructor
+    String searchTitle = null;          // Tìm theo tên bài test (có thể để null)
+    String categoryName = "Frontend";      // Lọc theo category (có thể để null)
+
+    try {
+        System.out.println("===== TEST getAllTests() WITH FILTER =====");
+
+        List<TestDetailDTO> list = dao.getAllTests(instructorId, searchTitle, categoryName);
+
+        if (list == null || list.isEmpty()) {
+            System.out.println("⚠ Không tìm thấy test nào phù hợp filter:");
+            System.out.println("- instructorId = " + instructorId);
+            System.out.println("- searchTitle   = " + searchTitle);
+            System.out.println("- category      = " + categoryName);
+        } else {
+            System.out.println("✅ Số lượng test tìm thấy: " + list.size());
+            System.out.println("----------------------------------");
+
+            for (TestDetailDTO t : list) {
+                System.out.println("ID: " + t.getId());
+                System.out.println("Title: " + t.getTitle());
+                System.out.println("Course: " + t.getCourseName());
+                System.out.println("Instructor: " + t.getInstructorName());
+                System.out.println("Category: " + t.getCategoryName());
+                System.out.println("Created At: " + t.getDateCreated());
+                System.out.println("----------------------------------");
+            }
+        }
+
+    } catch (Exception e) {
+        System.out.println("❌ Lỗi trong quá trình test: " + e.getMessage());
+        e.printStackTrace();
+    }
+}
+
+   
 }

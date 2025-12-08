@@ -22,6 +22,7 @@
                     <th class="px-4 py-2 border">Giảng viên</th>
                     <th class="px-4 py-2 border">Category</th>
                     <th class="px-4 py-2 border">Ngày tạo</th>
+                    <th class="px-4 py-2 border text-center">Hành động</th>
                 </tr>
             </thead>
 
@@ -34,6 +35,24 @@
                         <td class="border px-4 py-2">${t.instructorName}</td>
                         <td class="border px-4 py-2">${t.categoryName}</td>
                         <td class="border px-4 py-2">${t.dateCreated}</td>
+
+                        <!-- ACTION BUTTONS -->
+                        <td class="border px-4 py-2 text-center">
+
+                            <!-- Nút Update -->
+                            <a href="updateTest?id=${t.id}"
+                               class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded">
+                                Update
+                            </a>
+
+                            <!-- Nút Delete -->
+                            <a href="javascript:void(0)"
+                               onclick="confirmDelete(${t.id})"
+                               class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded ml-2">
+                                Delete
+                            </a>
+
+                        </td>
                     </tr>
                 </c:forEach>
             </tbody>
@@ -47,3 +66,22 @@
     <jsp:include page="/layout/importBottom.jsp"/>
 
 </body>
+
+<!-- SweetAlert2 Confirm Delete -->
+<script>
+    function confirmDelete(id) {
+        Swal.fire({
+            title: "Bạn chắc chắn muốn xóa?",
+            text: "Hành động này không thể hoàn tác!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#e3342f",
+            cancelButtonColor: "#6c757d",
+            confirmButtonText: "Xóa"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/yourProject/instructor/deleteTest?id=" + id;
+            }
+        });
+    }
+</script>

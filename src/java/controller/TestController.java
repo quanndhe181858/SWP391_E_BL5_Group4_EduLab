@@ -5,13 +5,17 @@ import dao.TestDAO;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet(urlPatterns = {"/instructor/listTests", "/instructor/deleteTest"})
+@WebServlet(urlPatterns = {
+    "/instructor/listTests",
+    "/instructor/deleteTest"
+})
 public class TestController extends HttpServlet {
 
     private final TestDAO dao = new TestDAO();
@@ -21,13 +25,24 @@ public class TestController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        String uri = request.getRequestURI();
+
+        if (uri.endsWith("/deleteTest")) {
+            deleteTest(request, response);
+            return;
+        }
+
+        listTests(request, response);
+    }
+
+    private void listTests(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
         try {
             String searchTitle = request.getParameter("searchTitle");
             String categoryName = request.getParameter("categoryName");
 
-            List<TestDetailDTO> list = dao.getAllTests(
-                    INSTRUCTOR_ID, searchTitle, categoryName
-            );
+            List<TestDetailDTO> list = dao.getAllTests(INSTRUCTOR_ID, searchTitle, categoryName);
 
             request.setAttribute("listTest", list);
             request.setAttribute("searchTitle", searchTitle);
@@ -40,5 +55,27 @@ public class TestController extends HttpServlet {
             e.printStackTrace();
             throw new ServletException("Lỗi CSDL: " + e.getMessage());
         }
+    }
+
+    private void deleteTest(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+
+            boolean success = dao.deleteTest(id);
+
+            if (success) {
+                request.getSession().setAttribute("msg", "Xóa test thành công!");
+            } else {
+                request.getSession().setAttribute("msg", "Không thể xóa test!");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.getSession().setAttribute("msg", "Lỗi khi xóa test!");
+        }
+
+        response.sendRedirect(request.getContextPath() + "/instructor/listTests");
     }
 }
