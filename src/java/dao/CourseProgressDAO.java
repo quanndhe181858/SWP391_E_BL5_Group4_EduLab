@@ -96,6 +96,7 @@ public class CourseProgressDAO extends dao {
                 cp.setSectionId(rs.getInt("section_id"));
                 cp.setProgressPercent(rs.getInt("progress_percent"));
                 cp.setStatus(rs.getString("status"));
+                cp.setTestDone(rs.getBoolean("test_done"));
                 cp.setLastAccessedAt(rs.getTimestamp("last_accessed_at"));
                 cp.setCompletedAt(rs.getTimestamp("completed_at"));
                 return cp;
@@ -108,6 +109,25 @@ public class CourseProgressDAO extends dao {
         }
 
         return null;
+    }
+
+    public void markTestDone(int userId, int courseId, int sectionId) {
+        String sql = """
+        UPDATE course_progress
+        SET test_done = 1
+        WHERE user_id = ? AND course_id = ? AND course_section_id = ?
+    """;
+
+        try (Connection conn = dbc.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+            ps.setInt(3, sectionId);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public int countCompletedSections(int userId, int courseId) {

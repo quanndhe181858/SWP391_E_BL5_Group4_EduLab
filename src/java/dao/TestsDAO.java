@@ -236,4 +236,38 @@ public class TestsDAO extends dao {
         return list;
     }
 
+    public Test getTestBySectionId(int sectionId) {
+        String sql = "SELECT * FROM test WHERE course_section_id = ?";
+
+        Test t = null;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, sectionId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                t = new Test();
+                t.setId(rs.getInt("id"));
+                t.setCode(rs.getString("code"));
+                t.setTitle(rs.getString("title"));
+                t.setDescription(rs.getString("description"));
+                t.setTimeInterval(rs.getInt("time_interval"));
+                t.setMinGrade(rs.getInt("min_grade"));
+                t.setCourseId(rs.getInt("course_id"));
+                t.setCourseSectionId(rs.getInt("course_section_id"));
+                t.setCreatedBy(rs.getInt("created_by"));
+                t.setUpdatedBy(rs.getInt("updated_by"));
+                t.setCreatedAt(rs.getTimestamp("created_at"));
+                t.setUpdatedAt(rs.getTimestamp("updated_at"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return t;
+    }
+
 }

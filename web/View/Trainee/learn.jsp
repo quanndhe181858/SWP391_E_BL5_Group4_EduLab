@@ -74,7 +74,7 @@
                                 </div>
 
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium ${isActive ? 'text-green-700' : 'text-gray-900'} 
+                                    <p class="text-sm font-medium ${isActive ? 'text-green-700' : 'text-gray-900'}
                                        line-clamp-2 group-hover:text-green-600 transition-colors">
                                         ${s.title}
                                     </p>
@@ -122,6 +122,38 @@
                             </div>
                         </div>
                     </c:if>
+                    <c:if test="${not empty test}">
+                        <div class="p-6 bg-blue-50 border border-blue-300 rounded-lg mb-10">
+                            <h3 class="text-xl font-semibold text-blue-700 mb-3">📝 Bài kiểm tra</h3>
+                            <p class="text-gray-700 mb-4">${test.description}</p>
+
+                            <c:choose>
+                                <!-- Nếu CHƯA hoàn thành test: hiện nút -->
+                                <c:when test="${not testDone}">
+                                    <a href="${pageContext.request.contextPath}/test/start?testId=${test.id}"
+                                       class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                        Làm bài test
+                                    </a>
+                                    <p class="mt-3 text-red-600 font-semibold">
+                                        ❗ Bạn cần hoàn thành bài test để hoàn thành bài học.
+                                    </p>
+                                </c:when>
+
+                                <!-- Nếu ĐÃ làm test -->
+                                <c:otherwise>
+                                    <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-700 rounded-lg font-semibold">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                              clip-rule="evenodd"/>
+                                        </svg>
+                                        Đã hoàn thành bài test
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+                        </div>
+                    </c:if>
+
 
                     <c:if test="${not empty mediaList}">
                         <div class="mb-10">
@@ -227,29 +259,19 @@
                         <input type="hidden" name="courseId" value="${course.id}">
                         <input type="hidden" name="sectionId" value="${current.id}">
 
-                        <button type="submit" 
-                                class="w-full md:w-auto px-8 py-4 rounded-lg font-semibold text-lg shadow-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-4
-                                ${isCurrentCompleted ? 
-                                  'bg-gray-400 text-white cursor-not-allowed' : 
-                                  'bg-green-500 hover:bg-green-600 text-white focus:ring-green-300'}"
-                                  ${isCurrentCompleted ? 'disabled' : ''}>
+                        <button type="submit"
+                                class="w-full md:w-auto px-8 py-4 rounded-lg font-semibold text-lg shadow-lg
+                                ${(empty test || testDone) ? 'bg-green-500 hover:bg-green-600 text-white' : 
+                                  'bg-gray-300 text-gray-500 cursor-not-allowed'}"
+                                  ${(not empty test && !testDone) ? 'disabled' : ''}>
                                     <span class="flex items-center justify-center gap-2">
-                                        <c:choose>
-                                            <c:when test="${isCurrentCompleted}">
-                                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                                </svg>
-                                                Đã hoàn thành
-                                            </c:when>
-                                            <c:otherwise>
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                                </svg>
-                                                Đánh dấu hoàn thành
-                                            </c:otherwise>
-                                        </c:choose>
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        Đánh dấu hoàn thành
                                     </span>
                                 </button>
+
                         </form>
 
                         <div class="flex justify-between items-center mt-8 pt-8 border-t border-gray-200">
