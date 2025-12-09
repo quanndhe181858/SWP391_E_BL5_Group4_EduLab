@@ -48,9 +48,13 @@
                                         id="title" 
                                         name="title" 
                                         value="${course.title}"
+                                        maxlength="200"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         placeholder="e.g., Complete Web Development Bootcamp"
                                         required>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <span id="titleCount">0</span>/200 ký tự
+                                    </p>
                                 </div>
 
                                 <div>
@@ -60,10 +64,14 @@
                                     <textarea 
                                         id="description" 
                                         name="description" 
-                                        rows="5"
+                                        rows="10"
+                                        maxlength="2000"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                                         placeholder="Describe what students will learn in this course..."
                                         required>${course.description}</textarea>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <span id="descCount">0</span>/2000 ký tự
+                                    </p>
                                 </div>
 
                                 <div>
@@ -279,6 +287,22 @@
         <jsp:include page="/layout/importBottom.jsp" />
 
         <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const titleInput = document.getElementById('title');
+                const descInput = document.getElementById('description');
+
+                document.getElementById('titleCount').textContent = titleInput.value.length;
+                document.getElementById('descCount').textContent = descInput.value.length;
+
+                titleInput.addEventListener('input', function () {
+                    document.getElementById('titleCount').textContent = this.value.length;
+                });
+
+                descInput.addEventListener('input', function () {
+                    document.getElementById('descCount').textContent = this.value.length;
+                });
+            });
+
             document.getElementById('thumbnail').addEventListener('change', function (e) {
                 const file = e.target.files[0];
                 if (file) {
@@ -312,8 +336,33 @@
                 const status = document.querySelector('input[name="status"]:checked').value;
                 const thumbnailFile = document.getElementById('thumbnail').files[0];
 
-                if (!title || !description || !categoryId) {
-                    showToast('Hãy điền vào các ô cần điền (Không được điền chỉ có khoảng cách)', 'error', 2500);
+                if (!title) {
+                    showToast('Tên khoá học không được để trống', 'error', 2500);
+                    document.getElementById('title').focus();
+                    return false;
+                }
+
+                if (title.length > 200) {
+                    showToast('Tên khoá học không được vượt quá 200 ký tự', 'error', 2500);
+                    document.getElementById('title').focus();
+                    return false;
+                }
+
+                if (!description) {
+                    showToast('Mô tả khoá học không được để trống', 'error', 2500);
+                    document.getElementById('description').focus();
+                    return false;
+                }
+
+                if (description.length > 2000) {
+                    showToast('Mô tả khoá học không được vượt quá 500 ký tự', 'error', 2500);
+                    document.getElementById('description').focus();
+                    return false;
+                }
+
+                if (!categoryId) {
+                    showToast('Vui lòng chọn đề mục', 'error', 2500);
+                    document.getElementById('categoryId').focus();
                     return false;
                 }
 
