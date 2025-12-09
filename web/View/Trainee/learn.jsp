@@ -138,8 +138,7 @@
                                                   fn:endsWith(fn:toLowerCase(m.path), '.png') ||
                                                   fn:endsWith(fn:toLowerCase(m.path), '.gif')}">
                                           <div class="rounded-lg overflow-hidden shadow-md border border-gray-200">
-                                              <img src="${pageContext.request.contextPath}/${m.path}" 
-                                                   alt="${m.name}"
+                                              <img src="${pageContext.request.contextPath}/${m.path}"
                                                    class="w-full h-auto">
                                           </div>
                                     </c:if>
