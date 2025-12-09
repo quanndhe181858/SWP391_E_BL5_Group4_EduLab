@@ -148,18 +148,11 @@
                                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                                                     onchange="submitFilter()">
                                                     <option value="">Tất cả danh mục</option>
-                                                    <option value="1" ${param.categoryId=='1' ? 'selected' : '' }>
-                                                        Lập trình</option>
-                                                    <option value="2" ${param.categoryId=='2' ? 'selected' : '' }>
-                                                        Toán học</option>
-                                                    <option value="3" ${param.categoryId=='3' ? 'selected' : '' }>
-                                                        Khoa học</option>
-                                                    <option value="4" ${param.categoryId=='4' ? 'selected' : '' }>
-                                                        Lịch sử</option>
-                                                    <option value="5" ${param.categoryId=='5' ? 'selected' : '' }>
-                                                        Ngôn ngữ</option>
-                                                    <option value="6" ${param.categoryId=='6' ? 'selected' : '' }>
-                                                        Kinh doanh</option>
+                                                    <c:forEach var="category" items="${categories}">
+                                                        <option value="${category.id}" ${param.categoryId == category.id ? 'selected' : ''}>
+                                                            ${category.name}
+                                                        </option>
+                                                    </c:forEach>
                                                 </select>
                                             </div>
 
@@ -331,7 +324,7 @@
                                                                             </span>
                                                                             <span
                                                                                 class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded">Danh mục:
-                                                                                <%= quiz.getCategory_id() %>
+                                                                                ${categoryMap[quiz.category_id]}
                                                                             </span>
                                                                             <span
                                                                                 class="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 rounded">ID:
@@ -620,8 +613,6 @@
                                                             <option value="True/False">Đúng/Sai</option>
                                                             <option value="Short Answer">Câu trả lời ngắn</option>
                                                             <option value="Essay">Tự luận</option>
-                                                            <option value="Fill in the Blank">Điền vào chỗ trống</option>
-                                                            <option value="Matching">Nối từ</option>
                                                         </select>
                                                     </div>
 
@@ -633,12 +624,9 @@
                                                         <select id="editCategoryId" name="categoryId" required
                                                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
                                                             <option value="">-- Chọn danh mục --</option>
-                                                            <option value="1">Lập trình</option>
-                                                            <option value="2">Toán học</option>
-                                                            <option value="3">Khoa học</option>
-                                                            <option value="4">Lịch sử</option>
-                                                            <option value="5">Ngôn ngữ</option>
-                                                            <option value="6">Kinh doanh</option>
+                                                            <c:forEach var="category" items="${categories}">
+                                                                <option value="${category.id}">${category.name}</option>
+                                                            </c:forEach>
                                                         </select>
                                                     </div>
                                                 </div>
