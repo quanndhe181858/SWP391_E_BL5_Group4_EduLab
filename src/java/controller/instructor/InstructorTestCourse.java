@@ -53,7 +53,7 @@ public class InstructorTestCourse extends HttpServlet {
         request.setAttribute("selectedCourse", selectedCourse);
 
         // LẤY DANH SÁCH TEST THEO COURSE
-         request.setAttribute("testList", testDAO.getTestsByInstructor(instructorId));
+        request.setAttribute("testList", testDAO.getTestsByInstructor(instructorId));
 
         // Load quiz list để tạo / sửa test
         request.setAttribute("quizList", quizDAO.getAllQuizzes());
@@ -109,6 +109,11 @@ public class InstructorTestCourse extends HttpServlet {
             t.setCourseId(courseId);
             t.setCourseSectionId(0); // test của khóa học
             t.setCreatedBy(instructorId);
+            if (testDAO.isCodeOrTitleExisted(code, title, null)) {
+                request.setAttribute("error", "Code hoặc tiêu đề đã tồn tại.");
+                doGet(request, response);
+                return;
+            }
 
             int id = testDAO.createTest(t);
 
@@ -133,6 +138,11 @@ public class InstructorTestCourse extends HttpServlet {
             t.setMinGrade(minGrade);
             t.setCourseId(courseId);
             t.setCourseSectionId(0);
+            if (testDAO.isCodeOrTitleExisted(code, title, id)) {
+                request.setAttribute("error", "Code hoặc tiêu đề đã tồn tại.");
+                doGet(request, response);
+                return;
+            }
 
             testDAO.updateTest(t);
 
@@ -154,14 +164,19 @@ public class InstructorTestCourse extends HttpServlet {
             }
         } else if ("random".equals(mode)) {
             Integer count = getInt(request, "randomCount");
-            if (count != null && count > 0) {
+            if (count == null || count <= 0) {
+                return;
+            }
 
-                List<Quiz> all = quizDAO.getAllQuizzes();
-                Collections.shuffle(all);
+            List<Quiz> all = quizDAO.getAllQuizzes();
+            if (count > all.size()) {
+                request.setAttribute("error", "Không đủ số lượng quiz trong ngân hàng.");
+                return;
+            }
 
-                for (int i = 0; i < Math.min(count, all.size()); i++) {
-                    quizTestDAO.addQuizToTest(testId, all.get(i).getId());
-                }
+            Collections.shuffle(all);
+            for (int i = 0; i < count; i++) {
+                quizTestDAO.addQuizToTest(testId, all.get(i).getId());
             }
         }
     }

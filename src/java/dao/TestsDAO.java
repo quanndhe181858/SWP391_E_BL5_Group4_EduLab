@@ -270,4 +270,31 @@ public class TestsDAO extends dao {
         return t;
     }
 
+    public boolean isCodeOrTitleExisted(String code, String title, Integer excludeId) {
+        String sql = """
+        SELECT COUNT(*) FROM test 
+        WHERE (code = ? OR title = ?)
+        """ + (excludeId != null ? " AND id <> ?" : "");
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setString(1, code);
+            ps.setString(2, title);
+            if (excludeId != null) {
+                ps.setInt(3, excludeId);
+            }
+
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
 }
