@@ -531,6 +531,45 @@
                 document.body.style.overflow = 'auto';
             }
 
+            // Check for addQuizId parameter and auto-open modal with pre-selected quiz
+            document.addEventListener('DOMContentLoaded', function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const addQuizId = urlParams.get('addQuizId');
+                
+                if (addQuizId) {
+                    // Pre-select the quiz in the add modal
+                    const addQuizSelect = document.getElementById('addQuizId');
+                    if (addQuizSelect) {
+                        addQuizSelect.value = addQuizId;
+                        // Trigger change event to update the type display
+                        if (typeof window.updateAddQuizType === 'function') {
+                            setTimeout(window.updateAddQuizType, 100);
+                        }
+                    }
+                    
+                    // Show a temporary notification
+                    const notification = document.createElement('div');
+                    notification.className = 'toast success';
+                    notification.innerHTML = 'Câu hỏi đã được chọn sẵn. Modal thêm câu trả lời sẽ mở tự động.';
+                    document.body.appendChild(notification);
+                    notification.classList.add('show');
+                    
+                    setTimeout(function() {
+                        notification.classList.remove('show');
+                        setTimeout(() => notification.remove(), 500);
+                    }, 2500);
+                    
+                    // Open the add modal automatically
+                    setTimeout(function() {
+                        openAddModal();
+                        // Clean URL by removing the addQuizId parameter
+                        const newUrl = new URL(window.location);
+                        newUrl.searchParams.delete('addQuizId');
+                        window.history.replaceState({}, '', newUrl);
+                    }, 500);
+                }
+            });
+
             // Edit Modal
             document.querySelectorAll('.edit-answer-btn').forEach(function (btn) {
                 btn.addEventListener('click', function (e) {
@@ -669,13 +708,20 @@
                                 <% if (quizzes != null) { for (Quiz quiz : quizzes) { %>
                                     quizzes.push({id: "<%= quiz.getId() %>", type: "<%= quiz.getType() != null ? quiz.getType().replace("\"", "&quot;") : "" %>"});
                                 <% } } %>
+                                
                                 function updateAddQuizType() {
                                     var select = document.getElementById('addQuizId');
                                     var typeInput = document.getElementById('addTypeDisplay');
-                                    var selectedId = select.value;
-                                    var q = quizzes.find(function(qz){ return qz.id === selectedId; });
-                                    typeInput.value = q ? q.type : '';
+                                    if (select && typeInput) {
+                                        var selectedId = select.value;
+                                        var q = quizzes.find(function(qz){ return qz.id === selectedId; });
+                                        typeInput.value = q ? q.type : '';
+                                    }
                                 }
+                                
+                                // Make function globally available
+                                window.updateAddQuizType = updateAddQuizType;
+                                
                                 var selectQuiz = document.getElementById('addQuizId');
                                 if(selectQuiz) {
                                     selectQuiz.addEventListener('change', updateAddQuizType);

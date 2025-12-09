@@ -379,6 +379,14 @@
                                                                                 safeQuestion=questionText.replace("\"", "&quot;"
                                                                                 ).replace("\n", " " ).replace("\r", ""
                                                                                 ); } %>
+                                                                    <a href="${pageContext.request.contextPath}/instructor/quiz-answers?action=list&addQuizId=<%= quiz.getId() %>"
+                                                                        class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition"
+                                                                        title="Thêm câu trả lời cho câu hỏi này">
+                                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                                        </svg>
+                                                                        Thêm câu trả lời
+                                                                    </a>
                                                                     <button type="button"
                                                                         class="edit-quiz-btn inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition"
                                                                         data-id="<%= quiz.getId() %>"
