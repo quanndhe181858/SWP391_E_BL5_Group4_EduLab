@@ -172,21 +172,6 @@
                                                                 %>>
                                                                 Short Answer
                                                             </option>
-                                                            <option value="Essay" <%="Essay"
-                                                                .equals(request.getParameter("type")) ? "selected" : ""
-                                                                %>>
-                                                                Essay
-                                                            </option>
-                                                            <option value="Fill in the Blank" <%="Fill in the Blank"
-                                                                .equals(request.getParameter("type")) ? "selected" : ""
-                                                                %>>
-                                                                Fill in the Blank
-                                                            </option>
-                                                            <option value="Matching" <%="Matching"
-                                                                .equals(request.getParameter("type")) ? "selected" : ""
-                                                                %>>
-                                                                Matching
-                                                            </option>
                                                         </select>
                                                         <p class="mt-2 text-xs text-gray-500">Select the type of
                                                             question format.</p>

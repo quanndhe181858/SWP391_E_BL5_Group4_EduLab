@@ -318,7 +318,6 @@ public class InstructorQuizAnswerController extends HttpServlet {
         // Get form parameters
         String quizIdParam = request.getParameter("quizId");
         String isTrueParam = request.getParameter("isTrue");
-        String type = request.getParameter("type");
         String content = request.getParameter("content");
 
         // Validate quiz ID
@@ -342,7 +341,7 @@ public class InstructorQuizAnswerController extends HttpServlet {
             return;
         }
 
-        // Check if quiz exists
+        // Check if quiz exists and get its type
         Quiz existingQuiz = quizDAO.getQuizById(quizId);
         if (existingQuiz == null) {
             response.sendError(httpStatus.NOT_FOUND.getCode(), "Quiz not found.");
@@ -353,7 +352,7 @@ public class InstructorQuizAnswerController extends HttpServlet {
         QuizAnswer answer = new QuizAnswer();
         answer.setQuiz_id(quizId);
         answer.setIs_true("true".equalsIgnoreCase(isTrueParam));
-        answer.setType(type != null ? type : "text");
+        answer.setType(existingQuiz.getType() != null ? existingQuiz.getType() : "text"); // Use Quiz's type
         answer.setContent(content.trim());
 
         // Save to database using the authorized user's ID
@@ -414,7 +413,6 @@ public class InstructorQuizAnswerController extends HttpServlet {
         String idParam = request.getParameter("id");
         String quizIdParam = request.getParameter("quizId");
         String isTrueParam = request.getParameter("isTrue");
-        String type = request.getParameter("type");
         String content = request.getParameter("content");
 
         // Validate answer ID
@@ -459,19 +457,19 @@ public class InstructorQuizAnswerController extends HttpServlet {
             return;
         }
 
-        // Check if quiz exists
+        // Check if quiz exists and get its type
         Quiz existingQuiz = quizDAO.getQuizById(quizId);
         if (existingQuiz == null) {
             response.sendError(httpStatus.NOT_FOUND.getCode(), "Quiz not found.");
             return;
         }
 
-        // Create quiz answer object with updated data
+        // Create quiz answer object with updated data, using quiz type from Quiz
         QuizAnswer answer = new QuizAnswer();
         answer.setId(answerId);
         answer.setQuiz_id(quizId);
         answer.setIs_true("true".equalsIgnoreCase(isTrueParam));
-        answer.setType(type != null ? type : "text");
+        answer.setType(existingQuiz.getType() != null ? existingQuiz.getType() : "text"); // Use Quiz's type
         answer.setContent(content.trim());
 
         // Update in database using the authorized user's ID
