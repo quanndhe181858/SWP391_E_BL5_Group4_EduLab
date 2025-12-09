@@ -56,7 +56,7 @@ public class CourseDAO extends dao {
 //        System.out.println(dao.countCourses("", "", 0, ""));
 //        System.out.println(dao.getCoursesByInstructorId(10, 0, "", "", 0, "", "", 1).size());
 //        System.out.println(dao.countCoursesByInstructorId(1, "active"));
-        System.out.println(dao.getCourseCatalog(1000, 0, "", "", 0).size());
+        System.out.println(dao.deleteCourse(7));
     }
 
     public Course createCourse(Course course, int uid) {

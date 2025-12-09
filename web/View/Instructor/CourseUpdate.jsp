@@ -371,7 +371,7 @@
                             setTimeout(() => window.location.href = "courses", 1500);
                         },
                         error: function (xhr) {
-                            showToast("Có lỗi xảy ra trong quá trình xoá khoá học, vui lòng thử lại sau", "error", 2500);
+                            showToast("Hiện tại đã có học viên tham gia khoá học và làm bài, không thể xoá!", "error", 2500);
                         }
                     });
                 });
