@@ -87,6 +87,20 @@
                                         </a>
                                     </c:if>
                                     <c:if test="${sessionScope.user.role_id == 2}">
+                                        <a href="${pageContext.request.contextPath}/instructor/quizes" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <div class="flex items-center">
+                                                My Quiz
+                                            </div>
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${sessionScope.user.role_id == 2}">
+                                        <a href="${pageContext.request.contextPath}/instructor/quiz-answers" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <div class="flex items-center">
+                                                My Quiz Answer
+                                            </div>
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${sessionScope.user.role_id == 2}">
                                         <a href="${pageContext.request.contextPath}/instructor/test" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                             <div class="flex items-center">
                                                 My Test
