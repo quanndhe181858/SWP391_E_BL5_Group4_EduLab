@@ -18,7 +18,7 @@
                     </div>
                     <div class="">
                         <div class="relative w-[500px]">
-                            <form action="courses">
+                            <form action="${pageContext.request.contextPath}/courses">
                                 <input 
                                     type="text" 
                                     placeholder="Bạn muốn học gì?" 
