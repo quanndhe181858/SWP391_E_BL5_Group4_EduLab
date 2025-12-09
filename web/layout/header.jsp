@@ -13,7 +13,7 @@
                 <div class="flex items-center space-x-8">
                     <div class="flex items-center">
                         <a href="${pageContext.request.contextPath}/home">
-                            <span class="text-2xl font-bold text-blue-600">LabEdu</span>
+                            <span class="text-2xl font-bold text-blue-600">EduLAB</span>
                         </a>
                     </div>
                     <div class="">

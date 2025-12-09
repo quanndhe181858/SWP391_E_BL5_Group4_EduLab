@@ -3,7 +3,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Login - Learning Platform</title>
+        <title>Login - EduLAB</title>
         <jsp:include page="/layout/import.jsp" />
     </head>
     <body class="bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-700 min-h-screen flex items-center justify-center p-4">
@@ -111,7 +111,7 @@
             </div>
 
             <p class="text-center text-white text-sm mt-6 opacity-90">
-                Bản quyền thuộc về © 2025 LabEdu.
+                Bản quyền thuộc về © 2025 EduLAB.
             </p>
         </div>
 

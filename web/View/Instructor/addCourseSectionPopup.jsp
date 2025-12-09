@@ -26,9 +26,13 @@
                     type="text" 
                     id="sectionTitle" 
                     name="title"
+                    maxlength="200"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Nhập tên bài học..."
                     required>
+                <p class="text-xs text-gray-500 mt-1">
+                    <span id="sectionTitleCount">0</span>/200 ký tự
+                </p>
             </div>
 
             <div>
@@ -329,7 +333,7 @@
         const content = document.getElementById('sectionContent').value.trim();
         const position = document.getElementById('sectionPosition').value;
         const status = document.querySelector('input[name="status"]:checked').value;
-        
+
         console.log(title + description + type + content + position);
 
         if (!title || !description || !type || !content || !position) {
