@@ -18,7 +18,7 @@ import model.Question;
  *
  * @author quan
  */
-@WebServlet(name = "TraineeTakeTestController", urlPatterns = {"/trainee/taketest"})
+@WebServlet(name = "TraineeTakeTestController", urlPatterns = {"/trainee/taketest_old"})
 public class TraineeTakeTestController extends HttpServlet {
 
     @Override

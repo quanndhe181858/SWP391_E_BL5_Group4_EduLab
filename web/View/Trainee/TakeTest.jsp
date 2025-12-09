@@ -1,5 +1,5 @@
 <%@ page contentType="text/html" pageEncoding="UTF-8" %>
-<%@ page import="java.util.*, model.Question, model.Answer" %>
+<%@ page import="java.util.*, model.Question, model.QuizAnswer" %>
 
 <jsp:include page="/layout/header.jsp" />
 <jsp:include page="/layout/import.jsp" />
@@ -44,6 +44,11 @@
         line-height: 42px;
         text-align: center;
         cursor: pointer;
+        user-select: none;
+    }
+    .question-box.answered {
+        background: #007bff;
+        color: white;
     }
     .submit-btn {
         margin-top: 25px;
@@ -54,6 +59,7 @@
         border: none;
         border-radius: 8px;
         font-weight: bold;
+        cursor: pointer;
     }
     .test-content {
         flex: 1;
@@ -68,6 +74,25 @@
     .question-block.active {
         display: block;
     }
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-box {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        width: 300px;
+        text-align: center;
+    }
+    .modal-box button {
+        margin: 10px;
+        padding: 8px 16px;
+    }
 </style>
 
 <%
@@ -77,13 +102,18 @@
 
 <div class="container-test">
 
+
     <div class="test-sidebar">
         <div class="timer" id="timer">00:10:00</div>
 
         <div class="question-grid">
-            <% for (int i = 1; i <= total; i++) { %>
-            <div class="question-box" onclick="showQuestion(<%= i %>)">
-                <%= i %>
+            <%
+                int stt = 1;
+                for (Question q : qs) {
+            %>
+            <div class="question-box" id="box-<%= q.getId() %>"
+                 onclick="showQuestion('<%= q.getId() %>')">
+                <%= stt++ %>
             </div>
             <% } %>
         </div>
@@ -91,64 +121,92 @@
         <button class="submit-btn" onclick="openModal()">Submit</button>
     </div>
 
+
     <div class="test-content">
         <form id="testForm"
               action="${pageContext.request.contextPath}/trainee/submit-test"
               method="POST">
 
-            <input type="hidden" name="testId" value="${testId}">
+            <input type="hidden" name="testId"
+                   value="<%= request.getAttribute("testId") %>">
 
             <%
-                int index = 1;
                 for (Question q : qs) {
             %>
 
-            <div id="q<%= index %>" class="question-block">
-                <h3>Question <%= index %></h3>
+            <div id="q<%= q.getId() %>" class="question-block">
+                <h3>Question</h3>
                 <p><%= q.getContent() %></p>
 
-                <% for (Answer a : q.getAnswers()) { %>
+                <% for (QuizAnswer a : q.getAnswers()) { %>
+                <%
+    boolean isMultiple = "Multiple Choice".equalsIgnoreCase(q.getType());
+    boolean isSingle   = "Single Choice".equalsIgnoreCase(q.getType());
+                %>
+
                 <label>
-                    <input type="radio" name="q<%= index %>" value="<%= a.getId() %>">
+                    <input
+                        type="<%= isMultiple ? "checkbox" : "radio" %>"
+                        name="q<%= q.getId() %><%= isMultiple ? "[]" : "" %>"
+                        value="<%= a.getId() %>"
+                        onclick="markAnswered('<%= q.getId() %>')"
+                        <%= isSingle ? "required" : "" %>
+                        >
                     <%= a.getContent() %>
                 </label><br>
+
                 <% } %>
+
             </div>
 
-            <%
-                index++;
-                }
-            %>
+            <% } %>
 
         </form>
     </div>
 </div>
 
-<!-- SUBMIT MODAL -->
+
 <div class="modal" id="submitModal" style="display:none;">
-    <button onclick="document.getElementById('testForm').submit()">Yes</button>
-    <button onclick="closeModal()">No</button>
+    <div class="modal-box">
+        <p>Are you sure you want to submit?</p>
+        <button onclick="submitTest()">Yes</button>
+        <button onclick="closeModal()">No</button>
+    </div>
 </div>
 
 <script>
-    function showQuestion(i) {
+    let submitted = false;
+
+    function showQuestion(id) {
         document.querySelectorAll(".question-block")
                 .forEach(q => q.classList.remove("active"));
-        document.getElementById("q" + i).classList.add("active");
+        document.getElementById("q" + id).classList.add("active");
+    }
+
+    function markAnswered(id) {
+        document.getElementById("box-" + id)
+                .classList.add("answered");
     }
 
     function openModal() {
-        document.getElementById("submitModal").style.display = "block";
+        document.getElementById("submitModal").style.display = "flex";
     }
+
     function closeModal() {
         document.getElementById("submitModal").style.display = "none";
     }
 
-    /* ===== TIMER H:M:S ===== */
+    function submitTest() {
+        if (!submitted) {
+            submitted = true;
+            document.getElementById("testForm").submit();
+        }
+    }
 
-    let totalSeconds = 10 * 60; 
 
-    setInterval(() => {
+    let totalSeconds = 10 * 60;
+
+    let timer = setInterval(() => {
         let h = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
         let m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
         let s = String(totalSeconds % 60).padStart(2, "0");
@@ -157,11 +215,14 @@
         totalSeconds--;
 
         if (totalSeconds < 0) {
-            document.getElementById("testForm").submit();
+            clearInterval(timer);
+            submitTest();
         }
     }, 1000);
 
-    showQuestion(1);
+    <% if (qs != null && !qs.isEmpty()) { %>
+    showQuestion("<%= qs.get(0).getId() %>");
+    <% } %>
 </script>
 
 <jsp:include page="/layout/footer.jsp" />

@@ -8,18 +8,21 @@ package controller.trainee;
  *
  * @author vomin
  */
-
-
-
-import dao.TestsDAO;
+import dao.QuizAnswerDAO;
+import dao.QuizDAO;
+import dao.QuizTestDAO;
 import dao.testAttemptDao;
-import jakarta.servlet.*;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import model.Answer;
-import model.Question;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import model.Question;
+import model.QuestionResult;
+import model.QuizAnswer;
+import model.User;
 
 @WebServlet("/trainee/submit-test")
 public class SubmitTestController extends HttpServlet {
@@ -41,7 +44,9 @@ public class SubmitTestController extends HttpServlet {
         int testId = Integer.parseInt(req.getParameter("testId"));
 
         testAttemptDao attemptDao = new testAttemptDao();
-        TestsDAO dao = new TestsDAO();
+        QuizDAO quizDAO = new QuizDAO();
+        QuizAnswerDAO answerDAO = new QuizAnswerDAO();
+        QuizTestDAO quizTestDAO = new QuizTestDAO();
 
         int currentAttempt = attemptDao.getCurrentAttempt(userId, testId);
         if (currentAttempt >= MAX_ATTEMPT) {
@@ -49,48 +54,73 @@ public class SubmitTestController extends HttpServlet {
             return;
         }
 
-        List<Question> questions = dao.getQuestionsByTest(testId);
+        List<Integer> quizIds = quizTestDAO.getQuizIdsByTest(testId);
+        List<QuestionResult> results = new ArrayList<>();
 
-        int correct = 0;
-        int total = questions.size();
+        int correctCount = 0;
 
-        for (int i = 0; i < total; i++) {
-            String userAnswer = req.getParameter("q" + (i + 1));
-            int correctAnswerId = findCorrectAnswerId(questions.get(i));
+        for (int quizId : quizIds) {
 
-            if (userAnswer != null
-                    && correctAnswerId != -1
-                    && Integer.parseInt(userAnswer) == correctAnswerId) {
-                correct++;
+            Question q = quizDAO.getQuestionById(quizId);
+            List<QuizAnswer> answers = answerDAO.getQuizAnswersByQuizId(quizId);
+
+            boolean isMultiple = "Multiple Choice".equalsIgnoreCase(q.getType());
+
+            // ✅ User selected
+            List<Integer> selectedIds = new ArrayList<>();
+            if (isMultiple) {
+                String[] arr = req.getParameterValues("q" + quizId);
+                if (arr != null) {
+                    for (String s : arr) {
+                        selectedIds.add(Integer.parseInt(s));
+                    }
+                }
+            } else {
+                String s = req.getParameter("q" + quizId);
+                if (s != null) {
+                    selectedIds.add(Integer.parseInt(s));
+                }
             }
+
+            // ✅ Correct answers
+            List<Integer> correctIds = answers.stream()
+                    .filter(QuizAnswer::isIs_true)
+                    .map(QuizAnswer::getId)
+                    .toList();
+
+            QuestionResult qr = new QuestionResult();
+            qr.setQuestionId(quizId);
+            qr.setContent(q.getContent());
+            qr.setType(q.getType());
+            qr.setAnswers(answers);
+            qr.setSelectedAnswerIds(selectedIds);
+            qr.setCorrectAnswerIds(correctIds);
+
+            if (qr.isCorrect()) {
+                correctCount++;
+            }
+
+            results.add(qr);
         }
 
-        double score = total == 0 ? 0 : (correct * 10.0) / total;
-        int newAttempt = currentAttempt + 1;
+        int total = quizIds.size();
+        double score = total == 0 ? 0 : (correctCount * 10.0 / total);
 
         attemptDao.saveAttempt(
                 userId,
                 testId,
-                newAttempt,
+                currentAttempt + 1,
                 score,
                 score >= 4 ? "pass" : "fail"
         );
 
         req.setAttribute("score", score);
+        req.setAttribute("passed", score >= 4);
+        req.setAttribute("results", results);
+        req.setAttribute("allowRetake", currentAttempt + 1 < MAX_ATTEMPT);
         req.setAttribute("testId", testId);
-        req.setAttribute("allowRetake", newAttempt < MAX_ATTEMPT);
-        req.setAttribute("showBack", score >= 4);
 
         req.getRequestDispatcher("/View/Trainee/TestResult.jsp")
                 .forward(req, resp);
-    }
-
-    private int findCorrectAnswerId(Question q) {
-        for (Answer a : q.getAnswers()) {
-            if (a.isCorrect()) {
-                return a.getId();
-            }
-        }
-        return -1;
     }
 }
