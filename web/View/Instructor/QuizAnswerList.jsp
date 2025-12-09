@@ -273,7 +273,7 @@
                                                                     { %>
                                                             <span
                                                                 class="px-2 py-1 text-xs font-semibold text-purple-600 bg-purple-100 rounded">
-                                                                <%= answer.getType() %>
+                                                                <%= answer.getType() %> (theo quiz)
                                                             </span>
                                                             <% } %>
                                                         </div>
@@ -335,7 +335,6 @@
                                                             data-id="<%= answer.getId() %>"
                                                             data-quiz-id="<%= answer.getQuiz_id() %>"
                                                             data-is-true="<%= answer.isIs_true() %>"
-                                                            data-type="<%= answer.getType() != null ? answer.getType() : "" %>"
                                                             data-content="<%= safeContent %>">
                                                         <svg class="w-4 h-4 mr-1"
                                                              fill="none"
@@ -532,6 +531,45 @@
                 document.body.style.overflow = 'auto';
             }
 
+            // Check for addQuizId parameter and auto-open modal with pre-selected quiz
+            document.addEventListener('DOMContentLoaded', function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const addQuizId = urlParams.get('addQuizId');
+                
+                if (addQuizId) {
+                    // Pre-select the quiz in the add modal
+                    const addQuizSelect = document.getElementById('addQuizId');
+                    if (addQuizSelect) {
+                        addQuizSelect.value = addQuizId;
+                        // Trigger change event to update the type display
+                        if (typeof window.updateAddQuizType === 'function') {
+                            setTimeout(window.updateAddQuizType, 100);
+                        }
+                    }
+                    
+                    // Show a temporary notification
+                    const notification = document.createElement('div');
+                    notification.className = 'toast success';
+                    notification.innerHTML = 'Câu hỏi đã được chọn sẵn. Modal thêm câu trả lời sẽ mở tự động.';
+                    document.body.appendChild(notification);
+                    notification.classList.add('show');
+                    
+                    setTimeout(function() {
+                        notification.classList.remove('show');
+                        setTimeout(() => notification.remove(), 500);
+                    }, 2500);
+                    
+                    // Open the add modal automatically
+                    setTimeout(function() {
+                        openAddModal();
+                        // Clean URL by removing the addQuizId parameter
+                        const newUrl = new URL(window.location);
+                        newUrl.searchParams.delete('addQuizId');
+                        window.history.replaceState({}, '', newUrl);
+                    }, 500);
+                }
+            });
+
             // Edit Modal
             document.querySelectorAll('.edit-answer-btn').forEach(function (btn) {
                 btn.addEventListener('click', function (e) {
@@ -541,14 +579,18 @@
                     var id = this.getAttribute('data-id');
                     var quizId = this.getAttribute('data-quiz-id');
                     var isTrue = this.getAttribute('data-is-true');
-                    var type = this.getAttribute('data-type');
                     var content = this.getAttribute('data-content');
 
                     document.getElementById('editAnswerId').value = id;
                     document.getElementById('editQuizId').value = quizId;
                     document.getElementById('editIsTrue').value = isTrue;
-                    document.getElementById('editType').value = type;
                     document.getElementById('editContent').value = content;
+
+                    // Update the edit type display field with the quiz type
+                    if(typeof window.updateEditQuizType === 'function') {
+                        setTimeout(window.updateEditQuizType, 0);
+                    }
+
                     document.getElementById('editModal').classList.remove('hidden');
                     document.body.style.overflow = 'hidden';
                 });
@@ -652,13 +694,41 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="addType"
-                                       class="block text-sm font-semibold text-gray-700 mb-2">Loại</label>
-                                <input type="text" id="addType" name="type"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="vd: văn bản, hình ảnh...">
+                                <label for="addTypeDisplay"
+                                       class="block text-sm font-semibold text-gray-700 mb-2">Loại (theo câu hỏi)</label>
+                                <input type="text" id="addTypeDisplay" name="typeDisplay" readonly
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
+                                       placeholder="Chọn câu hỏi để hiển thị loại...">
                             </div>
                         </div>
+                        <script>
+                            // Show type of selected quiz (in Add Modal)
+                            document.addEventListener('DOMContentLoaded', function () {
+                                var quizzes = [];
+                                <% if (quizzes != null) { for (Quiz quiz : quizzes) { %>
+                                    quizzes.push({id: "<%= quiz.getId() %>", type: "<%= quiz.getType() != null ? quiz.getType().replace("\"", "&quot;") : "" %>"});
+                                <% } } %>
+                                
+                                function updateAddQuizType() {
+                                    var select = document.getElementById('addQuizId');
+                                    var typeInput = document.getElementById('addTypeDisplay');
+                                    if (select && typeInput) {
+                                        var selectedId = select.value;
+                                        var q = quizzes.find(function(qz){ return qz.id === selectedId; });
+                                        typeInput.value = q ? q.type : '';
+                                    }
+                                }
+                                
+                                // Make function globally available
+                                window.updateAddQuizType = updateAddQuizType;
+                                
+                                var selectQuiz = document.getElementById('addQuizId');
+                                if(selectQuiz) {
+                                    selectQuiz.addEventListener('change', updateAddQuizType);
+                                    updateAddQuizType();
+                                }
+                            });
+                        </script>
                     </div>
 
                     <div
@@ -742,13 +812,35 @@
                                 </select>
                             </div>
                             <div>
-                                <label for="editType"
-                                       class="block text-sm font-semibold text-gray-700 mb-2">Loại</label>
-                                <input type="text" id="editType" name="type"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                       placeholder="vd: văn bản, hình ảnh...">
+                                <label for="editTypeDisplay"
+                                       class="block text-sm font-semibold text-gray-700 mb-2">Loại (theo câu hỏi)</label>
+                                <input type="text" id="editTypeDisplay" name="typeDisplay" readonly
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700"
+                                       placeholder="Chọn câu hỏi để hiển thị loại...">
                             </div>
                         </div>
+                        <script>
+                            // Show type of selected quiz (in Edit Modal)
+                            document.addEventListener('DOMContentLoaded', function () {
+                                var quizzes = [];
+                                <% if (quizzes != null) { for (Quiz quiz : quizzes) { %>
+                                    quizzes.push({id: "<%= quiz.getId() %>", type: "<%= quiz.getType() != null ? quiz.getType().replace("\"", "&quot;") : "" %>"});
+                                <% } } %>
+                                function updateEditQuizType() {
+                                    var select = document.getElementById('editQuizId');
+                                    var typeInput = document.getElementById('editTypeDisplay');
+                                    var selectedId = select.value;
+                                    var q = quizzes.find(function(qz){ return qz.id === selectedId; });
+                                    typeInput.value = q ? q.type : '';
+                                }
+                                var selectQuiz = document.getElementById('editQuizId');
+                                if(selectQuiz) {
+                                    selectQuiz.addEventListener('change', updateEditQuizType);
+                                }
+                                // Also update when opening edit modal
+                                window.updateEditQuizType = updateEditQuizType;
+                            });
+                        </script>
                     </div>
 
                     <div

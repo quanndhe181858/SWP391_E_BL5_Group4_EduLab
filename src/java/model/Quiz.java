@@ -7,6 +7,8 @@ package model;
 import java.sql.Timestamp;
 import java.util.List;
 
+import model.Category;
+
 /**
  *
  * @author Le Minh Duc
@@ -23,6 +25,7 @@ public class Quiz {
     private int updated_by;
 
     private List<QuizAnswer> answers;
+    private Category category;
 
     public Quiz() {
     }
@@ -110,6 +113,15 @@ public class Quiz {
 
     public void setAnswers(List<QuizAnswer> answers) {
         this.answers = answers;
+    }
+
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     @Override
