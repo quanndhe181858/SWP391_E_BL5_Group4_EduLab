@@ -35,7 +35,7 @@ public class InstructorTestController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int instructorId = 1;
+        int instructorId = 2;
 
         // Load course list
         var courses = courseDAO.getCoursesByInstructorId(
@@ -88,7 +88,7 @@ public class InstructorTestController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int instructorId = 1;
+        int instructorId = 2;
 
         String action = request.getParameter("action");
         String mode = request.getParameter("mode");
