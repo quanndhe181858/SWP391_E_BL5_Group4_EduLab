@@ -132,12 +132,6 @@
                                                         : '' }>Đúng/Sai</option>
                                                     <option value="Short Answer" ${param.type=='Short Answer'
                                                         ? 'selected' : '' }>Câu trả lời ngắn</option>
-                                                    <option value="Essay" ${param.type=='Essay' ? 'selected' : '' }>
-                                                        Tự luận</option>
-                                                    <option value="Fill in the Blank" ${param.type=='Fill in the Blank'
-                                                        ? 'selected' : '' }>Điền vào chỗ trống</option>
-                                                    <option value="Matching" ${param.type=='Matching' ? 'selected' : ''
-                                                        }>Nối từ</option>
                                                 </select>
                                             </div>
 
