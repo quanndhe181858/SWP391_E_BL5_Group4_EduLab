@@ -81,6 +81,41 @@ public class TestsDAO extends dao {
         return t;
     }
 
+    public List<Test> getTestsByCourseId(int courseId) {
+        List<Test> list = new ArrayList<>();
+        String sql = "SELECT * FROM Tests WHERE course_id = ?";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, courseId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Test t = new Test();
+                t.setId(rs.getInt("id"));
+                t.setCode(rs.getString("code"));
+                t.setTitle(rs.getString("title"));
+                t.setDescription(rs.getString("description"));
+                t.setTimeInterval(rs.getInt("time_interval"));
+                t.setMinGrade(rs.getInt("min_grade"));
+                t.setCourseId(rs.getInt("course_id"));
+                t.setCourseSectionId(rs.getInt("course_section_id"));
+                t.setCreatedBy(rs.getInt("created_by"));
+                t.setUpdatedBy(rs.getInt("updated_by"));
+                t.setCreatedAt(rs.getTimestamp("created_at"));
+                t.setUpdatedAt(rs.getTimestamp("updated_at"));
+
+                list.add(t);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
     public int createTest(Test t) {
         String sql = """
         INSERT INTO test 
@@ -149,36 +184,35 @@ public class TestsDAO extends dao {
     }
 
     public List<Question> getQuestionsByTest(int testId) {
-    List<Question> list = new ArrayList<>();
+        List<Question> list = new ArrayList<>();
 
-    String sql = """
+        String sql = """
         SELECT q.id, q.question, q.type
         FROM quiz q
         JOIN quiz_test qt ON q.id = qt.quiz_id
         WHERE qt.test_id = ?
     """;
 
-    try (Connection conn = dbc.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = dbc.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-        ps.setInt(1, testId);
-        ResultSet rs = ps.executeQuery();
+            ps.setInt(1, testId);
+            ResultSet rs = ps.executeQuery();
 
-        while (rs.next()) {
-            Question q = new Question();
-            q.setId(rs.getInt("id"));
-            q.setContent(rs.getString("question"));
-            q.setType(rs.getString("type")); // ★★★★★ BẮT BUỘC
+            while (rs.next()) {
+                Question q = new Question();
+                q.setId(rs.getInt("id"));
+                q.setContent(rs.getString("question"));
+                q.setType(rs.getString("type")); // ★★★★★ BẮT BUỘC
 
-            q.setAnswers(getAnswersByQuiz(q.getId(), conn));
-            list.add(q);
+                q.setAnswers(getAnswersByQuiz(q.getId(), conn));
+                list.add(q);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-    } catch (Exception e) {
-        e.printStackTrace();
+        return list;
     }
-    return list;
-}
-
 
     private List<QuizAnswer> getAnswersByQuiz(int quizId, Connection conn) throws Exception {
         List<QuizAnswer> list = new ArrayList<>();
@@ -200,6 +234,40 @@ public class TestsDAO extends dao {
             }
         }
         return list;
+    }
+
+    public Test getTestBySectionId(int sectionId) {
+        String sql = "SELECT * FROM test WHERE course_section_id = ?";
+
+        Test t = null;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, sectionId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                t = new Test();
+                t.setId(rs.getInt("id"));
+                t.setCode(rs.getString("code"));
+                t.setTitle(rs.getString("title"));
+                t.setDescription(rs.getString("description"));
+                t.setTimeInterval(rs.getInt("time_interval"));
+                t.setMinGrade(rs.getInt("min_grade"));
+                t.setCourseId(rs.getInt("course_id"));
+                t.setCourseSectionId(rs.getInt("course_section_id"));
+                t.setCreatedBy(rs.getInt("created_by"));
+                t.setUpdatedBy(rs.getInt("updated_by"));
+                t.setCreatedAt(rs.getTimestamp("created_at"));
+                t.setUpdatedAt(rs.getTimestamp("updated_at"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return t;
     }
 
 }
