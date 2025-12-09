@@ -4,25 +4,55 @@
  */
 package model;
 import java.util.List;
+import model.QuizAnswer; 
 /**
  *
  * @author vomin
  */
 public class Question {
     private int id;
-    private int testId;
+    private int testId;         
     private String content;
-    private List<Answer> answers;
+    private String type;
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public String getType() {
+        return type;
+    }
 
-    public int getTestId() { return testId; }
-    public void setTestId(int testId) { this.testId = testId; }
+    public void setType(String type) {
+        this.type = type;
+    }
+    private List<QuizAnswer> answers;
 
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
+    public int getId() {
+        return id;
+    }
 
-    public List<Answer> getAnswers() { return answers; }
-    public void setAnswers(List<Answer> answers) { this.answers = answers; }
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getTestId() {
+        return testId;
+    }
+
+    public void setTestId(int testId) {
+        this.testId = testId;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public List<QuizAnswer> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<QuizAnswer> answers) {
+        this.answers = answers;
+    }
 }

@@ -15,6 +15,7 @@ import java.util.List;
 import model.Answer;
 import model.Question;
 import model.Test;
+import model.QuizAnswer;
 
 public class TestsDAO extends dao {
 
@@ -147,41 +148,40 @@ public class TestsDAO extends dao {
         return false;
     }
 
-    /**
-     * Lấy danh sách câu hỏi theo test_id
-     */
     public List<Question> getQuestionsByTest(int testId) {
-        List<Question> list = new ArrayList<>();
+    List<Question> list = new ArrayList<>();
 
-        String sql = """
-            SELECT q.id, q.question
-            FROM quiz q
-            JOIN quiz_test qt ON q.id = qt.quiz_id
-            WHERE qt.test_id = ?
-        """;
+    String sql = """
+        SELECT q.id, q.question, q.type
+        FROM quiz q
+        JOIN quiz_test qt ON q.id = qt.quiz_id
+        WHERE qt.test_id = ?
+    """;
 
-        try (Connection conn = dbc.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+    try (Connection conn = dbc.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, testId);
-            ResultSet rs = ps.executeQuery();
+        ps.setInt(1, testId);
+        ResultSet rs = ps.executeQuery();
 
-            while (rs.next()) {
-                Question q = new Question();
-                q.setId(rs.getInt("id"));
-                q.setContent(rs.getString("question"));
+        while (rs.next()) {
+            Question q = new Question();
+            q.setId(rs.getInt("id"));
+            q.setContent(rs.getString("question"));
+            q.setType(rs.getString("type")); // ★★★★★ BẮT BUỘC
 
-                q.setAnswers(getAnswersByQuiz(q.getId(), conn));
-                list.add(q);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            q.setAnswers(getAnswersByQuiz(q.getId(), conn));
+            list.add(q);
         }
-        return list;
-    }
 
-    private List<Answer> getAnswersByQuiz(int quizId, Connection conn) throws Exception {
-        List<Answer> list = new ArrayList<>();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return list;
+}
+
+
+    private List<QuizAnswer> getAnswersByQuiz(int quizId, Connection conn) throws Exception {
+        List<QuizAnswer> list = new ArrayList<>();
 
         String sql = "SELECT * FROM quiz_answer WHERE quiz_id = ?";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -190,15 +190,16 @@ public class TestsDAO extends dao {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                Answer a = new Answer();
+                QuizAnswer a = new QuizAnswer();
                 a.setId(rs.getInt("id"));
-                a.setQuestionId(rs.getInt("quiz_id"));
+                a.setQuiz_id(rs.getInt("quiz_id"));
                 a.setContent(rs.getString("content"));
-                a.setCorrect(rs.getBoolean("is_true"));
+                a.setIs_true(rs.getBoolean("is_true"));
 
                 list.add(a);
             }
         }
         return list;
     }
+
 }

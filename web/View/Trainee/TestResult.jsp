@@ -6,10 +6,11 @@
     Double rawScore = (Double) request.getAttribute("score");
     double score = (rawScore == null || Double.isNaN(rawScore)) ? 0.0 : rawScore;
 
-    boolean allowRetake = Boolean.TRUE.equals(request.getAttribute("allowRetake"));
-    int testId = Integer.parseInt(request.getAttribute("testId").toString());
+    Boolean allowRetakeObj = (Boolean) request.getAttribute("allowRetake");
+    boolean allowRetake = allowRetakeObj != null && allowRetakeObj;
 
-    boolean passed = score >= 4;  
+    int testId = Integer.parseInt(request.getAttribute("testId").toString());
+    boolean passed = Boolean.TRUE.equals(request.getAttribute("passed"));
 %>
 
 <style>
@@ -59,6 +60,9 @@
     .btn-back {
         background: #6c757d;
         color: white;
+        display: block;
+        text-decoration: none;
+        line-height: 45px;
     }
 </style>
 
@@ -76,36 +80,25 @@
 
         <p>
             <%= passed
-                ? "You can continue or retake the test."
-                : "You may retake the test once more." %>
+                ? "Congratulations! You have passed the test."
+                : "You can retake the test if attempts remain." %>
         </p>
 
-        <!-- BUTTON LOGIC -->
-        <% if (allowRetake) { %>
-        <form action="<%= request.getContextPath() %>/trainee/taketest" method="get">
+
+        <% if (!passed && allowRetake) { %>
+        <form action="<%= request.getContextPath() %>/trainee/taketests" method="get">
             <input type="hidden" name="testId" value="<%= testId %>">
             <button class="main-btn btn-retake">Retake Test</button>
         </form>
         <% } %>
 
-        <% if (passed) { %>
-
-        <!-- VIEW CERTIFICATE -->
-        <a href="<%= request.getContextPath() %>/trainee/view-certificate?courseId=<%= testId %>"
-           class="main-btn btn-back">
-            View Certificate
-        </a>
-
-        <!-- BACK -->
+        
         <a href="<%= request.getContextPath() %>/trainee/lesson-detail?testId=<%= testId %>"
            class="main-btn btn-back">
             Back to Lesson
         </a>
 
-        <% } %>
-
-
     </div>
 </div>
 
-<jsp:include page="/layout/footer.jsp" />   
+<jsp:include page="/layout/footer.jsp" />
