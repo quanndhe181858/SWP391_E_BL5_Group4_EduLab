@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import model.Question;
 
 /**
  * Data Access Object for Quiz table operations
@@ -412,6 +413,30 @@ public class QuizDAO extends dao {
         }
 
         return list;
+    }
+
+    // ====== FOR TRAINEE - TAKE TEST ======
+    public Question getQuestionById(int quizId) {
+        String sql = "SELECT id, question FROM quiz WHERE id = ?";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, quizId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Question q = new Question();
+                q.setId(rs.getInt("id"));
+                q.setContent(rs.getString("question"));
+                return q;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return null;
     }
 
 }

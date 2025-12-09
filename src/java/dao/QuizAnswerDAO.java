@@ -14,10 +14,11 @@ import java.util.logging.Logger;
 
 /**
  * Data Access Object for QuizAnswer table operations
- * 
+ *
  * @author Le Minh Duc
  */
 public class QuizAnswerDAO extends dao {
+
     private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     private void log(Level level, String msg, Throwable e) {
@@ -37,9 +38,9 @@ public class QuizAnswerDAO extends dao {
 
     /**
      * Creates a new quiz answer in the database
-     * 
+     *
      * @param answer QuizAnswer object to create
-     * @param uid    User ID of the creator
+     * @param uid User ID of the creator
      * @return QuizAnswer object with generated ID, or null if creation fails
      */
     public QuizAnswer createQuizAnswer(QuizAnswer answer, int uid) {
@@ -86,9 +87,9 @@ public class QuizAnswerDAO extends dao {
 
     /**
      * Updates an existing quiz answer in the database
-     * 
+     *
      * @param answer QuizAnswer object with updated information
-     * @param uid    User ID of the updater
+     * @param uid User ID of the updater
      * @return QuizAnswer object if update was successful, null otherwise
      */
     public QuizAnswer updateQuizAnswer(QuizAnswer answer, int uid) {
@@ -133,7 +134,7 @@ public class QuizAnswerDAO extends dao {
 
     /**
      * Deletes a quiz answer from the database
-     * 
+     *
      * @param id ID of the quiz answer to delete
      * @return true if deletion was successful, false otherwise
      */
@@ -163,7 +164,7 @@ public class QuizAnswerDAO extends dao {
 
     /**
      * Retrieves a quiz answer by its ID
-     * 
+     *
      * @param id ID of the quiz answer to retrieve
      * @return QuizAnswer object if found, null otherwise
      */
@@ -218,7 +219,7 @@ public class QuizAnswerDAO extends dao {
 
     /**
      * Retrieves all quiz answers from the database
-     * 
+     *
      * @return List of all QuizAnswer objects
      */
     public List<QuizAnswer> getAllQuizAnswers() {
@@ -268,7 +269,7 @@ public class QuizAnswerDAO extends dao {
 
     /**
      * Retrieves quiz answers by quiz ID
-     * 
+     *
      * @param quizId Quiz ID to filter by
      * @return List of QuizAnswer objects for the specified quiz
      */
@@ -320,9 +321,26 @@ public class QuizAnswerDAO extends dao {
         return answers;
     }
 
+    public boolean isCorrect(int answerId) {
+        String sql = "SELECT is_true FROM quiz_answer WHERE id = ?";
+        // dùng dbc.getConnection() cho nhất quán với các method khác trong class
+        try (Connection c = dbc.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, answerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean("is_true");
+                }
+            }
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error in isCorrect()", e);
+        }
+        return false;
+    }
+
     /**
      * Retrieves quiz answers by type
-     * 
+     *
      * @param type Answer type to filter by
      * @return List of QuizAnswer objects of the specified type
      */
