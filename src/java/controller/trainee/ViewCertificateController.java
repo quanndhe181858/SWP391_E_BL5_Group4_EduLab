@@ -1,0 +1,50 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package controller.trainee;
+
+/**
+ *
+ * @author vomin
+ */
+import dao.certificateDAO;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+import java.io.IOException;
+import model.Certificate;
+import model.User;
+
+@WebServlet("/trainee/view-certificate")
+public class ViewCertificateController extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("account"); 
+        // ✅ project bạn đang dùng "account"
+
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            return;
+        }
+
+        int courseId = Integer.parseInt(request.getParameter("courseId"));
+
+        certificateDAO dao = new certificateDAO();
+        Certificate cert = dao.getCertificate(user.getId(), courseId);
+
+        if (cert == null) {
+            request.setAttribute("error", "You have not earned this certificate yet.");
+            request.getRequestDispatcher("/View/Error/error.jsp").forward(request, response);
+            return;
+        }
+
+        request.setAttribute("cert", cert);
+        request.getRequestDispatcher("/View/Trainee/Certificate.jsp")
+                .forward(request, response);
+    }
+}

@@ -4,7 +4,7 @@ import dao.CourseDAO;
 import dao.CourseSectionDAO;
 import dao.QuizDAO;
 import dao.QuizTestDAO;
-import dao.TestDAO;
+import dao.TestsDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,7 +19,7 @@ import model.Test;
 @WebServlet(name = "InstructorTestController", urlPatterns = {"/instructor/test"})
 public class InstructorTestController extends HttpServlet {
 
-    private final TestDAO testDAO = new TestDAO();
+    private final TestsDAO testDAO = new TestsDAO();
     private final QuizDAO quizDAO = new QuizDAO();
     private final QuizTestDAO quizTestDAO = new QuizTestDAO();
     private final CourseDAO courseDAO = new CourseDAO();
