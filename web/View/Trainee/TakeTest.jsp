@@ -1,3 +1,4 @@
+<%@page import="model.QuizAnswer"%>
 <%@ page import="java.util.*, model.Question, model.Answer" %>
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -65,7 +66,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="flex-1 bg-white rounded-xl shadow-xl border border-gray-200 p-8 min-h-screen">
                 <form id="testForm"
                       action="${pageContext.request.contextPath}/trainee/submit-test"
@@ -96,7 +96,7 @@
                         <div class="space-y-3">
                             <%
                                 char letter = 'A';
-                                for (Answer a : q.getAnswers()) {
+                                for (QuizAnswer a : q.getAnswers()) {
                             %>
                             <label class="flex items-start p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all group">
                                 <input type="radio" name="q<%= index%>" value="<%= a.getId()%>" 
@@ -149,7 +149,6 @@
                 </form>
             </div>
         </div>
-
         <div id="submitModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
             <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all">
                 <div class="text-center mb-6">
@@ -174,7 +173,6 @@
                 </div>
             </div>
         </div>
-
         <jsp:include page="/layout/footer.jsp" />
 
         <script>
@@ -183,11 +181,9 @@
                         .forEach(q => q.classList.remove("block"));
                 document.querySelectorAll(".question-block")
                         .forEach(q => q.classList.add("hidden"));
-
                 const targetQuestion = document.getElementById("q" + i);
                 targetQuestion.classList.remove("hidden");
                 targetQuestion.classList.add("block");
-
                 window.scrollTo({top: 0, behavior: 'smooth'});
             }
 
@@ -200,26 +196,21 @@
             }
 
             let totalSeconds = 10 * 60;
-
             setInterval(() => {
                 let h = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
                 let m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
                 let s = String(totalSeconds % 60).padStart(2, "0");
-
                 document.getElementById("timer").innerText = h + ":" + m + ":" + s;
-
                 const timerEl = document.getElementById("timer");
                 if (totalSeconds < 60) {
                     timerEl.parentElement.parentElement.classList.add("animate-pulse");
                 }
 
                 totalSeconds--;
-
                 if (totalSeconds < 0) {
                     document.getElementById("testForm").submit();
                 }
             }, 1000);
-
             showQuestion(1);
         </script>
     </body>
