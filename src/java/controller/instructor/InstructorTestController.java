@@ -127,6 +127,11 @@ public class InstructorTestController extends HttpServlet {
             t.setCourseSectionId(sectionId);
             t.setCreatedBy(instructorId);
             t.setUpdatedBy(instructorId);
+            if (testDAO.isCodeOrTitleExisted(code, title, null)) {
+                request.setAttribute("error", "Code hoặc tiêu đề đã tồn tại.");
+                doGet(request, response);
+                return;
+            }
 
             int id = testDAO.createTest(t);
             if (id <= 0) {
@@ -152,6 +157,11 @@ public class InstructorTestController extends HttpServlet {
             t.setCourseId(courseId);
             t.setCourseSectionId(sectionId);
             t.setUpdatedBy(instructorId);
+            if (testDAO.isCodeOrTitleExisted(code, title, id)) {
+                request.setAttribute("error", "Code hoặc tiêu đề đã tồn tại.");
+                doGet(request, response);
+                return;
+            }
 
             testDAO.updateTest(t);
 
@@ -176,15 +186,22 @@ public class InstructorTestController extends HttpServlet {
 
         if ("random".equals(mode)) {
             Integer count = getInt(request, "randomCount");
-            if (count == null || count <= 0) return;
+            if (count == null || count <= 0) {
+                return;
+            }
 
             List<Quiz> all = quizDAO.getAllQuizzes();
-            Collections.shuffle(all);
+            if (count > all.size()) {
+                request.setAttribute("error", "Không đủ số lượng quiz trong ngân hàng.");
+                return;
+            }
 
-            for (int i = 0; i < Math.min(count, all.size()); i++) {
+            Collections.shuffle(all);
+            for (int i = 0; i < count; i++) {
                 quizTestDAO.addQuizToTest(testId, all.get(i).getId());
             }
         }
+
     }
 
 }
