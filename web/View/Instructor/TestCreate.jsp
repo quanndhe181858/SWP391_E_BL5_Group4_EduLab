@@ -35,11 +35,70 @@
             align-items: center;
         }
 
+<<<<<<< Updated upstream
         .row label {
             width: 160px;
             font-weight: bold;
             color: #444;
         }
+=======
+        <div class="container mx-auto px-4 py-8 max-w-5xl">
+
+            <!-- LIST TEST -->
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden mb-8">
+                <div class="bg-gradient-to-r from-indigo-600 to-purple-700 px-8 py-6">
+                    <h2 class="text-2xl font-bold text-white flex items-center">
+                        <svg class="w-7 h-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Danh sách Test
+                    </h2>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200">
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Code</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Title</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <c:forEach items="${testList}" var="t">
+                                <tr class="hover:bg-blue-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${t.id}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">${t.code}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-700">${t.title}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <a href="${pageContext.request.contextPath}/instructor/test?action=edit&id=${t.id}"
+                                           class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 font-semibold rounded-lg hover:bg-blue-200 transition-colors">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                            Sửa
+                                        </a>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MESSAGES AT TOP -->
+            <c:if test="${not empty error}">
+                <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded-lg shadow-sm animate-fade-in">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                        <span class="font-semibold">${error}</span>
+                    </div>
+                </div>
+            </c:if>
+>>>>>>> Stashed changes
 
         .row select, .row input, .row textarea {
             flex: 1;
@@ -61,6 +120,7 @@
             font-weight: bold;
         }
 
+<<<<<<< Updated upstream
         .quiz-list {
             background: #fafafa;
             border: 1px solid #ddd;
@@ -74,6 +134,14 @@
         .random-box {
             display: none;
         }
+=======
+                    <!-- FORM POST TẠO/UPDATE -->
+                    <form method="POST" action="${pageContext.request.contextPath}/instructor/test" class="space-y-6">
+                        <input type="hidden" name="courseId" value="${selectedCourse}">
+                        <c:if test="${not empty editTest}">
+                            <input type="hidden" name="id" value="${editTest.id}">
+                        </c:if>
+>>>>>>> Stashed changes
 
         button {
             padding: 12px 25px;
@@ -87,6 +155,7 @@
         }
         button:hover { background: #005fcc; }
 
+<<<<<<< Updated upstream
         .test-table {
             width: 100%;
             margin-top: 20px;
@@ -113,6 +182,62 @@
             document.getElementById("manualQuizBox").style.display = (mode === "custom") ? "block" : "none";
             document.getElementById("randomBox").style.display = (mode === "random") ? "block" : "none";
         }
+=======
+                        <!-- Section -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <label class="font-semibold text-gray-700">Section</label>
+                            <div class="md:col-span-2">
+                                <select name="sectionId" required 
+                                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                                    <option value="">-- Chọn Section --</option>
+                                    <c:forEach items="${sections}" var="s">
+                                        <option value="${s.id}" <c:if test="${not empty editTest && editTest.courseSectionId == s.id}">selected</c:if>>
+                                            ${s.title}
+                                        </option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Test Code -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <label class="font-semibold text-gray-700">Test Code</label>
+                            <div class="md:col-span-2">
+                                <input type="text" name="code" required value="${editTest.code}"
+                                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                       placeholder="VD: TEST001">
+                            </div>
+                        </div>
+
+                        <!-- Title -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                            <label class="font-semibold text-gray-700">Tiêu đề</label>
+                            <div class="md:col-span-2">
+                                <input type="text" name="title" required value="${editTest.title}"
+                                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                       placeholder="Nhập tiêu đề bài test">
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                            <label class="font-semibold text-gray-700 pt-3">Mô tả</label>
+                            <div class="md:col-span-2">
+                                <textarea name="description" required rows="4"
+                                          class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                                          placeholder="Mô tả chi tiết về bài test...">${editTest.description}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Duration & MinGrade -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="flex items-center gap-4">
+                                <label class="font-semibold text-gray-700 whitespace-nowrap">Thời gian (phút)</label>
+                                <input type="number" name="duration" required value="${editTest.timeInterval}"
+                                       class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                       placeholder="60">
+                            </div>
+>>>>>>> Stashed changes
 
         window.onload = toggleMode;
     </script>
@@ -136,6 +261,7 @@
         <select name="courseId" onchange="this.form.submit()" required>
             <option value="">-- Chọn khóa học --</option>
 
+<<<<<<< Updated upstream
             <c:forEach items="${courses}" var="c">
                 <option value="${c.id}"
                         <c:if test="${selectedCourse == c.id}">selected</c:if>>
@@ -278,4 +404,23 @@
 </c:if>
 
 </body>
+=======
+                        <!-- SUBMIT BUTTON -->
+                        <div class="mt-6">
+                            <button type="submit" class="w-full md:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-colors">
+                                <c:choose>
+                                    <c:when test="${not empty editTest}">Cập nhật Test</c:when>
+                                    <c:otherwise>Tạo Test</c:otherwise>
+                                </c:choose>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <jsp:include page="/layout/footer.jsp" />
+        <jsp:include page="/layout/importBottom.jsp" />
+    </body>
+>>>>>>> Stashed changes
 </html>
