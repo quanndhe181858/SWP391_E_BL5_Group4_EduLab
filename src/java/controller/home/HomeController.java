@@ -34,7 +34,7 @@ public class HomeController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        List<Course> cList = _courseService.getAllCourses(8, 0, "", "", 0, "Active", "created_at");
+        List<Course> cList = _courseService.getAllCourses(8, 0, "", "", 0, "Active", "created_at desc");
 
         request.setAttribute("cList", cList);
         request.getRequestDispatcher("View/Home/Homepage.jsp").forward(request, response);

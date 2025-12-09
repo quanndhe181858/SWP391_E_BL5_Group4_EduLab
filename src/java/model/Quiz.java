@@ -5,32 +5,31 @@
 package model;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  *
  * @author Le Minh Duc
  */
 public class Quiz {
+
     private int id;
-
     private String question;
-
     private String type;
-
     private int category_id;
-
     private Timestamp created_at;
-
     private Timestamp updated_at;
-
     private int created_by;
-
     private int updated_by;
+
+    private List<QuizAnswer> answers;
 
     public Quiz() {
     }
 
-    public Quiz(int id, String question, String type, int category_id, Timestamp created_at, Timestamp updated_at, int created_by, int updated_by) {
+    public Quiz(int id, String question, String type, int category_id,
+                Timestamp created_at, Timestamp updated_at,
+                int created_by, int updated_by) {
         this.id = id;
         this.question = question;
         this.type = type;
@@ -105,10 +104,25 @@ public class Quiz {
         this.updated_by = updated_by;
     }
 
+    public List<QuizAnswer> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<QuizAnswer> answers) {
+        this.answers = answers;
+    }
+
     @Override
     public String toString() {
-        return "Quiz{" + "id=" + id + ", question=" + question + ", type=" + type + ", category_id=" + category_id + ", created_at=" + created_at + ", updated_at=" + updated_at + ", created_by=" + created_by + ", updated_by=" + updated_by + '}';
+        return "Quiz{" +
+                "id=" + id +
+                ", question=" + question +
+                ", type=" + type +
+                ", category_id=" + category_id +
+                ", created_at=" + created_at +
+                ", updated_at=" + updated_at +
+                ", created_by=" + created_by +
+                ", updated_by=" + updated_by +
+                '}';
     }
-    
-
 }
