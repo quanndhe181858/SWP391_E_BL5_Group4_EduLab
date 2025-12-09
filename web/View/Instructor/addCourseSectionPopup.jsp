@@ -43,9 +43,13 @@
                     id="sectionDescription" 
                     name="description"
                     rows="3"
+                    maxlength="500"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                     placeholder="Mô tả ngắn gọn về bài học..."
                     required></textarea>
+                <p class="text-xs text-gray-500 mt-1">
+                    <span id="sectionDescCount">0</span>/500 ký tự
+                </p>
             </div>
 
             <div>
@@ -229,6 +233,20 @@
     function addSection() {
         document.getElementById('addSectionModal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
+
+        const titleInput = document.getElementById('sectionTitle');
+        const descInput = document.getElementById('sectionDescription');
+
+        document.getElementById('sectionTitleCount').textContent = titleInput.value.length;
+        document.getElementById('sectionDescCount').textContent = descInput.value.length;
+
+        titleInput.addEventListener('input', function () {
+            document.getElementById('sectionTitleCount').textContent = this.value.length;
+        });
+
+        descInput.addEventListener('input', function () {
+            document.getElementById('sectionDescCount').textContent = this.value.length;
+        });
     }
 
     function closeAddSectionModal() {
@@ -336,8 +354,45 @@
 
         console.log(title + description + type + content + position);
 
-        if (!title || !description || !type || !content || !position) {
-            showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error', 2500);
+        if (!title) {
+            showToast('Tên bài học không được để trống', 'error', 2500);
+            document.getElementById('sectionTitle').focus();
+            return;
+        }
+
+        if (title.length > 200) {
+            showToast('Tên bài học không được vượt quá 200 ký tự', 'error', 2500);
+            document.getElementById('sectionTitle').focus();
+            return;
+        }
+
+        if (!description) {
+            showToast('Mô tả bài học không được để trống', 'error', 2500);
+            document.getElementById('sectionDescription').focus();
+            return;
+        }
+
+        if (description.length > 500) {
+            showToast('Mô tả bài học không được vượt quá 500 ký tự', 'error', 2500);
+            document.getElementById('sectionDescription').focus();
+            return;
+        }
+
+        if (!type) {
+            showToast('Vui lòng chọn thể loại', 'error', 2500);
+            document.getElementById('sectionType').focus();
+            return;
+        }
+
+        if (!content) {
+            showToast('Nội dung bài học không được để trống', 'error', 2500);
+            document.getElementById('sectionContent').focus();
+            return;
+        }
+
+        if (!position) {
+            showToast('Vui lòng nhập vị trí', 'error', 2500);
+            document.getElementById('sectionPosition').focus();
             return;
         }
 
