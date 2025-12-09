@@ -18,8 +18,8 @@
         <jsp:include page="/layout/header.jsp" />
         <div class="bg-gradient-to-br from-blue-50 to-indigo-50 relative overflow-hidden">
             <div class="container mx-auto px-4 py-16 relative z-10">
-                <div class="max-w-4xl">
-                    <h1 class="text-5xl font-bold text-gray-900 mb-8">
+                <div class="max-w-7xl">
+                    <h1 class="text-4xl font-bold text-gray-900 mb-8">
                         ${course.title}
                     </h1>
                     <c:choose>
@@ -68,7 +68,7 @@
         <div class="container mx-auto px-4 py-12 min-h-[280px]">
             <div id="description-content" class="tab-content">
                 <h2 class="text-3xl font-bold mb-6">Bạn sẽ học được gì ?</h2>
-                <p class="text-gray-700 leading-relaxed max-w-4xl">
+                <p class="text-gray-700 leading-relaxed max-w-7xl">
                     ${course.description}
                 </p>
             </div>
