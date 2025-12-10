@@ -22,6 +22,11 @@
                     <h3 class="text-xl font-bold text-gray-900 mb-4 line-clamp-2">
                         ${course.title}
                     </h3>
+                    <c:if test="${not empty error}">
+                        <div class="mb-6 p-4 rounded-lg bg-red-100 border border-red-300 text-red-800 font-semibold">
+                            ${error}
+                        </div>
+                    </c:if>
 
                     <c:set var="total" value="${fn:length(sections)}"/>
                     <c:set var="completed" value="0"/>
@@ -92,6 +97,22 @@
 
             <main class="flex-1 overflow-y-auto">
                 <div class="max-w-4xl mx-auto px-8 py-10">
+                    <div class="mb-6">
+                        <a href="${pageContext.request.contextPath}/courses"
+                           class="inline-flex items-center gap-2 text-sm font-semibold
+                           text-gray-600 hover:text-green-700 transition">
+
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                 viewBox="0 0 24 24">
+                            <path stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M15 19l-7-7 7-7"/>
+                            </svg>
+
+                            Quay về khóa học
+                        </a>
+                    </div>
 
                     <div class="mb-8">
                         <div class="flex items-center gap-2 text-sm text-gray-500 mb-3">
@@ -278,6 +299,25 @@
                     </div>
                 </main>
             </div>
+            <c:if test="${allCompleted && not empty courseTest}">
+                <hr class="my-12 border-gray-300">
+
+                <div class="p-8 bg-purple-50 border border-purple-300 rounded-xl">
+                    <h2 class="text-2xl font-bold text-purple-700 mb-3">
+                        🎓 Bài kiểm tra cuối khóa
+                    </h2>
+
+                    <p class="text-gray-700 mb-6">
+                        ${courseTest.description}
+                    </p>
+
+                    <a href="${pageContext.request.contextPath}/trainee/taketest?testId=${courseTest.id}"
+                       class="inline-block px-8 py-4 bg-purple-600 text-white rounded-lg
+                       text-lg hover:bg-purple-700 transition">
+                        Bắt đầu bài test cuối khóa
+                    </a>
+                </div>
+            </c:if>
 
             <jsp:include page="/layout/footer.jsp" />
             <jsp:include page="/layout/importBottom.jsp" />

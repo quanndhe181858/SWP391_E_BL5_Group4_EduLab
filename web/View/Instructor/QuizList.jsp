@@ -318,7 +318,7 @@
                                                                             </span>
                                                                             <span
                                                                                 class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded">Danh mục:
-                                                                                ${categoryMap[quiz.category_id]}
+                                                                                <%= quiz.getCategory() != null ? quiz.getCategory().getName() : "N/A" %>
                                                                             </span>
                                                                             <span
                                                                                 class="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 rounded">ID:
@@ -614,14 +614,13 @@
                                                             <option value="Multiple Choice">Trắc nghiệm</option>
                                                             <option value="True/False">Đúng/Sai</option>
                                                             <option value="Short Answer">Câu trả lời ngắn</option>
-                                                            <option value="Essay">Tự luận</option>
                                                         </select>
                                                     </div>
 
                                                     <div>
                                                         <label for="editCategoryId"
                                                             class="block text-sm font-semibold text-gray-700 mb-2">
-                                                            Danh mục <span class="text-red-500">*</span>
+                                                            Danh mục <span class="text-red-500" >*</span>
                                                         </label>
                                                         <select id="editCategoryId" name="categoryId" required
                                                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">

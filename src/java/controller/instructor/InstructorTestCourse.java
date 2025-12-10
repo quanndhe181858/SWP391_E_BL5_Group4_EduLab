@@ -9,11 +9,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import model.Quiz;
 import model.Test;
+import model.User;
 
 @WebServlet(name = "InstructorTestCourse", urlPatterns = {"/instructor/test-course"})
 public class InstructorTestCourse extends HttpServlet {
@@ -35,7 +37,26 @@ public class InstructorTestCourse extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int instructorId = 1;
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        User u = (User) session.getAttribute("user");
+
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        if (u.getRole_id() != 2) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        int instructorId = u.getId();
 
         // Lấy danh sách khóa học
         var courses = courseDAO.getCoursesByInstructorId(999, 0, "", "", 0, "", "", instructorId);
@@ -76,7 +97,26 @@ public class InstructorTestCourse extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int instructorId = 1;
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        User u = (User) session.getAttribute("user");
+
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        if (u.getRole_id() != 2) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        int instructorId = u.getId();
 
         String action = request.getParameter("action");
         Integer courseId = getInt(request, "courseId");
@@ -114,6 +154,23 @@ public class InstructorTestCourse extends HttpServlet {
                 doGet(request, response);
                 return;
             }
+            if (testDAO.isCourseTestExisted(courseId, null)) {
+                request.setAttribute("error", "Khóa học này đã có bài test cuối khóa.");
+                doGet(request, response);
+                return;
+            }
+
+            if (duration <= 0) {
+                request.setAttribute("error", "Thời lượng bài test phải lớn hơn 0.");
+                doGet(request, response);
+                return;
+            }
+
+            if (minGrade < 0 || minGrade > 100) {
+                request.setAttribute("error", "Điểm đạt phải nằm trong khoảng 0 – 100.");
+                doGet(request, response);
+                return;
+            }
 
             int id = testDAO.createTest(t);
 
@@ -140,6 +197,23 @@ public class InstructorTestCourse extends HttpServlet {
             t.setCourseSectionId(0);
             if (testDAO.isCodeOrTitleExisted(code, title, id)) {
                 request.setAttribute("error", "Code hoặc tiêu đề đã tồn tại.");
+                doGet(request, response);
+                return;
+            }
+            if (testDAO.isCourseTestExisted(courseId, id)) {
+                request.setAttribute("error", "Mỗi khóa học chỉ được có 1 bài test cuối khóa.");
+                doGet(request, response);
+                return;
+            }
+
+            if (duration <= 0) {
+                request.setAttribute("error", "Thời lượng bài test phải lớn hơn 0.");
+                doGet(request, response);
+                return;
+            }
+
+            if (minGrade < 0 || minGrade > 100) {
+                request.setAttribute("error", "Điểm đạt phải nằm trong khoảng 0 – 100.");
                 doGet(request, response);
                 return;
             }

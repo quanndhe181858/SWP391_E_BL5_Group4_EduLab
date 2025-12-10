@@ -1,12 +1,26 @@
 package controller.trainee;
 
-import dao.*;
-import model.*;
+import dao.CourseDAO;
+import dao.CourseProgressDAO;
+import dao.CourseSectionDAO;
+import dao.EnrollmentDAO;
+import dao.MediaDAO;
+import dao.TestsDAO;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import model.Course;
+import model.CourseProgress;
+import model.CourseSection;
+import model.Media;
+import model.Test;
+import model.User;
 
 @WebServlet(name = "LearnCourseController", urlPatterns = {"/learn"})
 public class LearnCourseController extends HttpServlet {
@@ -18,50 +32,105 @@ public class LearnCourseController extends HttpServlet {
     private final MediaDAO mediaDAO = new MediaDAO();
     private final TestsDAO testsDAO = new TestsDAO();
 
+    // Helper parse int an toàn
+    private Integer getInt(HttpServletRequest req, String name) {
+        try {
+            String raw = req.getParameter(name);
+            if (raw == null || raw.isBlank()) {
+                return null;
+            }
+            return Integer.parseInt(raw);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         User u = util.AuthUtils.doAuthorize(request, response, 3);
-        if (u == null) return;
-
+        if (u == null) {
+            return;
+        }
         int userId = u.getId();
-        int courseId = Integer.parseInt(request.getParameter("courseId"));
+
+        Integer courseIdObj = getInt(request, "courseId");
+        if (courseIdObj == null) {
+            request.setAttribute("error", "Thiếu hoặc sai courseId");
+            request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
+            return;
+        }
+        int courseId = courseIdObj;
+
+        Course course = courseDAO.getCourseById(courseId);
+        if (course == null) {
+            request.setAttribute("error", "Khóa học không tồn tại");
+           request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
+            return;
+        }
+
+        if (!"Active".equalsIgnoreCase(course.getStatus())) {
+            request.setAttribute("error", "Khóa học chưa được mở");
+            request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
+            return;
+        }
 
         if (!enrollmentDAO.isEnrolled(userId, courseId)) {
-            response.sendError(403, "Bạn chưa đăng ký khóa học này.");
+            request.setAttribute("error", "Bạn chưa đăng ký khóa học này");
+           request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
             return;
         }
 
         List<CourseSection> sections = sectionDAO.getAllCourseSectionsByCourseId(courseId);
-        if (sections.isEmpty()) {
-            response.sendError(404, "Khóa học chưa có bài học nào.");
+        if (sections == null || sections.isEmpty()) {
+            request.setAttribute("error", "Khóa học chưa có bài học nào");
+            request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
             return;
         }
 
-        String rawSectionId = request.getParameter("sectionId");
-        int sectionId = (rawSectionId == null) ? sections.get(0).getId() : Integer.parseInt(rawSectionId);
+        Integer sectionIdObj = getInt(request, "sectionId");
+        int sectionId = (sectionIdObj == null) ? sections.get(0).getId() : sectionIdObj;
+
         CourseSection current = sectionDAO.getCourseSectionById(sectionId);
+        if (current == null || current.getCourse_id() != courseId) {
+            request.setAttribute("error", "Bài học không tồn tại hoặc không thuộc khóa học");
+            request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
+            return;
+        }
 
-        List<Media> mediaList = mediaDAO.getMediaBySectionId(sectionId);
-        Test test = testsDAO.getTestBySectionId(sectionId);
-        CourseProgress progress = progressDAO.getProgress(userId, courseId, sectionId);
-
-        // Nếu chưa có progress → tạo progress entry (nhưng chưa đánh dấu hoàn thành)
         progressDAO.createOrUpdateProgress(userId, courseId, sectionId);
 
         Map<Integer, CourseProgress> progressMap = new HashMap<>();
+        int completedCount = 0;
+
         for (CourseSection s : sections) {
-            progressMap.put(s.getId(), progressDAO.getProgress(userId, courseId, s.getId()));
+            CourseProgress p = progressDAO.getProgress(userId, courseId, s.getId());
+            progressMap.put(s.getId(), p);
+            if (p != null && "Completed".equalsIgnoreCase(p.getStatus())) {
+                completedCount++;
+            }
         }
 
-        request.setAttribute("course", courseDAO.getCourseById(courseId));
+        boolean allCompleted = completedCount == sections.size();
+
+        Test sectionTest = testsDAO.getTestBySectionId(sectionId);
+        CourseProgress curProgress = progressMap.get(sectionId);
+        boolean testDone = curProgress != null && curProgress.isTestDone();
+
+        Test courseTest = allCompleted
+                ? testsDAO.getCourseTestByCourseId(courseId)
+                : null;
+
+        request.setAttribute("course", course);
         request.setAttribute("sections", sections);
         request.setAttribute("current", current);
-        request.setAttribute("mediaList", mediaList);
+        request.setAttribute("mediaList", mediaDAO.getMediaBySectionId(sectionId));
         request.setAttribute("progressMap", progressMap);
-        request.setAttribute("test", test);
-        request.setAttribute("testDone", (progress != null && progress.isTestDone()));
+        request.setAttribute("test", sectionTest);
+        request.setAttribute("testDone", testDone);
+        request.setAttribute("allCompleted", allCompleted);
+        request.setAttribute("courseTest", courseTest);
 
         request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
     }
@@ -71,21 +140,41 @@ public class LearnCourseController extends HttpServlet {
             throws ServletException, IOException {
 
         User u = util.AuthUtils.doAuthorize(request, response, 3);
-        if (u == null) return;
-
+        if (u == null) {
+            return;
+        }
         int userId = u.getId();
-        int courseId = Integer.parseInt(request.getParameter("courseId"));
-        int sectionId = Integer.parseInt(request.getParameter("sectionId"));
 
-        Test test = testsDAO.getTestBySectionId(sectionId);
+        Integer courseIdObj = getInt(request, "courseId");
+        Integer sectionIdObj = getInt(request, "sectionId");
+
+        if (courseIdObj == null || sectionIdObj == null) {
+            request.setAttribute("error", "Dữ liệu gửi lên không hợp lệ");
+            doGet(request, response);
+            return;
+        }
+
+        int courseId = courseIdObj;
+        int sectionId = sectionIdObj;
+
         CourseProgress progress = progressDAO.getProgress(userId, courseId, sectionId);
+        Test sectionTest = testsDAO.getTestBySectionId(sectionId);
 
-        if (test != null && (progress == null || !progress.isTestDone())) {
-            response.sendError(400, "Bạn cần hoàn thành bài test trước khi đánh dấu hoàn thành.");
+        if (sectionTest != null && (progress == null || !progress.isTestDone())) {
+            request.setAttribute("error", "Bạn phải hoàn thành bài test trước khi đánh dấu hoàn thành");
+            doGet(request, response);
+            return;
+        }
+
+        if (progress != null && "Completed".equalsIgnoreCase(progress.getStatus())) {
+            response.sendRedirect(request.getContextPath()
+                    + "/learn?courseId=" + courseId + "&sectionId=" + sectionId);
             return;
         }
 
         progressDAO.markCompleted(userId, courseId, sectionId);
-        response.sendRedirect(request.getContextPath() + "/learn?courseId=" + courseId + "&sectionId=" + sectionId);
+
+        response.sendRedirect(request.getContextPath()
+                + "/learn?courseId=" + courseId + "&sectionId=" + sectionId);
     }
 }
