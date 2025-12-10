@@ -464,7 +464,8 @@ public class CourseDAO extends dao {
     public int countCourses(String title, String description,
             int categoryId, String status) {
         StringBuilder sql = new StringBuilder(
-                "SELECT COUNT(*) FROM edulab.course"
+                "SELECT DISTINCT c.* FROM edulab.course c "
+                + "INNER JOIN edulab.course_section cs ON c.id = cs.course_id"
         );
 
         List<Object> params = new ArrayList<>();
@@ -736,7 +737,9 @@ public class CourseDAO extends dao {
             int categoryId) {
 
         StringBuilder sql = new StringBuilder(
-                "SELECT COUNT(*) FROM edulab.course WHERE status = 'Active'"
+                "SELECT DISTINCT c.* FROM edulab.course c "
+                + "INNER JOIN edulab.course_section cs ON c.id = cs.course_id "
+                + "WHERE c.status = 'Active'"
         );
 
         List<Object> params = new ArrayList<>();

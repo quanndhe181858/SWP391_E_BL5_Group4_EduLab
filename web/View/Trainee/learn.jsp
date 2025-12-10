@@ -17,7 +17,7 @@
         <jsp:include page="/layout/header.jsp" />
 
         <div class="flex h-screen">
-            <aside class="w-80 bg-white border-r border-gray-200 overflow-y-auto">
+            <aside class="w-80 bg-white border-r border-gray-200 max-h-[800px] overflow-y-auto">
                 <div class="p-6">
                     <h3 class="text-xl font-bold text-gray-900 mb-4 line-clamp-2">
                         ${course.title}
@@ -91,6 +91,36 @@
                                 </div>
                             </a>
                         </c:forEach>
+
+                        <c:if test="${allCompleted && not empty courseTest}">
+                            <div class="mt-4 pt-4 border-t-2 border-gray-300">
+                                <div class="p-4 bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-lg shadow-sm">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                        <h4 class="text-base font-bold text-purple-900">
+                                            Kiểm tra cuối khóa
+                                        </h4>
+                                    </div>
+
+                                    <p class="text-sm text-gray-700 mb-4 leading-relaxed">
+                                        ${courseTest.description}
+                                    </p>
+
+                                    <a href="${pageContext.request.contextPath}/trainee/taketest?testId=${courseTest.id}"
+                                       class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-purple-600 text-white rounded-lg
+                                       font-semibold hover:bg-purple-700 transition-all duration-200 shadow-md hover:shadow-lg">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                        </svg>
+                                        Bắt đầu làm bài
+                                    </a>
+                                </div>
+                            </div>
+                        </c:if>
                     </nav>
                 </div>
             </aside>
@@ -203,43 +233,6 @@
                                         </div>
                                     </c:if>
 
-                                    <c:if test="${fn:contains(m.path, 'youtube.com') || fn:contains(m.path, 'youtu.be')}">
-                                        <c:set var="videoId" value="${fn:substringAfter(m.path, 'v=')}"/>
-                                        <c:if test="${fn:contains(m.path, 'youtu.be')}">
-                                            <c:set var="videoId" value="${fn:substringAfter(m.path, 'youtu.be/')}"/>
-                                        </c:if>
-                                        <div class="relative rounded-lg overflow-hidden shadow-md border border-gray-200"
-                                             style="padding-bottom: 56.25%;">
-                                            <iframe class="absolute top-0 left-0 w-full h-full"
-                                                    src="https://www.youtube.com/embed/${videoId}"
-                                                    frameborder="0"
-                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                    allowfullscreen>
-                                            </iframe>
-                                        </div>
-                                    </c:if>
-
-                                    <c:if test="${fn:endsWith(fn:toLowerCase(m.path), '.pdf')}">
-                                        <a href="${pageContext.request.contextPath}/${m.path}" 
-                                           target="_blank"
-                                           class="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
-                                            <svg class="w-8 h-8 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
-                                            </svg>
-                                            <div class="flex-1">
-                                                <p class="font-semibold text-red-900">
-                                                    ${not empty m.name ? m.name : 'Tài liệu PDF'}
-                                                </p>
-                                                <p class="text-sm text-red-700">
-                                                    Click để xem hoặc tải xuống
-                                                </p>
-                                            </div>
-                                            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                            </svg>
-                                        </a>
-                                    </c:if>
-
                                     <c:if test="${not fn:endsWith(fn:toLowerCase(m.path), '.jpg') && 
                                                   not fn:endsWith(fn:toLowerCase(m.path), '.jpeg') && 
                                                   not fn:endsWith(fn:toLowerCase(m.path), '.png') &&
@@ -336,25 +329,6 @@
                     </div>
                 </main>
             </div>
-            <c:if test="${allCompleted && not empty courseTest}">
-                <hr class="my-12 border-gray-300">
-
-                <div class="p-8 bg-purple-50 border border-purple-300 rounded-xl">
-                    <h2 class="text-2xl font-bold text-purple-700 mb-3">
-                        🎓 Bài kiểm tra cuối khóa
-                    </h2>
-
-                    <p class="text-gray-700 mb-6">
-                        ${courseTest.description}
-                    </p>
-
-                    <a href="${pageContext.request.contextPath}/trainee/taketest?testId=${courseTest.id}"
-                       class="inline-block px-8 py-4 bg-purple-600 text-white rounded-lg
-                       text-lg hover:bg-purple-700 transition">
-                        Bắt đầu bài test cuối khóa
-                    </a>
-                </div>
-            </c:if>
 
             <jsp:include page="/layout/footer.jsp" />
             <jsp:include page="/layout/importBottom.jsp" />
