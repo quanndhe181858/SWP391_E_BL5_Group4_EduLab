@@ -129,7 +129,7 @@
 
                             <c:choose>
                                 <c:when test="${not testDone}">
-                                    <a href="${pageContext.request.contextPath}/test/start?testId=${test.id}"
+                                    <a href="${pageContext.request.contextPath}/trainee/taketest?testId=${test.id}"
                                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                                         Làm bài test
                                     </a>
