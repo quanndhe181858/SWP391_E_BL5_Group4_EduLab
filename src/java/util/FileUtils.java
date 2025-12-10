@@ -20,7 +20,7 @@ public class FileUtils {
     private static final String IMAGE_DIR = "media/image";
     private static final String VIDEO_DIR = "media/video";
 
-    private static final String[] IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"};
+    private static final String[] IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".jfif"};
     private static final String[] VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".wmv", ".flv", ".mkv", ".webm"};
 
     private static final long MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
