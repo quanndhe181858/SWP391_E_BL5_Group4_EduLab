@@ -132,7 +132,11 @@ public class InstructorTestController extends HttpServlet {
                 doGet(request, response);
                 return;
             }
-
+            if (testDAO.isSectionTestExisted(courseId, sectionId, null)) {
+                request.setAttribute("error", "Bài học này đã có bài test.");
+                doGet(request, response);
+                return;
+            }
             int id = testDAO.createTest(t);
             if (id <= 0) {
                 request.setAttribute("error", "Không thể tạo test");
@@ -162,10 +166,16 @@ public class InstructorTestController extends HttpServlet {
                 doGet(request, response);
                 return;
             }
-
+            if (testDAO.isSectionTestExisted(courseId, sectionId, id)) {
+                request.setAttribute("error", "Mỗi bài học chỉ được có 1 bài test.");
+                doGet(request, response);
+                return;
+            }
             testDAO.updateTest(t);
 
             quizTestDAO.deleteQuizByTest(id);
+            
+            
             processQuiz(mode, id, request);
         }
 

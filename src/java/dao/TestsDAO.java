@@ -24,7 +24,6 @@ public class TestsDAO extends dao {
         System.out.println(t.getQuestionsByTest(1));
     }
 
-    // Lấy danh sách test theo instructor
     public List<Test> getTestsByInstructor(int instructorId) {
         List<Test> list = new ArrayList<>();
         String sql = "SELECT * FROM test WHERE created_by = ? ORDER BY id DESC";
@@ -53,7 +52,6 @@ public class TestsDAO extends dao {
         return list;
     }
 
-    // Lấy test theo ID
     public Test getById(int id) {
         String sql = "SELECT * FROM test WHERE id = ?";
         Test t = null;
@@ -83,7 +81,7 @@ public class TestsDAO extends dao {
 
     public List<Test> getTestsByCourseId(int courseId) {
         List<Test> list = new ArrayList<>();
-        String sql = "SELECT * FROM Tests WHERE course_id = ?";
+        String sql = "SELECT * FROM test  WHERE course_id = ?";
 
         try {
             con = dbc.getConnection();
@@ -152,7 +150,6 @@ public class TestsDAO extends dao {
         return -1;
     }
 
-    // Cập nhật bài test
     public boolean updateTest(Test t) {
         String sql = """
             UPDATE test 
@@ -295,6 +292,111 @@ public class TestsDAO extends dao {
         }
 
         return false;
+    }
+
+    public boolean isCourseTestExisted(int courseId, Integer excludeTestId) {
+        String sql = """
+        SELECT 1
+        FROM test
+        WHERE course_id = ?
+          AND course_section_id = 0
+          AND (? IS NULL OR id <> ?)
+        LIMIT 1
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, courseId);
+
+            if (excludeTestId == null) {
+                ps.setNull(2, java.sql.Types.INTEGER);
+                ps.setNull(3, java.sql.Types.INTEGER);
+            } else {
+                ps.setInt(2, excludeTestId);
+                ps.setInt(3, excludeTestId);
+            }
+
+            rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isSectionTestExisted(int courseId, int sectionId, Integer excludeTestId) {
+        String sql = """
+        SELECT 1
+        FROM test
+        WHERE course_id = ?
+          AND course_section_id = ?
+          AND (? IS NULL OR id <> ?)
+        LIMIT 1
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, courseId);
+            ps.setInt(2, sectionId);
+
+            if (excludeTestId == null) {
+                ps.setNull(3, java.sql.Types.INTEGER);
+                ps.setNull(4, java.sql.Types.INTEGER);
+            } else {
+                ps.setInt(3, excludeTestId);
+                ps.setInt(4, excludeTestId);
+            }
+
+            rs = ps.executeQuery();
+            return rs.next();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public Test getCourseTestByCourseId(int courseId) {
+        String sql = """
+        SELECT * 
+        FROM test
+        WHERE course_id = ?
+          AND course_section_id = 0
+        LIMIT 1
+    """;
+
+        Test t = null;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, courseId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                t = new Test();
+                t.setId(rs.getInt("id"));
+                t.setCode(rs.getString("code"));
+                t.setTitle(rs.getString("title"));
+                t.setDescription(rs.getString("description"));
+                t.setTimeInterval(rs.getInt("time_interval"));
+                t.setMinGrade(rs.getInt("min_grade"));
+                t.setCourseId(rs.getInt("course_id"));
+
+                t.setCourseSectionId(0);
+
+                t.setCreatedBy(rs.getInt("created_by"));
+                t.setUpdatedBy(rs.getInt("updated_by"));
+                t.setCreatedAt(rs.getTimestamp("created_at"));
+                t.setUpdatedAt(rs.getTimestamp("updated_at"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return t;
     }
 
 }

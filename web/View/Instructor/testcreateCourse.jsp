@@ -67,22 +67,32 @@
             </c:if>
 
 
-            <!-- SELECT COURSE (GET FORM) -->
             <form method="GET" action="${pageContext.request.contextPath}/instructor/test-course" 
                   class="bg-white p-4 rounded-lg shadow mb-8">
 
                 <label class="font-semibold text-gray-700">Chọn khóa học</label>
-                <select name="courseId" onchange="this.form.submit()"
-                        class="w-full px-4 py-3 border rounded-lg mt-2">
-                    <option value="">-- Chọn khóa học --</option>
-                    <c:forEach items="${courses}" var="c">
-                        <option value="${c.id}" <c:if test="${selectedCourse == c.id}">selected</c:if>>
-                            ${c.title}
-                        </option>
-                    </c:forEach>
+
+                <select name="courseId"
+                        onchange="this.form.submit()"
+                        <c:if test="${not empty editTest}">disabled</c:if>
+                            required
+                            class="w-full px-4 py-3 border rounded-lg mt-2
+                        <c:if test='${not empty editTest}'>bg-gray-100 cursor-not-allowed</c:if>">
+
+                            <option value="">-- Chọn khóa học --</option>
+                        <c:forEach items="${courses}" var="c">
+                            <option value="${c.id}" <c:if test="${selectedCourse == c.id}">selected</c:if>>
+                                ${c.title}
+                            </option>
+                        </c:forEach>
                 </select>
 
+                <c:if test="${not empty editTest}">
+                    <input type="hidden" name="courseId" value="${selectedCourse}">
+                </c:if>
+
             </form>
+
 
             <!-- MAIN FORM CREATE / UPDATE -->
             <form method="POST" action="${pageContext.request.contextPath}/instructor/test-course"

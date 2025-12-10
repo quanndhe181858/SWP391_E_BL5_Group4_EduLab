@@ -70,26 +70,41 @@
                 </div>
 
                 <div class="p-8">
-                    <!-- CHỌN KHÓA HỌC -->
                     <form method="GET" action="${pageContext.request.contextPath}/instructor/test" class="mb-8">
                         <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
                             <label class="block text-sm font-semibold text-gray-700 mb-3 flex items-center">
                                 <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13
+                                      C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13
+                                      C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13
+                                      C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                                 </svg>
                                 Chọn khóa học
                             </label>
-                            <select name="courseId" onchange="this.form.submit()" required 
-                                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white">
-                                <option value="">-- Chọn khóa học để bắt đầu --</option>
-                                <c:forEach items="${courses}" var="c">
-                                    <option value="${c.id}" <c:if test="${selectedCourse == c.id}">selected</c:if>>
-                                        ${c.title}
-                                    </option>
-                                </c:forEach>
+
+                            <select name="courseId"
+                                    onchange="this.form.submit()"
+                                    required
+                                    <c:if test="${not empty editTest}">disabled</c:if>
+                                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm
+                                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all
+                                    <c:if test='${not empty editTest}'>bg-gray-100 cursor-not-allowed</c:if>">
+
+                                        <option value="">-- Chọn khóa học để bắt đầu --</option>
+                                    <c:forEach items="${courses}" var="c">
+                                        <option value="${c.id}" <c:if test="${selectedCourse == c.id}">selected</c:if>>
+                                            ${c.title}
+                                        </option>
+                                    </c:forEach>
                             </select>
+
+                            <c:if test="${not empty editTest}">
+                                <input type="hidden" name="courseId" value="${selectedCourse}">
+                            </c:if>
                         </div>
                     </form>
+
 
                     <!-- FORM POST TẠO/UPDATE -->
                     <form method="POST" action="${pageContext.request.contextPath}/instructor/test" class="space-y-6">
