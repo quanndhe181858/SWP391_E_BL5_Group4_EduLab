@@ -7,6 +7,7 @@ package controller.instructor;
 import constant.httpStatus;
 import dao.QuizDAO;
 import dao.CategoryDAO;
+import service.QuizServices;
 import model.Quiz;
 import model.User;
 import model.Category;
@@ -40,6 +41,7 @@ public class InstructorQuizController extends HttpServlet {
     private final Logger logger = Logger.getLogger(this.getClass().getName());
     private QuizDAO quizDAO;
     private CategoryDAO categoryDAO;
+    private QuizServices quizServices;
     private static final int ITEMS_PER_PAGE = 10;
 
     @Override
@@ -47,6 +49,7 @@ public class InstructorQuizController extends HttpServlet {
         super.init();
         quizDAO = new QuizDAO();
         categoryDAO = new CategoryDAO();
+        quizServices = new QuizServices();
     }
 
     /**
@@ -153,8 +156,8 @@ public class InstructorQuizController extends HttpServlet {
                 }
             }
 
-            // Get all quizzes first
-            List<Quiz> allQuizzes = quizDAO.getAllQuizzes();
+            // Get all quizzes with categories properly loaded
+            List<Quiz> allQuizzes = quizServices.getAllQuizzes();
             List<Quiz> filteredQuizzes = new ArrayList<>(allQuizzes);
 
             // Apply category filter with validation
@@ -364,7 +367,7 @@ public class InstructorQuizController extends HttpServlet {
         quiz.setCategory_id(categoryId);
 
         // Save to database
-        Quiz createdQuiz = quizDAO.createQuiz(quiz, user.getId());
+        Quiz createdQuiz = quizServices.createQuiz(quiz, user.getId());
 
         if (createdQuiz != null) {
             session.setAttribute("notification", "Quiz created successfully!");
@@ -390,7 +393,7 @@ public class InstructorQuizController extends HttpServlet {
 
         try {
             int quizId = Integer.parseInt(idParam);
-            Quiz quiz = quizDAO.getQuizById(quizId);
+            Quiz quiz = quizServices.getQuizById(quizId);
 
             if (quiz != null) {
                 request.setAttribute("quiz", quiz);
@@ -465,7 +468,7 @@ public class InstructorQuizController extends HttpServlet {
         }
 
         // Check if quiz exists
-        Quiz existingQuiz = quizDAO.getQuizById(quizId);
+        Quiz existingQuiz = quizServices.getQuizById(quizId);
         if (existingQuiz == null) {
             response.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
             return;
@@ -479,9 +482,9 @@ public class InstructorQuizController extends HttpServlet {
         quiz.setCategory_id(categoryId);
 
         // Update in database using the authorized user's ID
-        Quiz updatedQuiz = quizDAO.updateQuiz(quiz, user.getId());
+        boolean updated = quizServices.updateQuiz(quiz, user.getId());
 
-        if (updatedQuiz != null) {
+        if (updated) {
             session.setAttribute("notification", "Quiz updated successfully!");
             session.setAttribute("notificationType", "success");
         } else {
@@ -520,14 +523,14 @@ public class InstructorQuizController extends HttpServlet {
         }
 
         // Check if quiz exists before attempting to delete
-        Quiz existingQuiz = quizDAO.getQuizById(quizId);
+        Quiz existingQuiz = quizServices.getQuizById(quizId);
         if (existingQuiz == null) {
             response.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
             return;
         }
 
         // Delete from database
-        boolean deleted = quizDAO.deleteQuiz(quizId);
+        boolean deleted = quizServices.deleteQuiz(quizId);
 
         if (deleted) {
             session.setAttribute("notification", "Quiz deleted successfully!");

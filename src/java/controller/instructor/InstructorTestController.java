@@ -10,11 +10,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import model.Quiz;
 import model.Test;
+import model.User;
 
 @WebServlet(name = "InstructorTestController", urlPatterns = {"/instructor/test"})
 public class InstructorTestController extends HttpServlet {
@@ -29,7 +31,7 @@ public class InstructorTestController extends HttpServlet {
         try {
             String raw = req.getParameter(name);
             return (raw == null || raw.isBlank()) ? null : Integer.parseInt(raw);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             return null;
         }
     }
@@ -38,9 +40,27 @@ public class InstructorTestController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int instructorId = 1;
+        HttpSession session = request.getSession(false);
 
-        // Load all courses
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        User u = (User) session.getAttribute("user");
+
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        if (u.getRole_id() != 2) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        int instructorId = u.getId();
+
         var courses = courseDAO.getCoursesByInstructorId(
                 999, 0, "", "", 0, "", "", instructorId);
         request.setAttribute("courses", courses);
@@ -50,19 +70,12 @@ public class InstructorTestController extends HttpServlet {
         if (selectedCourse == null && !courses.isEmpty()) {
             selectedCourse = courses.get(0).getId();
         }
+
         request.setAttribute("selectedCourse", selectedCourse);
-
-        // Load sections based on selected course
-        request.setAttribute("sections",
-                sectionDAO.getAllCourseSectionsByCourseId(selectedCourse));
-
-        // Load quiz list for manual select
+        request.setAttribute("sections", sectionDAO.getAllCourseSectionsByCourseId(selectedCourse));
         request.setAttribute("quizList", quizDAO.getAllQuizzes());
-
-        // Load test list
         request.setAttribute("testList", testDAO.getTestsByInstructor(instructorId));
 
-        // Handle EDIT MODE
         String action = request.getParameter("action");
         Integer id = getInt(request, "id");
 
@@ -70,7 +83,6 @@ public class InstructorTestController extends HttpServlet {
 
             Test t = testDAO.getById(id);
 
-            // ❗ Nếu Test thuộc khóa học thì redirect đúng controller
             if (t.getCourseSectionId() == 0) {
                 response.sendRedirect(request.getContextPath()
                         + "/instructor/test-course?action=edit&id=" + id);
@@ -79,10 +91,23 @@ public class InstructorTestController extends HttpServlet {
 
             request.setAttribute("editTest", t);
             request.setAttribute("selectedCourse", t.getCourseId());
-
             request.setAttribute("sections",
                     sectionDAO.getAllCourseSectionsByCourseId(t.getCourseId()));
+            request.setAttribute("selectedQuizIds",
+                    quizTestDAO.getQuizIdsByTest(id));
+        } else if ("view".equals(action) && id != null) {
+            Test t = testDAO.getById(id);
 
+            if (t.getCourseSectionId() == 0) {
+                response.sendRedirect(request.getContextPath()
+                        + "/instructor/test-course?action=edit&id=" + id);
+                return;
+            }
+
+            request.setAttribute("editTest", t);
+            request.setAttribute("selectedCourse", t.getCourseId());
+            request.setAttribute("sections",
+                    sectionDAO.getAllCourseSectionsByCourseId(t.getCourseId()));
             request.setAttribute("selectedQuizIds",
                     quizTestDAO.getQuizIdsByTest(id));
         }
@@ -95,7 +120,26 @@ public class InstructorTestController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int instructorId = 1;
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        User u = (User) session.getAttribute("user");
+
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        if (u.getRole_id() != 2) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        int instructorId = u.getId();
 
         String action = request.getParameter("action");
         String mode = request.getParameter("mode");

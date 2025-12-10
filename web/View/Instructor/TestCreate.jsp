@@ -255,55 +255,6 @@
                     </form>
                 </div>
             </div>
-
-            <!-- LIST TEST -->
-            <div class="bg-white rounded-xl shadow-xl overflow-hidden">
-                <div class="bg-gradient-to-r from-indigo-600 to-purple-700 px-8 py-6">
-                    <h2 class="text-2xl font-bold text-white flex items-center">
-                        <svg class="w-7 h-7 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        Danh sách Test
-                    </h2>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="bg-gray-50 border-b border-gray-200">
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">ID</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Code</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Title</th>
-                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <c:forEach items="${testList}" var="t">
-                                <tr class="hover:bg-blue-50 transition-colors">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${t.id}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">${t.code}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-700">${t.title}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <c:choose>
-
-                                            <c:when test="${t.courseSectionId == 0}">
-                                                <a href="${pageContext.request.contextPath}/instructor/test-course?action=edit&id=${t.id}"
-                                                   class="btn-edit">Sửa</a>
-                                            </c:when>
-
-                                            <c:otherwise>
-                                                <a href="${pageContext.request.contextPath}/instructor/test?action=edit&id=${t.id}"
-                                                   class="btn-edit">Sửa</a>
-                                            </c:otherwise>
-
-                                        </c:choose>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </div>
 
         <jsp:include page="/layout/footer.jsp" />

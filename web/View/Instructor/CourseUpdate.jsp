@@ -209,16 +209,18 @@
                             </div>
                         </div>
 
+                        <!-- Trong phần radio buttons status -->
                         <div class="bg-white rounded-lg shadow-sm p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-4">Trạng thái khoá học</h2>
 
                             <div class="space-y-3">
-                                <label class="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                                <label class="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition ${empty sections ? 'opacity-50 cursor-not-allowed' : ''}">
                                     <input 
                                         type="radio" 
                                         name="status" 
                                         value="Active"
                                         ${course.status == 'Active' ? 'checked' : ''}
+                                        ${empty sections ? 'disabled' : ''}
                                         class="w-4 h-4 text-blue-600 focus:ring-blue-500">
                                     <div class="ml-3">
                                         <span class="block font-semibold text-gray-900">Hoạt động</span>
@@ -231,13 +233,24 @@
                                         type="radio" 
                                         name="status" 
                                         value="Inactive"
-                                        ${course.status == 'Inactive' ? 'checked' : ''}
+                                        ${course.status == 'Inactive' || empty sections ? 'checked' : ''}
                                         class="w-4 h-4 text-blue-600 focus:ring-blue-500">
                                     <div class="ml-3">
                                         <span class="block font-semibold text-gray-900">Không hoạt động</span>
                                         <span class="text-sm text-gray-600">Khoá học bị ẩn, không tiếp nhận học sinh mới</span>
                                     </div>
                                 </label>
+
+                                <c:if test="${empty sections}">
+                                    <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <div class="flex items-start gap-2">
+                                            <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                            </svg>
+                                            <p class="text-sm text-yellow-800">Khoá học cần có ít nhất 1 bài học để có thể đặt trạng thái Hoạt động</p>
+                                        </div>
+                                    </div>
+                                </c:if>
                             </div>
                         </div>
 
@@ -335,6 +348,7 @@
                 const categoryId = document.getElementById('categoryId').value;
                 const status = document.querySelector('input[name="status"]:checked').value;
                 const thumbnailFile = document.getElementById('thumbnail').files[0];
+                const hasSections = ${not empty sections};
 
                 if (!title) {
                     showToast('Tên khoá học không được để trống', 'error', 2500);
@@ -366,6 +380,12 @@
                     return false;
                 }
 
+                // Kiểm tra nếu không có bài học và muốn set Active
+                if (!hasSections && status === 'Active') {
+                    showToast('Khoá học cần có ít nhất 1 bài học để có thể đặt trạng thái Hoạt động', 'error', 3000);
+                    return false;
+                }
+
                 const formData = new FormData();
                 formData.append('action', 'update');
                 formData.append('id', cid);
@@ -387,7 +407,7 @@
                     success: function (response) {
                         formModified = false;
                         showToast("Cập nhật khoá học thành công!", "success", 2500);
-//                        setTimeout(() => window.location.reload(), 1500);
+                        setTimeout(() => window.location.reload(), 1500);
                     },
                     error: function (xhr) {
                         const errorMsg = xhr.responseJSON?.message || "Có lỗi xảy ra trong quá trình cập nhật khoá học, vui lòng thử lại sau";
