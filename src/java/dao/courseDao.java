@@ -275,30 +275,26 @@ public class CourseDAO extends dao {
         List<Course> cList = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
-                "SELECT * FROM edulab.course WHERE 1 = 1"
+                "SELECT DISTINCT c.* FROM edulab.course c "
+                + "INNER JOIN edulab.course_section cs ON c.id = cs.course_id "
+                + "WHERE 1 = 1"
         );
-
         List<Object> params = new ArrayList<>();
-
         StringBuilder orGroup = new StringBuilder();
 
         if (title != null && !title.isEmpty()) {
-            orGroup.append(" OR title LIKE ?");
+            orGroup.append(" OR c.title LIKE ?");
             params.add("%" + title + "%");
         }
-
         if (description != null && !description.isEmpty()) {
-            orGroup.append(" OR description LIKE ?");
+            orGroup.append(" OR c.description LIKE ?");
             params.add("%" + description + "%");
         }
-
         if (categoryId > 0) {
-
             List<Integer> allCategoryIds = new ArrayList<>();
             allCategoryIds.add(categoryId);
             allCategoryIds.addAll(categoryDao.getChildCategoryIds(categoryId));
-
-            StringBuilder inClause = new StringBuilder(" AND category_id IN (");
+            StringBuilder inClause = new StringBuilder(" AND c.category_id IN (");
             for (int i = 0; i < allCategoryIds.size(); i++) {
                 inClause.append("?");
                 if (i < allCategoryIds.size() - 1) {
@@ -307,27 +303,22 @@ public class CourseDAO extends dao {
                 params.add(allCategoryIds.get(i));
             }
             inClause.append(")");
-
             orGroup.append(inClause);
         }
-
         if (status != null && !status.isEmpty()) {
-            orGroup.append(" AND status = ?");
+            orGroup.append(" AND c.status = ?");
             params.add(status);
         }
-
         if (orGroup.length() > 0) {
             sql.append(" AND (");
             sql.append(orGroup.substring(4));
             sql.append(")");
         }
-
         if (sortBy != null && !sortBy.isBlank()) {
-            sql.append(" ORDER BY ").append(sortBy);
+            sql.append(" ORDER BY c.").append(sortBy);
         } else {
-            sql.append(" ORDER BY id DESC");
+            sql.append(" ORDER BY c.id DESC");
         }
-
         sql.append(" LIMIT ? OFFSET ?");
 
         try {
@@ -666,37 +657,32 @@ public class CourseDAO extends dao {
         List<Object> params = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder(
-                "SELECT * FROM edulab.course WHERE status = 'Active'"
+                "SELECT DISTINCT c.* FROM edulab.course c "
+                + "INNER JOIN edulab.course_section cs ON c.id = cs.course_id "
+                + "WHERE c.status = 'Active'"
         );
-
         StringBuilder orSearch = new StringBuilder();
-
         if (title != null && !title.isBlank()) {
-            orSearch.append(" title LIKE ? OR");
+            orSearch.append(" c.title LIKE ? OR");
             params.add("%" + title + "%");
         }
-
         if (description != null && !description.isBlank()) {
-            orSearch.append(" description LIKE ? OR");
+            orSearch.append(" c.description LIKE ? OR");
             params.add("%" + description + "%");
         }
-
         if (orSearch.length() > 0) {
             sql.append(" AND (");
             sql.append(orSearch.substring(0, orSearch.length() - 2)); // remove last OR
             sql.append(")");
         }
-
         if (categoryId > 0) {
             List<Integer> allCategoryIds = new ArrayList<>();
             allCategoryIds.add(categoryId);
-
             List<Integer> children = categoryDao.getChildCategoryIds(categoryId);
             if (children != null && !children.isEmpty()) {
                 allCategoryIds.addAll(children);
             }
-
-            sql.append(" AND category_id IN (");
+            sql.append(" AND c.category_id IN (");
             for (int i = 0; i < allCategoryIds.size(); i++) {
                 sql.append("?");
                 if (i < allCategoryIds.size() - 1) {
@@ -706,7 +692,6 @@ public class CourseDAO extends dao {
             }
             sql.append(")");
         }
-
         sql.append(" LIMIT ? OFFSET ?");
         params.add(limit);
         params.add(offset);
