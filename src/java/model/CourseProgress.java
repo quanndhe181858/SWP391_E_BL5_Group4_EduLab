@@ -10,19 +10,21 @@ public class CourseProgress {
     private int sectionId;
     private int progressPercent;
     private String status;
+    private boolean testDone;
     private Timestamp lastAccessedAt;
     private Timestamp completedAt;
 
     public CourseProgress() {
     }
 
-    public CourseProgress(int id, int userId, int courseId, int sectionId, int progressPercent, String status, Timestamp lastAccessedAt, Timestamp completedAt) {
+    public CourseProgress(int id, int userId, int courseId, int sectionId, int progressPercent, String status, boolean testDone, Timestamp lastAccessedAt, Timestamp completedAt) {
         this.id = id;
         this.userId = userId;
         this.courseId = courseId;
         this.sectionId = sectionId;
         this.progressPercent = progressPercent;
         this.status = status;
+        this.testDone = testDone;
         this.lastAccessedAt = lastAccessedAt;
         this.completedAt = completedAt;
     }
@@ -89,6 +91,14 @@ public class CourseProgress {
 
     public void setCompletedAt(Timestamp completedAt) {
         this.completedAt = completedAt;
+    }
+
+    public boolean isTestDone() {
+        return testDone;
+    }
+
+    public void setTestDone(boolean testDone) {
+        this.testDone = testDone;
     }
 
     @Override
