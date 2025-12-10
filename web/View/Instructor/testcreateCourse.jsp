@@ -23,8 +23,6 @@
         <jsp:include page="/layout/header.jsp" />
 
         <div class="max-w-5xl mx-auto px-6 py-10">
-
-            <!-- TITLE -->
             <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-xl shadow-lg mb-6">
                 <h1 class="text-3xl text-white font-semibold flex items-center">
                     <svg class="w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,10 +38,8 @@
                         ⬅ Quay về danh sách Test
                     </a>
                 </div>
-
             </div>
 
-            <!-- ERROR / SUCCESS -->
             <c:if test="${not empty error}">
                 <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded-lg shadow-sm animate-fade-in">
                     <div class="flex items-center">
@@ -66,11 +62,8 @@
                 </div>
             </c:if>
 
-
-            <!-- SELECT COURSE (GET FORM) -->
             <form method="GET" action="${pageContext.request.contextPath}/instructor/test-course" 
                   class="bg-white p-4 rounded-lg shadow mb-8">
-
                 <label class="font-semibold text-gray-700">Chọn khóa học</label>
                 <select name="courseId" onchange="this.form.submit()"
                         class="w-full px-4 py-3 border rounded-lg mt-2">
@@ -81,10 +74,8 @@
                         </option>
                     </c:forEach>
                 </select>
-
             </form>
 
-            <!-- MAIN FORM CREATE / UPDATE -->
             <form method="POST" action="${pageContext.request.contextPath}/instructor/test-course"
                   class="bg-white p-8 rounded-xl shadow-lg space-y-6">
 
@@ -96,7 +87,6 @@
                     <input type="hidden" name="id" value="${editTest.id}">
                 </c:if>
 
-                <!-- Code / Title -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="font-semibold">Test Code</label>
@@ -105,7 +95,6 @@
                                class="w-full px-4 py-3 border rounded-lg"
                                placeholder="VD: FINAL001">
                     </div>
-
                     <div>
                         <label class="font-semibold">Tiêu đề</label>
                         <input type="text" name="title" required
@@ -115,14 +104,12 @@
                     </div>
                 </div>
 
-                <!-- Description -->
                 <div>
                     <label class="font-semibold">Mô tả</label>
                     <textarea name="description" rows="4" required
                               class="w-full px-4 py-3 border rounded-lg">${editTest.description}</textarea>
                 </div>
 
-                <!-- Duration / Min grade -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="font-semibold">Thời gian (phút)</label>
@@ -130,7 +117,6 @@
                                value="${editTest.timeInterval}"
                                class="w-full px-4 py-3 border rounded-lg">
                     </div>
-
                     <div>
                         <label class="font-semibold">Điểm tối thiểu</label>
                         <input type="number" name="minGrade" required
@@ -139,17 +125,14 @@
                     </div>
                 </div>
 
-                <!-- QUIZ MODE -->
                 <div class="bg-gray-50 p-6 rounded-lg border">
                     <h3 class="font-bold mb-3">Cấu hình câu hỏi</h3>
-
                     <div class="flex gap-6 mb-4">
                         <label class="flex items-center gap-2">
                             <input type="radio" name="mode" value="random" onclick="toggleMode()"
                                    <c:if test="${empty selectedQuizIds}">checked</c:if>>
                                    <span>Random</span>
                             </label>
-
                             <label class="flex items-center gap-2">
                                 <input type="radio" name="mode" value="custom" onclick="toggleMode()"
                                 <c:if test="${not empty selectedQuizIds}">checked</c:if>>
@@ -157,7 +140,6 @@
                             </label>
                         </div>
 
-                        <!-- RANDOM -->
                         <div id="randomBox"
                              class="<c:if test='${not empty selectedQuizIds}'>hidden</c:if> flex gap-3 items-center">
                             <label>Số câu hỏi:</label>
@@ -165,7 +147,6 @@
                                    class="px-4 py-2 border rounded-lg w-24">
                         </div>
 
-                        <!-- CUSTOM -->
                         <div id="manualQuizBox"
                              class="<c:if test='${empty selectedQuizIds}'>hidden</c:if> bg-white p-4 rounded-lg max-h-64 overflow-y-auto border mt-4">
 
@@ -176,12 +157,9 @@
                                 <span>[${q.id}] ${q.question}</span>
                             </label>
                         </c:forEach>
-
                     </div>
-
                 </div>
 
-                <!-- Submit -->
                 <button type="submit" name="action"
                         value="<c:choose><c:when test='${not empty editTest}'>update</c:when><c:otherwise>create</c:otherwise></c:choose>"
                                 class="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold">
@@ -190,59 +168,7 @@
                             <c:otherwise>Tạo Test</c:otherwise>
                         </c:choose>
                 </button>
-
             </form>
-
-            <!-- LIST TEST -->
-            <div class="bg-white rounded-xl shadow-xl overflow-hidden mt-10">
-                <div class="bg-gradient-to-r from-indigo-600 to-purple-700 px-8 py-6">
-                    <h2 class="text-2xl font-bold text-white">Danh sách Test của khóa học</h2>
-                </div>
-
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="px-6 py-4 text-left text-xs font-bold">ID</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold">Code</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold">Title</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-
-                        <c:forEach items="${testList}" var="t">
-                            <tr class="hover:bg-blue-50">
-                                <td class="px-6 py-4">${t.id}</td>
-                                <td class="px-6 py-4 font-semibold">${t.code}</td>
-                                <td class="px-6 py-4">${t.title}</td>
-                                <td class="px-6 py-4">
-                                    <c:choose>
-                                        <c:when test="${t.courseSectionId == 0}">
-                                            <a href="${pageContext.request.contextPath}/instructor/test-course?action=edit&id=${t.id}"
-                                               class="btn-edit">Sửa</a>
-                                        </c:when>
-
-                                        <c:otherwise>
-                                            <a href="${pageContext.request.contextPath}/instructor/test?action=edit&id=${t.id}"
-                                               class="btn-edit">Sửa</a>
-                                        </c:otherwise>
-
-                                    </c:choose>
-                                </td>
-                            </tr>
-                        </c:forEach>
-
-                        <!-- FIX: Nếu không có test -->
-                        <c:if test="${empty testList}">
-                            <tr>
-                                <td colspan="4" class="px-6 py-4 text-center text-gray-500">Chưa có test nào cho khóa này</td>
-                            </tr>
-                        </c:if>
-
-                    </tbody>
-                </table>
-            </div>
-
         </div>
 
         <jsp:include page="/layout/footer.jsp" />
