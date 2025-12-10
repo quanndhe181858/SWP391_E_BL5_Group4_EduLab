@@ -114,6 +114,23 @@ public class InstructorTestCourse extends HttpServlet {
                 doGet(request, response);
                 return;
             }
+            if (testDAO.isCourseTestExisted(courseId, null)) {
+                request.setAttribute("error", "Khóa học này đã có bài test cuối khóa.");
+                doGet(request, response);
+                return;
+            }
+
+            if (duration <= 0) {
+                request.setAttribute("error", "Thời lượng bài test phải lớn hơn 0.");
+                doGet(request, response);
+                return;
+            }
+
+            if (minGrade < 0 || minGrade > 100) {
+                request.setAttribute("error", "Điểm đạt phải nằm trong khoảng 0 – 100.");
+                doGet(request, response);
+                return;
+            }
 
             int id = testDAO.createTest(t);
 
@@ -140,6 +157,23 @@ public class InstructorTestCourse extends HttpServlet {
             t.setCourseSectionId(0);
             if (testDAO.isCodeOrTitleExisted(code, title, id)) {
                 request.setAttribute("error", "Code hoặc tiêu đề đã tồn tại.");
+                doGet(request, response);
+                return;
+            }
+            if (testDAO.isCourseTestExisted(courseId, id)) {
+                request.setAttribute("error", "Mỗi khóa học chỉ được có 1 bài test cuối khóa.");
+                doGet(request, response);
+                return;
+            }
+
+            if (duration <= 0) {
+                request.setAttribute("error", "Thời lượng bài test phải lớn hơn 0.");
+                doGet(request, response);
+                return;
+            }
+
+            if (minGrade < 0 || minGrade > 100) {
+                request.setAttribute("error", "Điểm đạt phải nằm trong khoảng 0 – 100.");
                 doGet(request, response);
                 return;
             }
