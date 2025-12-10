@@ -12,7 +12,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import model.Answer;
 import model.Question;
 import model.Test;
 import model.QuizAnswer;
@@ -297,4 +296,48 @@ public class TestsDAO extends dao {
         return false;
     }
 
+    public boolean deleteTest(int testId) {
+        String deleteTestAttemptSql = "DELETE FROM test_attempt WHERE test_id = ?";
+        String deleteTestSql = "DELETE FROM test WHERE id = ?";
+
+        try {
+            con = dbc.getConnection();
+            con.setAutoCommit(false); // bắt đầu transaction
+
+            // Xóa test_attempt
+            ps = con.prepareStatement(deleteTestAttemptSql);
+            ps.setInt(1, testId);
+            ps.executeUpdate();
+
+            // Xóa test
+            ps = con.prepareStatement(deleteTestSql);
+            ps.setInt(1, testId);
+            int rowsAffected = ps.executeUpdate();
+
+            con.commit(); // commit transaction
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try {
+                if (con != null) {
+                    con.rollback(); // rollback nếu lỗi
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        } finally {
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+                if (con != null) {
+                    con.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
 }
