@@ -9,11 +9,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import model.Quiz;
 import model.Test;
+import model.User;
 
 @WebServlet(name = "InstructorTestCourse", urlPatterns = {"/instructor/test-course"})
 public class InstructorTestCourse extends HttpServlet {
@@ -35,7 +37,26 @@ public class InstructorTestCourse extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int instructorId = 1;
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        User u = (User) session.getAttribute("user");
+
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        if (u.getRole_id() != 2) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        int instructorId = u.getId();
 
         // Lấy danh sách khóa học
         var courses = courseDAO.getCoursesByInstructorId(999, 0, "", "", 0, "", "", instructorId);
@@ -76,7 +97,26 @@ public class InstructorTestCourse extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int instructorId = 1;
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        User u = (User) session.getAttribute("user");
+
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        if (u.getRole_id() != 2) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        int instructorId = u.getId();
 
         String action = request.getParameter("action");
         Integer courseId = getInt(request, "courseId");
