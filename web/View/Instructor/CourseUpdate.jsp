@@ -320,13 +320,13 @@
                 const file = e.target.files[0];
                 if (file) {
                     if (file.size > 5 * 1024 * 1024) {
-                        showToast('File size must be less than 5MB', 'error', 2500);
+                        showToast('File không được quá 5MB', 'error', 2500);
                         e.target.value = '';
                         return;
                     }
 
                     if (!file.type.startsWith('image/')) {
-                        showToast('Please select an image file', 'error', 2500);
+                        showToast('Hãy chọn file đúng định dạng hình ảnh!', 'error', 2500);
                         e.target.value = '';
                         return;
                     }
