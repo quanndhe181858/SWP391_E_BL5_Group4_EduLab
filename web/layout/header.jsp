@@ -6,14 +6,14 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<header>
+<header class="sticky z-20 top-0">
     <nav class="bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-8">
                     <div class="flex items-center">
                         <a href="${pageContext.request.contextPath}/home">
-                            <span class="text-2xl font-bold text-blue-600">LabEdu</span>
+                            <span class="text-2xl font-bold text-blue-600">EduLAB</span>
                         </a>
                     </div>
                     <div class="">

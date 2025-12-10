@@ -10,9 +10,9 @@
         <!-- Bottom Bar -->
         <div class="flex flex-col md:flex-row justify-between items-center">
             <div class="flex items-center space-x-2 mb-4 md:mb-0">
-                <a href="${pageContext.request.contextPath}/courses"><span class="text-2xl font-bold text-blue-500">LabEdu</span></a>
+                <a href="${pageContext.request.contextPath}/courses"><span class="text-2xl font-bold text-blue-500">EduLAB</span></a>
             </div>
-            <p class="text-sm text-gray-300">Bản quyền thuộc về © 2025 LabEdu Inc.</p>
+            <p class="text-sm text-gray-300">Bản quyền thuộc về © 2025 EduLAB Inc.</p>
         </div>
     </div>
 </footer>

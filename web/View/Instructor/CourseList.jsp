@@ -234,8 +234,8 @@
                                                                         <span class="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 rounded">${course.category.name}</span>
                                                                         <span class="px-2 py-1 text-xs font-semibold ${course.status == 'Active' ? 'text-green-600 bg-green-100' : 'text-yellow-600 bg-yellow-100'} rounded">${course.status == "Active" ? "Hoạt động" : "Không hoạt động"}</span>
                                                                     </div>
-                                                                    <h3 class="text-xl font-bold text-gray-900 mb-2">${course.title}</h3>
-                                                                    <p class="text-sm text-gray-600 mb-3">${course.description}</p>
+                                                                    <h3 class="text-xl font-bold text-gray-900 mb-2 line-clamp-2">${course.title}</h3>
+                                                                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">${course.description}</p>
                                                                 </div>
                                                             </div>
 

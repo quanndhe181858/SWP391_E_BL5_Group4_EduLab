@@ -73,7 +73,7 @@
                                             <div class="relative h-48 overflow-hidden bg-white p-3">
                                                 <c:choose>
                                                     <c:when test="${not empty c.thumbnail}">
-                                                        <img src="${c.thumbnail}" alt="${c.title}" class="w-full h-full object-cover rounded-lg">
+                                                        <img src="${pageContext.request.contextPath}/${c.thumbnail}" alt="${c.title}" class="w-full h-full object-cover rounded-lg">
                                                     </c:when>
                                                     <c:otherwise>
                                                         <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg">

@@ -51,6 +51,19 @@ public class TraineeCoursesController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+
+        if (session != null) {
+            User u = (User) session.getAttribute("user");
+
+            if (u != null) {
+                if (u.getRole_id() == 2) {
+                    resp.sendRedirect(req.getContextPath() + "/instructor/courses");
+                    return;
+                }
+            }
+        }
+
         try {
             String qs = req.getQueryString();
 
@@ -103,11 +116,11 @@ public class TraineeCoursesController extends HttpServlet {
             boolean isEnrolled = _enrollDao.isEnrolled(userId, courseId);
 
             if (isEnrolled) {
-                resp.sendRedirect(req.getContextPath() + "/learn?courseId=" + courseId); 
+                resp.sendRedirect(req.getContextPath() + "/learn?courseId=" + courseId);
             } else {
                 boolean ok = _enrollDao.enrollCourse(courseId, userId, "Learning");
                 if (ok) {
-                    resp.sendRedirect(req.getContextPath() + "/learn?courseId=" + courseId); 
+                    resp.sendRedirect(req.getContextPath() + "/learn?courseId=" + courseId);
                 } else {
                     resp.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(),
                             userId + " " + isEnrolled);

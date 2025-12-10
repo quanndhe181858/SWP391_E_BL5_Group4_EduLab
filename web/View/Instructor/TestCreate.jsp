@@ -60,6 +60,13 @@
                         </c:choose>
                     </h1>
                     <p class="text-blue-100 mt-2">Quản lý và cấu hình bài kiểm tra cho khóa học</p>
+                    <div class="flex justify-end mb-4">
+                        <a href="${pageContext.request.contextPath}/managerTest"
+                           class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                            ⬅ Quay về danh sách Test
+                        </a>
+                    </div>
+
                 </div>
 
                 <div class="p-8">
@@ -262,13 +269,19 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 font-semibold">${t.code}</td>
                                     <td class="px-6 py-4 text-sm text-gray-700">${t.title}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <a href="${pageContext.request.contextPath}/instructor/test?action=edit&id=${t.id}"
-                                           class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 font-semibold rounded-lg hover:bg-blue-200 transition-colors">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                            Sửa
-                                        </a>
+                                        <c:choose>
+
+                                            <c:when test="${t.courseSectionId == 0}">
+                                                <a href="${pageContext.request.contextPath}/instructor/test-course?action=edit&id=${t.id}"
+                                                   class="btn-edit">Sửa</a>
+                                            </c:when>
+
+                                            <c:otherwise>
+                                                <a href="${pageContext.request.contextPath}/instructor/test?action=edit&id=${t.id}"
+                                                   class="btn-edit">Sửa</a>
+                                            </c:otherwise>
+
+                                        </c:choose>
                                     </td>
                                 </tr>
                             </c:forEach>
