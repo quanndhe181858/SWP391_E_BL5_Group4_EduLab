@@ -18,7 +18,7 @@ import model.Quiz;
 import model.Test;
 import model.User;
 
-@WebServlet(name = "InstructorTestController", urlPatterns = {"/instructor/test"})
+@WebServlet(name = "InstructorTestController", urlPatterns = {"/instructor/test"})//bai hoc
 public class InstructorTestController extends HttpServlet {
 
     private final TestsDAO testDAO = new TestsDAO();
@@ -223,7 +223,7 @@ public class InstructorTestController extends HttpServlet {
             processQuiz(mode, id, request);
         }
 
-        response.sendRedirect(request.getContextPath() + "/instructor/test");
+        response.sendRedirect(request.getContextPath() + "/managerTest");
     }
 
     private void processQuiz(String mode, int testId, HttpServletRequest request) {
