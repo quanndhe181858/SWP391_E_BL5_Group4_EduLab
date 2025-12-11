@@ -8,14 +8,14 @@ package controller.trainee;
 /**
  *
  * @author vomin
- */
+ */ 
 import dao.QuizAnswerDAO;
 import dao.QuizDAO;
 import dao.QuizTestDAO;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import model.Question;
+import model.Quiz;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,47 +28,44 @@ public class TakeTestController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String testIdRaw = req.getParameter("testId");
-        if (testIdRaw == null) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-
-        int testId;
-        try {
-            testId = Integer.parseInt(testIdRaw);
-        } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
+        int testId = Integer.parseInt(req.getParameter("testId"));
 
         QuizTestDAO quizTestDAO = new QuizTestDAO();
         QuizDAO quizDAO = new QuizDAO();
         QuizAnswerDAO answerDAO = new QuizAnswerDAO();
 
+        // Lấy danh sách quizId theo test
         List<Integer> quizIds = quizTestDAO.getQuizIdsByTest(testId);
-        List<Question> questions = new ArrayList<>();
 
-        for (int quizId : quizIds) {
-            Question q = quizDAO.getQuestionById(quizId);
-            if (q != null) {
-                q.setAnswers(answerDAO.getQuizAnswersByQuizId(quizId));
-                questions.add(q);
-            }
-        }
-
-        if (questions.isEmpty()) {
-            req.setAttribute("error", "This test has no questions yet.");
-            req.getRequestDispatcher("/error/empty-test.jsp")
-                    .forward(req, resp);
+        if (quizIds == null || quizIds.isEmpty()) {
+            req.setAttribute("error", "No quiz found for this test.");
+            req.getRequestDispatcher("/View/Error/error.jsp").forward(req, resp);
             return;
         }
 
-        req.setAttribute("questions", questions);
+        // Chuẩn hóa list Quiz + Answers
+        List<Quiz> quizList = new ArrayList<>();
+
+        for (int qId : quizIds) {
+            Quiz quiz = quizDAO.getQuizById(qId);
+
+            if (quiz != null) {
+                // TÊN HÀM ĐÚNG !!
+                quiz.setAnswers(answerDAO.getQuizAnswersByQuizId(qId));
+                quizList.add(quiz);
+            }
+        }
+
+        if (quizList.isEmpty()) {
+            req.setAttribute("error", "Quiz data is missing.");
+            req.getRequestDispatcher("/View/Error/error.jsp").forward(req, resp);
+            return;
+        }
+
+        req.setAttribute("quizList", quizList);
         req.setAttribute("testId", testId);
 
         req.getRequestDispatcher("/View/Trainee/TakeTest.jsp")
                 .forward(req, resp);
     }
 }
-
