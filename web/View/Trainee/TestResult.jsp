@@ -67,9 +67,10 @@
 </style>
 
 <div class="min-h-screen flex justify-center items-center bg-gray-100">
+    <!-- score, passed, allowRetake, testId đã có từ controller -->
+
     <div class="result-card">
 
-        <!-- SCORE -->
         <div class="score-circle <%= passed ? "score-pass" : "score-fail" %>">
             <%= String.format("%.1f", score) %> / 10
         </div>
@@ -79,26 +80,31 @@
         </h2>
 
         <p>
-            <%= passed
-                ? "Congratulations! You have passed the test."
-                : "You can retake the test if attempts remain." %>
+            <%= passed ? "Congratulations!" : "You can retake the test if attempts remain." %>
         </p>
 
-
         <% if (!passed && allowRetake) { %>
-        <form action="<%= request.getContextPath() %>/trainee/taketests" method="get">
+        <form action="<%= request.getContextPath() %>/trainee/taketest" method="get">
             <input type="hidden" name="testId" value="<%= testId %>">
             <button class="main-btn btn-retake">Retake Test</button>
         </form>
         <% } %>
 
-        
+        <% if (passed) { %>
+        <a href="<%= request.getContextPath() %>/trainee/view-certificate?testId=<%= testId %>"
+           class="main-btn btn-retake" style="background: #28a745">
+            View Certificate
+        </a>
+
+        <% } %>
+
         <a href="<%= request.getContextPath() %>/trainee/lesson-detail?testId=<%= testId %>"
            class="main-btn btn-back">
             Back to Lesson
         </a>
 
     </div>
+
 </div>
 
 <jsp:include page="/layout/footer.jsp" />
