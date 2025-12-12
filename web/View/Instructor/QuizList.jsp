@@ -9,63 +9,7 @@
                     <head>
                         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
                         <title>Quản lý câu hỏi - EduLab</title>
-                        <jsp:include page="/layout/import.jsp" />
-                        <style>
-                            .toast {
-                                visibility: hidden;
-                                min-width: 250px;
-                                text-align: center;
-                                border-radius: 8px;
-                                padding: 16px 24px;
-                                position: fixed;
-                                z-index: 1000;
-                                left: 50%;
-                                bottom: 30px;
-                                transform: translateX(-50%);
-                                font-weight: 500;
-                            }
-
-                            .toast.show {
-                                visibility: visible;
-                                animation: fadein 0.5s, fadeout 0.5s 2.5s;
-                            }
-
-                            .toast.error {
-                                background-color: #FEE2E2;
-                                color: #DC2626;
-                                border: 1px solid #FECACA;
-                            }
-
-                            .toast.success {
-                                background-color: #D1FAE5;
-                                color: #059669;
-                                border: 1px solid #A7F3D0;
-                            }
-
-                            @keyframes fadein {
-                                from {
-                                    bottom: 0;
-                                    opacity: 0;
-                                }
-
-                                to {
-                                    bottom: 30px;
-                                    opacity: 1;
-                                }
-                            }
-
-                            @keyframes fadeout {
-                                from {
-                                    bottom: 30px;
-                                    opacity: 1;
-                                }
-
-                                to {
-                                    bottom: 0;
-                                    opacity: 0;
-                                }
-                            }
-                        </style>
+        <jsp:include page="/layout/import.jsp" />
                     </head>
 
                     <body class="bg-gray-50">
@@ -457,25 +401,18 @@
                         </div>
 
                         <jsp:include page="/layout/footer.jsp" />
-                        <jsp:include page="/layout/importBottom.jsp" />
-        
-                        <% String notification=(String) session.getAttribute("notification");
-                            String nType=(String)
-                            session.getAttribute("notificationType");
-                            if (notification !=null) { %>
-                            <div id="snackbar" class="toast <%= nType %>">
-                                <%= notification %>
-                            </div>
-                            <script>
-                                var x = document.getElementById("snackbar");
-                                x.className += " show";
-                                setTimeout(function () {
-                                    x.className = x.className.replace(" show", "");
-                                }, 3000);
-                            </script>
-                            <% session.removeAttribute("notification");
-                                session.removeAttribute("notificationType"); }
-                                %>
+        <jsp:include page="/layout/importBottom.jsp" />
+
+        <% String notification=(String) session.getAttribute("notification");
+            String nType=(String)
+            session.getAttribute("notificationType");
+            if (notification !=null) { %>
+            <script>
+                showToast("<%= notification %>", "<%= nType != null ? nType : "info" %>", 3000, "right");
+            </script>
+            <% session.removeAttribute("notification");
+                session.removeAttribute("notificationType"); }
+                %>
 
                                 <script>
                                     // Submit filter form
