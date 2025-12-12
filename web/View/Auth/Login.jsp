@@ -110,10 +110,7 @@
                 </div>
             </div>
 
-            <p class="text-center text-white text-sm mt-6 opacity-90">
-                Bản quyền thuộc về © 2025 LabEdu.
-            </p>
-        </div>
+           
 
         <script>
             $(document).ready(function () {
