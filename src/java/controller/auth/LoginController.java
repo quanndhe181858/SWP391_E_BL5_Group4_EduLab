@@ -68,10 +68,13 @@ public class LoginController extends HttpServlet {
             int roleId = user.getRole_id();
 
             if (roleId == 1) {
-
+                // Admin redirect to user management
+                response.sendRedirect(request.getContextPath() + "/admin/users");
             } else if (roleId == 2) {
+                // Instructor redirect to courses
                 response.sendRedirect(request.getContextPath() + "/instructor/courses");
             } else {
+                // Trainee redirect to home
                 response.sendRedirect(request.getContextPath() + "/home");
             }
         }
