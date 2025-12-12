@@ -108,9 +108,11 @@ public class InstructorQuizAnswerController extends HttpServlet {
             } else {
                 switch (action) {
                     case "create":
+                    case "createAnswer":
                         createQuizAnswer(request, response);
                         break;
                     case "update":
+                    case "updateAnswer":
                         updateQuizAnswer(request, response);
                         break;
                     case "delete":
@@ -359,9 +361,19 @@ public class InstructorQuizAnswerController extends HttpServlet {
         QuizAnswer createdAnswer = quizAnswerDAO.createQuizAnswer(answer, user.getId());
 
         if (createdAnswer != null) {
-            session.setAttribute("notification", "Quiz answer created successfully!");
-            session.setAttribute("notificationType", "success");
-            response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            // Check if this is an AJAX request
+            String ajaxHeader = request.getHeader("X-Requested-With");
+            boolean isAjax = "XMLHttpRequest".equals(ajaxHeader);
+
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"success\": true, \"message\": \"Quiz answer created successfully!\"}");
+            } else {
+                session.setAttribute("notification", "Quiz answer created successfully!");
+                session.setAttribute("notificationType", "success");
+                response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
+            }
         } else {
             logger.log(Level.SEVERE, "Failed to create quiz answer for user: " + user.getId());
             response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
@@ -409,10 +421,16 @@ public class InstructorQuizAnswerController extends HttpServlet {
         // Get authorized user - we know this exists because authorization was checked in doPost
         User user = (User) session.getAttribute("user");
 
-        // Get form parameters
-        String idParam = request.getParameter("id");
+        // Get form parameters - check both parameter names for flexibility
+        String idParam = request.getParameter("answerId");
+        if (idParam == null || idParam.isEmpty()) {
+            idParam = request.getParameter("id");
+        }
         String quizIdParam = request.getParameter("quizId");
-        String isTrueParam = request.getParameter("isTrue");
+        String isTrueParam = request.getParameter("isCorrect");
+        if (isTrueParam == null || isTrueParam.isEmpty()) {
+            isTrueParam = request.getParameter("isTrue");
+        }
         String content = request.getParameter("content");
 
         // Validate answer ID
@@ -475,16 +493,33 @@ public class InstructorQuizAnswerController extends HttpServlet {
         // Update in database using the authorized user's ID
         QuizAnswer updatedAnswer = quizAnswerDAO.updateQuizAnswer(answer, user.getId());
 
+        // Check if this is an AJAX request
+        String ajaxHeader = request.getHeader("X-Requested-With");
+        boolean isAjax = "XMLHttpRequest".equals(ajaxHeader);
+
         if (updatedAnswer != null) {
-            session.setAttribute("notification", "Quiz answer updated successfully!");
-            session.setAttribute("notificationType", "success");
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"success\": true, \"message\": \"Quiz answer updated successfully!\"}");
+            } else {
+                session.setAttribute("notification", "Quiz answer updated successfully!");
+                session.setAttribute("notificationType", "success");
+                response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
+            }
         } else {
             logger.log(Level.SEVERE, "Failed to update quiz answer ID: " + answerId + " for user: " + user.getId());
-            session.setAttribute("notification", "Failed to update quiz answer. Please try again.");
-            session.setAttribute("notificationType", "error");
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\": false, \"message\": \"Failed to update quiz answer.\"}");
+            } else {
+                session.setAttribute("notification", "Failed to update quiz answer. Please try again.");
+                session.setAttribute("notificationType", "error");
+                response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            }
         }
-
-        response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
     }
 
     /**
@@ -495,8 +530,11 @@ public class InstructorQuizAnswerController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        // Get answer ID parameter
-        String idParam = request.getParameter("id");
+        // Get answer ID parameter - check both parameter names
+        String idParam = request.getParameter("answerId");
+        if (idParam == null || idParam.isEmpty()) {
+            idParam = request.getParameter("id");
+        }
 
         // Validate answer ID
         if (idParam == null || idParam.isEmpty()) {
@@ -520,19 +558,39 @@ public class InstructorQuizAnswerController extends HttpServlet {
             return;
         }
 
+        // Get quizId for redirect
+        int quizId = existingAnswer.getQuiz_id();
+
         // Delete from database
         boolean deleted = quizAnswerDAO.deleteQuizAnswer(answerId);
 
+        // Check if this is an AJAX request
+        String ajaxHeader = request.getHeader("X-Requested-With");
+        boolean isAjax = "XMLHttpRequest".equals(ajaxHeader);
+
         if (deleted) {
-            session.setAttribute("notification", "Quiz answer deleted successfully!");
-            session.setAttribute("notificationType", "success");
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"success\": true, \"message\": \"Quiz answer deleted successfully!\"}");
+            } else {
+                session.setAttribute("notification", "Quiz answer deleted successfully!");
+                session.setAttribute("notificationType", "success");
+                response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
+            }
         } else {
             logger.log(Level.SEVERE, "Failed to delete quiz answer ID: " + answerId);
-            session.setAttribute("notification", "Failed to delete quiz answer.");
-            session.setAttribute("notificationType", "error");
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                response.getWriter().write("{\"success\": false, \"message\": \"Failed to delete quiz answer.\"}");
+            } else {
+                session.setAttribute("notification", "Failed to delete quiz answer.");
+                session.setAttribute("notificationType", "error");
+                response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
+            }
         }
-
-        response.sendRedirect(request.getContextPath() + "/instructor/quiz-answers?action=list");
     }
 
     @Override

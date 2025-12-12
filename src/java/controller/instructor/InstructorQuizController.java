@@ -317,7 +317,7 @@ public class InstructorQuizController extends HttpServlet {
         List<Category> categories = categoryDAO.getCategories();
         request.setAttribute("categories", categories);
 
-        request.getRequestDispatcher("../View/Instructor/QuizCreate.jsp").forward(request, response);
+        request.getRequestDispatcher("../View/Instructor/QuizManage.jsp").forward(request, response);
     }
 
     /**
@@ -370,9 +370,10 @@ public class InstructorQuizController extends HttpServlet {
         Quiz createdQuiz = quizServices.createQuiz(quiz, user.getId());
 
         if (createdQuiz != null) {
-            session.setAttribute("notification", "Quiz created successfully!");
+            session.setAttribute("notification", "Câu hỏi đã được tạo thành công! Bây giờ bạn có thể thêm câu trả lời.");
             session.setAttribute("notificationType", "success");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            // Redirect to edit page to add answers
+            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + createdQuiz.getId());
         } else {
             logger.log(Level.SEVERE, "Failed to create quiz for user: " + user.getId());
             response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
@@ -396,8 +397,17 @@ public class InstructorQuizController extends HttpServlet {
             Quiz quiz = quizServices.getQuizById(quizId);
 
             if (quiz != null) {
+                // Get quiz answers
+                dao.QuizAnswerDAO quizAnswerDAO = new dao.QuizAnswerDAO();
+                List<model.QuizAnswer> quizAnswers = quizAnswerDAO.getQuizAnswersByQuizId(quizId);
+
+                // Get categories for dropdown
+                List<Category> categories = categoryDAO.getCategories();
+
                 request.setAttribute("quiz", quiz);
-                request.getRequestDispatcher("../View/Instructor/editQuiz.jsp").forward(request, response);
+                request.setAttribute("quizAnswers", quizAnswers);
+                request.setAttribute("categories", categories);
+                request.getRequestDispatcher("../View/Instructor/QuizManage.jsp").forward(request, response);
             } else {
                 response.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
             }

@@ -1,37 +1,39 @@
 <%-- Document : addQuiz Created on : Dec 5, 2024 Author : Le Minh Duc --%>
     <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <%@page contentType="text/html" pageEncoding="UTF-8" %>
-            <!DOCTYPE html>
-            <html>
+            <%@page import="java.util.List" %>
+                <%@page import="model.QuizAnswer" %>
+                    <!DOCTYPE html>
+                    <html>
 
-            <head>
-                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-                <title>Thêm câu hỏi mới - EduLab</title>
-                <jsp:include page="/layout/import.jsp" />
-            </head>
+                    <head>
+                        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                        <title>${quiz != null ? 'Chỉnh sửa câu hỏi' : 'Thêm câu hỏi mới'} - EduLab</title>
+                        <jsp:include page="/layout/import.jsp" />
+                    </head>
 
-            <body class="bg-gray-50">
-                <jsp:include page="/layout/header.jsp" />
+                    <body class="bg-gray-50">
+                        <jsp:include page="/layout/header.jsp" />
 
-                <div class="container mx-auto px-4 py-8">
-                    <div class="mb-8">
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                            <div>
-                                <div class="flex items-center gap-3 mb-2">
-                                    <a href="${pageContext.request.contextPath}/instructor/quizes?action=list"
-                                        class="inline-flex items-center text-gray-600 hover:text-blue-600 transition">
-                                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                                        </svg>
-                                        Quay lại danh sách câu hỏi
-                                    </a>
+                        <div class="container mx-auto px-4 py-8">
+                            <div class="mb-8">
+                                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <div>
+                                        <div class="flex items-center gap-3 mb-2">
+                                            <a href="${pageContext.request.contextPath}/instructor/quizes?action=list"
+                                               class="inline-flex items-center text-gray-600 hover:text-blue-600 transition">
+                                                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                                </svg>
+                                                Quay lại danh sách câu hỏi
+                                            </a>
+                                        </div>
+                                        <h1 class="text-3xl font-bold text-gray-900">${quiz != null ? 'Chỉnh sửa câu hỏi' : 'Thêm câu hỏi mới'}</h1>
+                                        <p class="text-lg text-gray-600 mt-1">${quiz != null ? 'Cập nhật thông tin và câu trả lời' : 'Tạo câu hỏi trắc nghiệm mới cho khóa học của bạn'}</p>
+                                    </div>
                                 </div>
-                                <h1 class="text-3xl font-bold text-gray-900">Thêm câu hỏi mới</h1>
-                                <p class="text-lg text-gray-600 mt-1">Tạo câu hỏi trắc nghiệm mới cho khóa học của bạn</p>
                             </div>
-                        </div>
-                    </div>
 
                     <div class="flex flex-col lg:flex-row gap-6">
                         <aside class="w-full lg:w-1/4">
@@ -123,41 +125,44 @@
 
                                             <form action="${pageContext.request.contextPath}/instructor/quizes"
                                                 method="POST">
-                                                <input type="hidden" name="action" value="create">
+                                                <input type="hidden" name="action" value="${quiz != null ? 'update' : 'create'}">
+                                                <c:if test="${quiz != null}">
+                                                    <input type="hidden" name="id" value="${quiz.id}">
+                                                </c:if>
 
                                                 <div class="mb-6">
                                                     <label for="question"
-                                                        class="block text-sm font-semibold text-gray-700 mb-2">
+                                                           class="block text-sm font-semibold text-gray-700 mb-2">
                                                         Câu hỏi <span class="text-red-500">*</span>
                                                     </label>
                                                     <textarea id="question" name="question" required rows="4"
-                                                        placeholder="Nhập nội dung câu hỏi tại đây..."
-                                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"><%= request.getParameter("question") != null ? request.getParameter("question") : "" %></textarea>
+                                                              placeholder="Nhập nội dung câu hỏi tại đây..."
+                                                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"><c:choose><c:when test="${quiz != null}">${quiz.question}</c:when><c:otherwise><%= request.getParameter("question") != null ? request.getParameter("question") : "" %></c:otherwise></c:choose></textarea>
                                                     <p class="mt-2 text-xs text-gray-500">Nhập đầy đủ nội dung câu hỏi. Hãy rõ ràng và cụ thể.</p>
                                                 </div>
 
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                                     <div>
                                                         <label for="type"
-                                                            class="block text-sm font-semibold text-gray-700 mb-2">
+                                                               class="block text-sm font-semibold text-gray-700 mb-2">
                                                             Loại câu hỏi <span class="text-red-500">*</span>
                                                         </label>
                                                         <select id="type" name="type" required
-                                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
                                                             <option value="">-- Chọn loại câu hỏi --</option>
-                                                            <option value="Multiple Choice" <%="Multiple Choice"
-                                                                .equals(request.getParameter("type")) ? "selected" : ""
-                                                                %>>
+                                                            <option value="Multiple Choice" 
+                                                                    <c:if test="${quiz != null && quiz.type == 'Multiple Choice'}">selected</c:if>
+                                                                    <%="Multiple Choice".equals(request.getParameter("type")) ? "selected" : "" %>>
                                                                 Trắc nghiệm
                                                             </option>
-                                                            <option value="True/False" <%="True/False"
-                                                                .equals(request.getParameter("type")) ? "selected" : ""
-                                                                %>>
+                                                            <option value="True/False" 
+                                                                    <c:if test="${quiz != null && quiz.type == 'True/False'}">selected</c:if>
+                                                                    <%="True/False".equals(request.getParameter("type")) ? "selected" : "" %>>
                                                                 Đúng/Sai
                                                             </option>
-                                                            <option value="Short Answer" <%="Short Answer"
-                                                                .equals(request.getParameter("type")) ? "selected" : ""
-                                                                %>>
+                                                            <option value="Short Answer" 
+                                                                    <c:if test="${quiz != null && quiz.type == 'Short Answer'}">selected</c:if>
+                                                                    <%="Short Answer".equals(request.getParameter("type")) ? "selected" : "" %>>
                                                                 Câu trả lời ngắn
                                                             </option>
                                                         </select>
@@ -166,15 +171,16 @@
 
                                                     <div>
                                                         <label for="categoryId"
-                                                            class="block text-sm font-semibold text-gray-700 mb-2">
+                                                               class="block text-sm font-semibold text-gray-700 mb-2">
                                                             Danh mục <span class="text-red-500">*</span>
                                                         </label>
                                                         <select id="categoryId" name="categoryId" required
-                                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
+                                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
                                                             <option value="">-- Chọn danh mục --</option>
                                                             <c:forEach var="cat" items="${categories}">
-                                                                <option value="${cat.id}" <c:if
-                                                                    test="${cat.id == param.categoryId}">selected</c:if>>
+                                                                <option value="${cat.id}" 
+                                                                        <c:if test="${quiz != null && cat.id == quiz.category_id}">selected</c:if>
+                                                                        <c:if test="${cat.id == param.categoryId}">selected</c:if>>
                                                                     ${cat.name}
                                                                 </option>
                                                             </c:forEach>
@@ -212,6 +218,92 @@
                 </div>
 
                 <jsp:include page="/layout/footer.jsp" />
+                <jsp:include page="/layout/importBottom.jsp" />
+
+                <c:if test="${not empty sessionScope.notification}">
+                    <script>
+                        showToast("${sessionScope.notification}", "${not empty sessionScope.notificationType ? sessionScope.notificationType : 'info'}", 3000, "right");
+                    </script>
+                    <c:remove var="notification" scope="session" />
+                    <c:remove var="notificationType" scope="session" />
+                </c:if>
+
+                <script>
+                    let answerCount = 0;
+
+                    function addAnswer() {
+                        answerCount++;
+                        const answersContainer = document.getElementById('answersContainer');
+                        
+                        const answerDiv = document.createElement('div');
+                        answerDiv.className = 'flex items-start gap-3 p-4 border border-gray-200 rounded-lg bg-gray-50';
+                        answerDiv.id = 'answer-' + answerCount;
+                        
+                        answerDiv.innerHTML = `
+                            <div class="flex items-center pt-2">
+                                <input type="checkbox" 
+                                       name="answerIsCorrect[]" 
+                                       value="${answerCount}"
+                                       class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                       title="Đánh dấu là câu trả lời đúng">
+                            </div>
+                            <div class="flex-grow">
+                                <label class="block text-xs font-medium text-gray-600 mb-1">
+                                    Câu trả lời #${answerCount}
+                                </label>
+                                <input type="text" 
+                                       name="answerContent[]" 
+                                       required
+                                       placeholder="Nhập nội dung câu trả lời..."
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <input type="hidden" name="answerIndex[]" value="${answerCount}">
+                            </div>
+                            <button type="button" 
+                                    onclick="removeAnswer(${answerCount})"
+                                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                                    title="Xóa câu trả lời">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        `;
+                        
+                        answersContainer.appendChild(answerDiv);
+                    }
+
+                    function removeAnswer(id) {
+                        const answerDiv = document.getElementById('answer-' + id);
+                        if (answerDiv) {
+                            answerDiv.remove();
+                        }
+                    }
+
+                    // Form validation
+                    document.querySelector('form').addEventListener('submit', function(e) {
+                        const answersContainer = document.getElementById('answersContainer');
+                        const answerDivs = answersContainer.querySelectorAll('[id^="answer-"]');
+                        
+                        if (answerDivs.length === 0) {
+                            e.preventDefault();
+                            showToast('Vui lòng thêm ít nhất một câu trả lời', 'warning', 3000, 'right');
+                            return false;
+                        }
+                        
+                        const checkedBoxes = answersContainer.querySelectorAll('input[name="answerIsCorrect[]"]:checked');
+                        if (checkedBoxes.length === 0) {
+                            e.preventDefault();
+                            showToast('Vui lòng chọn ít nhất một câu trả lời đúng', 'warning', 3000, 'right');
+                            return false;
+                        }
+                        
+                        return true;
+                    });
+
+                    // Add initial answer on page load
+                    document.addEventListener('DOMContentLoaded', function() {
+                        addAnswer();
+                    });
+                </script>
             </body>
 
             </html>
