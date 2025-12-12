@@ -317,7 +317,7 @@
                                                                     safeQuestion=questionText.replace("\"", "&quot;"
                                                                     ).replace("\n", " " ).replace("\r", ""
                                                                     ); } %>
-                                                        <a href="${pageContext.request.contextPath}/instructor/quiz-answers?action=list&addQuizId=<%= quiz.getId() %>"
+                                                        <a href="${pageContext.request.contextPath}/instructor/quizes?action=edit&id=<%= quiz.getId() %>#answers-section"
                                                            class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition"
                                                            title="Thêm câu trả lời cho câu hỏi này">
                                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

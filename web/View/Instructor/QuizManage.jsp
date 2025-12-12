@@ -4,7 +4,7 @@
 <%@page import="java.util.List" %>
 <%@page import="model.QuizAnswer" %>
 <!DOCTYPE html>
-<html>
+<html class="scroll-smooth">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <title>${quiz != null ? 'Chỉnh sửa câu hỏi' : 'Thêm câu hỏi mới'} - EduLab</title>
@@ -106,7 +106,7 @@
                 </div>
 
                 <!-- Answers Management Section -->
-                <div class="bg-white rounded-lg shadow-sm">
+                <div id="answers-section" class="bg-white rounded-lg shadow-sm scroll-mt-4">
                     <div class="p-6 border-b border-gray-200">
                         <div class="flex justify-between items-center">
                             <div>
@@ -302,6 +302,23 @@
     <script>
         const contextPath = '${pageContext.request.contextPath}';
         const quizId = '${quiz != null ? quiz.id : ''}';
+
+        // Scroll to answers section if hash is present
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.location.hash === '#answers-section') {
+                const answersSection = document.getElementById('answers-section');
+                if (answersSection) {
+                    setTimeout(() => {
+                        answersSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Optionally highlight the section briefly
+                        answersSection.classList.add('ring-2', 'ring-blue-500', 'ring-opacity-50');
+                        setTimeout(() => {
+                            answersSection.classList.remove('ring-2', 'ring-blue-500', 'ring-opacity-50');
+                        }, 2000);
+                    }, 300);
+                }
+            }
+        });
 
         function showAddAnswerModal() {
             document.getElementById('modalTitle').textContent = 'Thêm câu trả lời';
