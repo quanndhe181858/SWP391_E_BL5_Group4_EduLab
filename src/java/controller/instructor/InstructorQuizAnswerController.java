@@ -319,7 +319,7 @@ public class InstructorQuizAnswerController extends HttpServlet {
 
         // Get form parameters
         String quizIdParam = request.getParameter("quizId");
-        String isTrueParam = request.getParameter("isTrue");
+        String isTrueParam = request.getParameter("isCorrect");
         String content = request.getParameter("content");
 
         // Validate quiz ID
@@ -353,7 +353,7 @@ public class InstructorQuizAnswerController extends HttpServlet {
         // Create quiz answer object
         QuizAnswer answer = new QuizAnswer();
         answer.setQuiz_id(quizId);
-        answer.setIs_true("true".equalsIgnoreCase(isTrueParam));
+        answer.setIs_true("on".equalsIgnoreCase(isTrueParam));
         answer.setType(existingQuiz.getType() != null ? existingQuiz.getType() : "text"); // Use Quiz's type
         answer.setContent(content.trim());
 
@@ -428,9 +428,6 @@ public class InstructorQuizAnswerController extends HttpServlet {
         }
         String quizIdParam = request.getParameter("quizId");
         String isTrueParam = request.getParameter("isCorrect");
-        if (isTrueParam == null || isTrueParam.isEmpty()) {
-            isTrueParam = request.getParameter("isTrue");
-        }
         String content = request.getParameter("content");
 
         // Validate answer ID
@@ -486,7 +483,7 @@ public class InstructorQuizAnswerController extends HttpServlet {
         QuizAnswer answer = new QuizAnswer();
         answer.setId(answerId);
         answer.setQuiz_id(quizId);
-        answer.setIs_true("true".equalsIgnoreCase(isTrueParam));
+        answer.setIs_true("on".equalsIgnoreCase(isTrueParam));
         answer.setType(existingQuiz.getType() != null ? existingQuiz.getType() : "text"); // Use Quiz's type
         answer.setContent(content.trim());
 
