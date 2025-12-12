@@ -317,7 +317,7 @@ public class InstructorQuizController extends HttpServlet {
         List<Category> categories = categoryDAO.getCategories();
         request.setAttribute("categories", categories);
 
-        request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
+        request.getRequestDispatcher("../View/Instructor/QuizCreate.jsp").forward(request, response);
     }
 
     /**
