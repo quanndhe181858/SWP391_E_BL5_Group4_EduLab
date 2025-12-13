@@ -10,7 +10,6 @@ import dao.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,6 +20,8 @@ import model.User;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.fluent.Form;
 import org.apache.http.client.fluent.Request;
+import util.Hash;
+import util.RandomUtils;
 
 /**
  *
@@ -31,12 +32,11 @@ public class LoginGoogleController extends HttpServlet {
 
     static final ResourceBundle bundle = ResourceBundle.getBundle("configuration.google");
     static final UserDAO userDao = new UserDAO();
-    static final Random ran = new Random();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession();
+        HttpSession session = request.getSession(true);
         String code = request.getParameter("code");
         String accessToken = getToken(code);
 
@@ -56,9 +56,7 @@ public class LoginGoogleController extends HttpServlet {
         String email;
         String fName;
         String lName;
-        String phone;
         String avatar;
-        String gender = null;
 
         if (userInfo.has("emailAddresses") && userInfo.getAsJsonArray("emailAddresses").size() > 0) {
             JsonObject emailAddresses = userInfo.getAsJsonArray("emailAddresses").get(0).getAsJsonObject();
@@ -77,13 +75,6 @@ public class LoginGoogleController extends HttpServlet {
             fName = null;
         }
 
-        if (userInfo.has("phoneNumbers") && userInfo.getAsJsonArray("phoneNumbers").size() > 0) {
-            JsonObject phoneNumbers = userInfo.getAsJsonArray("phoneNumbers").get(0).getAsJsonObject();
-            phone = phoneNumbers.get("value").getAsString();
-        } else {
-            phone = null;
-        }
-
         if (userInfo.has("photos") && userInfo.getAsJsonArray("photos").size() > 0) {
             JsonObject photos = userInfo.getAsJsonArray("photos").get(0).getAsJsonObject();
             avatar = photos.get("url").getAsString();
@@ -91,23 +82,11 @@ public class LoginGoogleController extends HttpServlet {
             avatar = null;
         }
 
-        if (userInfo.has("genders") && userInfo.getAsJsonArray("genders").size() > 0) {
-            JsonObject genders = userInfo.getAsJsonArray("genders").get(0).getAsJsonObject();
-            if (genders.get("value").getAsString().equalsIgnoreCase("male")) {
-                gender = "M";
-            }
-            if (genders.get("value").getAsString().equalsIgnoreCase("female")) {
-                gender = "F";
-            }
-        } else {
-            gender = null;
-        }
-
         if (email == null) {
-            request.setAttribute("msg", "Invalid google account can not login/register!");
-            request.getRequestDispatcher("public/Login.jsp").forward(request, response);
+            request.setAttribute("msg", "Tài khoản google có vấn đề, không thể đăng nhập bằng phương thức này!");
+            request.getRequestDispatcher("View/Auth/Login.jsp").forward(request, response);
         } else {
-            doAuthorizeGoogleUser(email, fName, lName, phone, gender, avatar, session, request, response);
+            doAuthorizeGoogleUser(email, fName, lName, avatar, session, request, response);
         }
 
     }
@@ -140,10 +119,56 @@ public class LoginGoogleController extends HttpServlet {
         return googleUser;
     }
 
-    private void doAuthorizeGoogleUser(String email, String fName, String lName, String phone, String gender, String avatar,
+    private void doAuthorizeGoogleUser(String email, String fName, String lName, String avatar,
             HttpSession session, HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
-    }
+        boolean isEmailExisted = userDao.isEmailExisted(email);
+        if (isEmailExisted) {
+            User u = userDao.getAuthUserByEmail(email);
 
+            if (!"Active".equals(u.getStatus())) {
+                String msg = "Tài khoản đã bị khoá, vui lòng liên hệ quản trị viên.";
+                request.setAttribute("msg", msg);
+                request.getRequestDispatcher("View/Auth/Login.jsp").forward(request, response);
+            }
+
+            session.setAttribute("user", u);
+
+            int roleId = u.getRole_id();
+
+            switch (roleId) {
+                case 1 ->
+                    response.sendRedirect(request.getContextPath() + "/admin_dashboard");
+                case 2 ->
+                    response.sendRedirect(request.getContextPath() + "/instructor/courses");
+                default ->
+                    response.sendRedirect(request.getContextPath() + "/home");
+            }
+        } else {
+            String random_string = RandomUtils.getRandomString(8);
+            String hash_password = Hash.sha512(random_string);
+
+            User u = new User();
+            u.setFirst_name(fName);
+            u.setLast_name(lName);
+            u.setEmail(email);
+            u.setHash_password(hash_password);
+
+            userDao.doRegister(u);
+            User newU = userDao.getAuthUserByEmail(email);
+
+            session.setAttribute("user", newU);
+
+            int roleId = u.getRole_id();
+
+            switch (roleId) {
+                case 1 ->
+                    response.sendRedirect(request.getContextPath() + "/admin_dashboard");
+                case 2 ->
+                    response.sendRedirect(request.getContextPath() + "/instructor/courses");
+                default ->
+                    response.sendRedirect(request.getContextPath() + "/home");
+            }
+        }
+    }
 }
