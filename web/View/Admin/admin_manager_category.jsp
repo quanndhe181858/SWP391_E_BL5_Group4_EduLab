@@ -219,20 +219,44 @@
                             placeholder="Mô tả về danh mục này..."></textarea>
                         <p class="text-xs text-gray-500 mt-1">Tối đa 500 ký tự</p>
                     </div>
-
-                    <!-- ID DANH MỤC CHA -->
+                    <!-- CATEGORY TYPE -->
                     <div>
-                        <label for="categoryParentId" class="block text-sm font-semibold text-gray-700 mb-2">
-                            ID Danh mục cha
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Loại danh mục <span class="text-red-500">*</span>
                         </label>
-                        <input 
-                            type="number" 
+
+                        <div class="flex gap-6">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="category_type" value="parent" checked
+                                       onchange="toggleParentSelect()">
+                                <span>Danh mục cha</span>
+                            </label>
+
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="category_type" value="child"
+                                       onchange="toggleParentSelect()">
+                                <span>Danh mục con</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="parentSelectWrapper" class="hidden">
+                        <label for="categoryParentId" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Danh mục cha <span class="text-red-500">*</span>
+                        </label>
+
+                        <select 
                             id="categoryParentId"
-                            name="parent_id" 
-                            min="0"
-                            value="0"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                            placeholder="Nhập số">
+                            name="parent_id"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg
+                            focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">— Chọn danh mục cha —</option>
+                            <c:forEach var="p" items="${listcategory}">
+                                <c:if test="${p.parent_id == 0}">
+                                    <option value="${p.id}">${p.name}</option>
+                                </c:if>
+                            </c:forEach>
+                        </select>
                     </div>
 
                     <!-- ACTION BUTTONS -->
@@ -254,6 +278,7 @@
             </div>
         </div>
 
+
         <script>
             function openAddModal() {
                 document.getElementById("categoryForm").reset();
@@ -261,7 +286,10 @@
                 document.getElementById("categoryId").value = "";
                 document.getElementById("categoryName").value = "";
                 document.getElementById("categoryDescription").value = "";
-                document.getElementById("categoryParentId").value = "0";
+
+                document.querySelector("input[value='parent']").checked = true;
+                toggleParentSelect();
+
                 document.getElementById("modalTitle").textContent = "Thêm danh mục mới";
                 document.getElementById("submitBtn").textContent = "Tạo danh mục";
                 document.getElementById("categoryModal").classList.remove("hidden");
@@ -275,7 +303,14 @@
                 document.getElementById("categoryId").value = id;
                 document.getElementById("categoryName").value = name || "";
                 document.getElementById("categoryDescription").value = description || "";
-                document.getElementById("categoryParentId").value = parentId || "0";
+                if (parentId && parentId > 0) {
+                    document.querySelector("input[value='child']").checked = true;
+                    toggleParentSelect();
+                    document.getElementById("categoryParentId").value = parentId;
+                } else {
+                    document.querySelector("input[value='parent']").checked = true;
+                    toggleParentSelect();
+                }
                 document.getElementById("modalTitle").textContent = "Chỉnh sửa danh mục";
                 document.getElementById("submitBtn").textContent = "Cập nhật";
                 document.getElementById("categoryModal").classList.remove("hidden");
@@ -288,7 +323,20 @@
                 document.getElementById("categoryModal").classList.add("hidden");
                 document.getElementById("categoryForm").reset();
             }
+            function toggleParentSelect() {
+                const type = document.querySelector("input[name='category_type']:checked").value;
+                const wrapper = document.getElementById("parentSelectWrapper");
+                const parentSelect = document.getElementById("categoryParentId");
 
+                if (type === "child") {
+                    wrapper.classList.remove("hidden");
+                    parentSelect.required = true;
+                } else {
+                    wrapper.classList.add("hidden");
+                    parentSelect.required = false;
+                    parentSelect.value = "";
+                }
+            }
             function confirmDelete(id, name) {
                 if (confirm('Bạn có chắc chắn muốn xóa danh mục "' + name + '"?\n\nHành động này không thể hoàn tác!')) {
                     const form = document.createElement('form');
