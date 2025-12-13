@@ -125,8 +125,116 @@ public class CategoryDAO extends dao {
             this.log(Level.SEVERE, e.getMessage(), e);
             return null;
         }
-        
+
         return ids;
     }
 
+    public List<Category> searchCategories(String keyword) {
+        List<Category> list = new ArrayList<>();
+
+        String sql = """
+        SELECT *
+        FROM category
+        WHERE name LIKE ?
+        ORDER BY id DESC
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setString(1, "%" + keyword + "%");
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Category c = new Category();
+                c.setId(rs.getInt("id"));
+                c.setName(rs.getString("name"));
+                c.setDescription(rs.getString("description"));
+                c.setParent_id(rs.getInt("parent_id"));
+                list.add(c);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error searchCategories()", e);
+        } finally {
+            this.closeResources();
+        }
+
+        return list;
+    }
+
+    public boolean createCategory(Category category) {
+        String sql = "INSERT INTO category (name, description, parent_id) VALUES (?, ?, ?)";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setString(1, category.getName());
+            ps.setString(2, category.getDescription());
+            ps.setInt(3, category.getParent_id());
+
+            int rows = ps.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error createCategory()", e);
+            return false;
+        } finally {
+            this.closeResources();
+        }
+    }
+
+    public boolean updateCategory(Category category) {
+        String sql = "UPDATE category SET name = ?, description = ?, parent_id = ? WHERE id = ?";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setString(1, category.getName());
+            ps.setString(2, category.getDescription());
+            ps.setInt(3, category.getParent_id());
+            ps.setInt(4, category.getId());
+
+            int rows = ps.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error updateCategory()", e);
+            return false;
+        } finally {
+            this.closeResources();
+        }
+    }
+
+    public boolean deleteCategory(int categoryId) {
+        // Kiểm tra xem có khóa học nào phụ thuộc không
+        String checkSql = "SELECT COUNT(*) FROM course WHERE category_id = ?";
+        String deleteSql = "DELETE FROM category WHERE id = ?";
+
+        try {
+            con = dbc.getConnection();
+
+            // Kiểm tra khóa học phụ thuộc
+            ps = con.prepareStatement(checkSql);
+            ps.setInt(1, categoryId);
+            rs = ps.executeQuery();
+
+            if (rs.next() && rs.getInt(1) > 0) {
+                // Có khóa học phụ thuộc, không thể xóa
+                return false;
+            }
+
+            // Xóa category
+            ps = con.prepareStatement(deleteSql);
+            ps.setInt(1, categoryId);
+            int rows = ps.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error deleteCategory()", e);
+            return false;
+        } finally {
+            this.closeResources();
+        }
+    }
 }
