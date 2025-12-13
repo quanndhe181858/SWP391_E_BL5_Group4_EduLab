@@ -6,7 +6,7 @@
 
             <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-                <title>Add New Quiz - EduLab</title>
+                <title>Thêm câu hỏi mới - EduLab</title>
                 <jsp:include page="/layout/import.jsp" />
             </head>
 
@@ -14,7 +14,6 @@
                 <jsp:include page="/layout/header.jsp" />
 
                 <div class="container mx-auto px-4 py-8">
-                    <!-- Page Header -->
                     <div class="mb-8">
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div>
@@ -25,20 +24,19 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                                         </svg>
-                                        Back to Quiz List
+                                        Quay lại danh sách câu hỏi
                                     </a>
                                 </div>
-                                <h1 class="text-3xl font-bold text-gray-900">Add New Quiz</h1>
-                                <p class="text-lg text-gray-600 mt-1">Create a new quiz question for your courses</p>
+                                <h1 class="text-3xl font-bold text-gray-900">Thêm câu hỏi mới</h1>
+                                <p class="text-lg text-gray-600 mt-1">Tạo câu hỏi trắc nghiệm mới cho khóa học của bạn</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="flex flex-col lg:flex-row gap-6">
-                        <!-- Sidebar Info -->
                         <aside class="w-full lg:w-1/4">
                             <div class="bg-white p-6 rounded-lg shadow-sm sticky top-4">
-                                <h2 class="text-xl font-bold text-gray-900 mb-6">Guidelines</h2>
+                                <h2 class="text-xl font-bold text-gray-900 mb-6">Hướng dẫn</h2>
 
                                 <div class="space-y-4">
                                     <div class="flex items-start gap-3">
@@ -52,9 +50,8 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <h3 class="text-sm font-semibold text-gray-900">Clear Questions</h3>
-                                            <p class="text-xs text-gray-600">Write clear and concise questions that are
-                                                easy to understand.</p>
+                                            <h3 class="text-sm font-semibold text-gray-900">Câu hỏi rõ ràng</h3>
+                                            <p class="text-xs text-gray-600">Viết câu hỏi rõ ràng, ngắn gọn và dễ hiểu.</p>
                                         </div>
                                     </div>
 
@@ -68,9 +65,8 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <h3 class="text-sm font-semibold text-gray-900">Choose Right Type</h3>
-                                            <p class="text-xs text-gray-600">Select the appropriate question type based
-                                                on the answer format.</p>
+                                            <h3 class="text-sm font-semibold text-gray-900">Chọn đúng loại</h3>
+                                            <p class="text-xs text-gray-600">Chọn loại câu hỏi phù hợp dựa trên định dạng câu trả lời.</p>
                                         </div>
                                     </div>
 
@@ -85,9 +81,8 @@
                                             </svg>
                                         </div>
                                         <div>
-                                            <h3 class="text-sm font-semibold text-gray-900">Proper Category</h3>
-                                            <p class="text-xs text-gray-600">Categorize your quiz for better
-                                                organization and filtering.</p>
+                                            <h3 class="text-sm font-semibold text-gray-900">Danh mục phù hợp</h3>
+                                            <p class="text-xs text-gray-600">Phân loại câu hỏi để tổ chức và lọc tốt hơn.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -95,24 +90,20 @@
                                 <hr class="my-6 border-gray-200">
 
                                 <div class="bg-blue-50 p-4 rounded-lg">
-                                    <h3 class="text-sm font-semibold text-blue-900 mb-2">Need Help?</h3>
-                                    <p class="text-xs text-blue-700">Check out our documentation for tips on creating
-                                        effective quiz questions.</p>
+                                    <h3 class="text-sm font-semibold text-blue-900 mb-2">Cần trợ giúp?</h3>
+                                    <p class="text-xs text-blue-700">Xem tài liệu của chúng tôi để biết các mẹo tạo câu hỏi hiệu quả.</p>
                                 </div>
                             </div>
                         </aside>
 
-                        <!-- Main Form -->
                         <main class="w-full lg:w-3/4">
                             <div class="bg-white rounded-lg shadow-sm">
                                 <div class="p-6 border-b border-gray-200">
-                                    <h2 class="text-xl font-bold text-gray-900">Quiz Details</h2>
-                                    <p class="text-sm text-gray-600 mt-1">Fill in the information below to create your
-                                        quiz question</p>
+                                    <h2 class="text-xl font-bold text-gray-900">Chi tiết câu hỏi</h2>
+                                    <p class="text-sm text-gray-600 mt-1">Điền thông tin bên dưới để tạo câu hỏi của bạn</p>
                                 </div>
 
                                 <div class="p-6">
-                                    <!-- Error Message -->
                                     <% if (request.getAttribute("error") !=null) { %>
                                         <div
                                             class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
@@ -122,7 +113,7 @@
                                                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
                                             <div>
-                                                <h3 class="text-sm font-semibold text-red-800">Error</h3>
+                                                <h3 class="text-sm font-semibold text-red-800">Lỗi</h3>
                                                 <p class="text-sm text-red-700">
                                                     <%= request.getAttribute("error") %>
                                                 </p>
@@ -134,110 +125,64 @@
                                                 method="POST">
                                                 <input type="hidden" name="action" value="create">
 
-                                                <!-- Question Field -->
                                                 <div class="mb-6">
                                                     <label for="question"
                                                         class="block text-sm font-semibold text-gray-700 mb-2">
-                                                        Question <span class="text-red-500">*</span>
+                                                        Câu hỏi <span class="text-red-500">*</span>
                                                     </label>
                                                     <textarea id="question" name="question" required rows="4"
-                                                        placeholder="Enter your quiz question here..."
+                                                        placeholder="Nhập nội dung câu hỏi tại đây..."
                                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"><%= request.getParameter("question") != null ? request.getParameter("question") : "" %></textarea>
-                                                    <p class="mt-2 text-xs text-gray-500">Enter the complete question
-                                                        text. Be clear and specific.</p>
+                                                    <p class="mt-2 text-xs text-gray-500">Nhập đầy đủ nội dung câu hỏi. Hãy rõ ràng và cụ thể.</p>
                                                 </div>
 
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                                    <!-- Type Field -->
                                                     <div>
                                                         <label for="type"
                                                             class="block text-sm font-semibold text-gray-700 mb-2">
-                                                            Question Type <span class="text-red-500">*</span>
+                                                            Loại câu hỏi <span class="text-red-500">*</span>
                                                         </label>
                                                         <select id="type" name="type" required
                                                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
-                                                            <option value="">-- Select Question Type --</option>
+                                                            <option value="">-- Chọn loại câu hỏi --</option>
                                                             <option value="Multiple Choice" <%="Multiple Choice"
                                                                 .equals(request.getParameter("type")) ? "selected" : ""
                                                                 %>>
-                                                                Multiple Choice
+                                                                Trắc nghiệm
                                                             </option>
                                                             <option value="True/False" <%="True/False"
                                                                 .equals(request.getParameter("type")) ? "selected" : ""
                                                                 %>>
-                                                                True/False
+                                                                Đúng/Sai
                                                             </option>
                                                             <option value="Short Answer" <%="Short Answer"
                                                                 .equals(request.getParameter("type")) ? "selected" : ""
                                                                 %>>
-                                                                Short Answer
-                                                            </option>
-                                                            <option value="Essay" <%="Essay"
-                                                                .equals(request.getParameter("type")) ? "selected" : ""
-                                                                %>>
-                                                                Essay
-                                                            </option>
-                                                            <option value="Fill in the Blank" <%="Fill in the Blank"
-                                                                .equals(request.getParameter("type")) ? "selected" : ""
-                                                                %>>
-                                                                Fill in the Blank
-                                                            </option>
-                                                            <option value="Matching" <%="Matching"
-                                                                .equals(request.getParameter("type")) ? "selected" : ""
-                                                                %>>
-                                                                Matching
+                                                                Câu trả lời ngắn
                                                             </option>
                                                         </select>
-                                                        <p class="mt-2 text-xs text-gray-500">Select the type of
-                                                            question format.</p>
+                                                        <p class="mt-2 text-xs text-gray-500">Chọn định dạng cho câu hỏi.</p>
                                                     </div>
 
-                                                    <!-- Category Field -->
                                                     <div>
                                                         <label for="categoryId"
                                                             class="block text-sm font-semibold text-gray-700 mb-2">
-                                                            Category <span class="text-red-500">*</span>
+                                                            Danh mục <span class="text-red-500">*</span>
                                                         </label>
                                                         <select id="categoryId" name="categoryId" required
                                                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
-                                                            <option value="">-- Select Category --</option>
-                                                            <option value="1" <%="1"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                Programming
-                                                            </option>
-                                                            <option value="2" <%="2"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                Mathematics
-                                                            </option>
-                                                            <option value="3" <%="3"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                Science
-                                                            </option>
-                                                            <option value="4" <%="4"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                History
-                                                            </option>
-                                                            <option value="5" <%="5"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                Language Arts
-                                                            </option>
-                                                            <option value="6" <%="6"
-                                                                .equals(request.getParameter("categoryId")) ? "selected"
-                                                                : "" %>>
-                                                                Business
-                                                            </option>
+                                                            <option value="">-- Chọn danh mục --</option>
+                                                            <c:forEach var="cat" items="${categories}">
+                                                                <option value="${cat.id}" <c:if
+                                                                    test="${cat.id == param.categoryId}">selected</c:if>>
+                                                                    ${cat.name}
+                                                                </option>
+                                                            </c:forEach>
                                                         </select>
-                                                        <p class="mt-2 text-xs text-gray-500">Choose the category for
-                                                            organization.</p>
+                                                        <p class="mt-2 text-xs text-gray-500">Chọn danh mục để sắp xếp.</p>
                                                     </div>
                                                 </div>
 
-                                                <!-- Form Actions -->
                                                 <div
                                                     class="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
                                                     <button type="submit"
@@ -247,7 +192,7 @@
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 stroke-width="2" d="M12 4v16m8-8H4"></path>
                                                         </svg>
-                                                        Create Quiz
+                                                        Tạo câu hỏi
                                                     </button>
                                                     <a href="${pageContext.request.contextPath}/instructor/quizes?action=list"
                                                         class="inline-flex items-center justify-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">
@@ -256,7 +201,7 @@
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                                         </svg>
-                                                        Cancel
+                                                        Hủy
                                                     </a>
                                                 </div>
                                             </form>

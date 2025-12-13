@@ -46,9 +46,13 @@
                                         type="text" 
                                         id="title" 
                                         name="title" 
+                                        maxlength="200"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         placeholder="Ví dụ: Lập trình Web từ A đến Z"
                                         required>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <span id="titleCount">0</span>/200 ký tự
+                                    </p>
                                 </div>
 
                                 <div>
@@ -58,10 +62,14 @@
                                     <textarea 
                                         id="description" 
                                         name="description" 
-                                        rows="5"
+                                        rows="10"
+                                        maxlength="2000"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                                         placeholder="Mô tả chi tiết về nội dung khoá học, những gì học sinh sẽ học được..."
                                         required></textarea>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <span id="descCount">0</span>/2000 ký tự
+                                    </p>
                                 </div>
 
                                 <div>
@@ -216,8 +224,33 @@
                     const categoryId = $('#categoryId').val();
                     const thumbnail = $('#thumbnail')[0].files[0];
 
-                    if (!title || !description || !categoryId) {
-                        showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error', 2500);
+                    if (!title) {
+                        showToast('Tên khoá học không được để trống', 'error', 2500);
+                        $('#title').focus();
+                        return false;
+                    }
+
+                    if (title.length > 200) {
+                        showToast('Tên khoá học không được vượt quá 200 ký tự', 'error', 2500);
+                        $('#title').focus();
+                        return false;
+                    }
+
+                    if (!description) {
+                        showToast('Mô tả khoá học không được để trống', 'error', 2500);
+                        $('#description').focus();
+                        return false;
+                    }
+
+                    if (description.length > 2000) {
+                        showToast('Mô tả khoá học không được vượt quá 500 ký tự', 'error', 2500);
+                        $('#description').focus();
+                        return false;
+                    }
+
+                    if (!categoryId) {
+                        showToast('Vui lòng chọn đề mục', 'error', 2500);
+                        $('#categoryId').focus();
                         return false;
                     }
 
@@ -291,6 +324,16 @@
                         return message;
                     }
                 });
+            });
+
+            $('#title').on('input', function () {
+                const length = $(this).val().length;
+                $('#titleCount').text(length);
+            });
+
+            $('#description').on('input', function () {
+                const length = $(this).val().length;
+                $('#descCount').text(length);
             });
         </script>
     </body>

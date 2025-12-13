@@ -4,90 +4,142 @@ import dao.CourseDAO;
 import dao.CourseSectionDAO;
 import dao.QuizDAO;
 import dao.QuizTestDAO;
-import dao.TestDAO;
+import dao.TestsDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import model.Quiz;
 import model.Test;
+import model.User;
 
-@WebServlet(name = "InstructorTestController", urlPatterns = {"/instructor/test"})
+@WebServlet(name = "InstructorTestController", urlPatterns = {"/instructor/test"})//bai hoc
 public class InstructorTestController extends HttpServlet {
 
-    private final TestDAO testDAO = new TestDAO();
+    private final TestsDAO testDAO = new TestsDAO();
     private final QuizDAO quizDAO = new QuizDAO();
     private final QuizTestDAO quizTestDAO = new QuizTestDAO();
     private final CourseDAO courseDAO = new CourseDAO();
     private final CourseSectionDAO sectionDAO = new CourseSectionDAO();
 
     private Integer getInt(HttpServletRequest req, String name) {
-        String raw = req.getParameter(name);
-        return (raw == null || raw.isBlank()) ? null : Integer.parseInt(raw);
+        try {
+            String raw = req.getParameter(name);
+            return (raw == null || raw.isBlank()) ? null : Integer.parseInt(raw);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int instructorId = 1;
+        HttpSession session = request.getSession(false);
 
-        // Load course list
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        User u = (User) session.getAttribute("user");
+
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        if (u.getRole_id() != 2) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        int instructorId = u.getId();
+
         var courses = courseDAO.getCoursesByInstructorId(
                 999, 0, "", "", 0, "", "", instructorId);
-
         request.setAttribute("courses", courses);
 
-        // Determine selected course
         Integer selectedCourse = getInt(request, "courseId");
 
         if (selectedCourse == null && !courses.isEmpty()) {
-            selectedCourse = courses.get(0).getId();   // CHỌN KHÓA ĐẦU TIÊN
+            selectedCourse = courses.get(0).getId();
         }
 
         request.setAttribute("selectedCourse", selectedCourse);
-
-        // Load section theo selectedCourse
-        var sections = sectionDAO.getAllCourseSectionsByCourseId(selectedCourse);
-        request.setAttribute("sections", sections);
-
-        // Load quiz
+        request.setAttribute("sections", sectionDAO.getAllCourseSectionsByCourseId(selectedCourse));
         request.setAttribute("quizList", quizDAO.getAllQuizzes());
-
-        // Load tests
         request.setAttribute("testList", testDAO.getTestsByInstructor(instructorId));
 
-        // EDIT MODE
         String action = request.getParameter("action");
-        if ("edit".equals(action)) {
-            Integer id = getInt(request, "id");
-            if (id != null) {
-                Test t = testDAO.getById(id);
-                request.setAttribute("editTest", t);
+        Integer id = getInt(request, "id");
 
-                selectedCourse = t.getCourseId();
-                request.setAttribute("selectedCourse", selectedCourse);
+        if ("edit".equals(action) && id != null) {
 
-                request.setAttribute("sections",
-                        sectionDAO.getAllCourseSectionsByCourseId(selectedCourse));
+            Test t = testDAO.getById(id);
 
-                request.setAttribute("selectedQuizIds",
-                        quizTestDAO.getQuizIdsByTest(id));
+            if (t.getCourseSectionId() == 0) {
+                response.sendRedirect(request.getContextPath()
+                        + "/instructor/test-course?action=edit&id=" + id);
+                return;
             }
+
+            request.setAttribute("editTest", t);
+            request.setAttribute("selectedCourse", t.getCourseId());
+            request.setAttribute("sections",
+                    sectionDAO.getAllCourseSectionsByCourseId(t.getCourseId()));
+            request.setAttribute("selectedQuizIds",
+                    quizTestDAO.getQuizIdsByTest(id));
+        } else if ("view".equals(action) && id != null) {
+            Test t = testDAO.getById(id);
+
+            if (t.getCourseSectionId() == 0) {
+                response.sendRedirect(request.getContextPath()
+                        + "/instructor/test-course?action=edit&id=" + id);
+                return;
+            }
+
+            request.setAttribute("editTest", t);
+            request.setAttribute("selectedCourse", t.getCourseId());
+            request.setAttribute("sections",
+                    sectionDAO.getAllCourseSectionsByCourseId(t.getCourseId()));
+            request.setAttribute("selectedQuizIds",
+                    quizTestDAO.getQuizIdsByTest(id));
         }
 
-        request.getRequestDispatcher("/View/Instructor/TestCreate.jsp").forward(request, response);
+        request.getRequestDispatcher("/View/Instructor/TestCreate.jsp")
+                .forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        int instructorId = 1;
+        HttpSession session = request.getSession(false);
+
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        User u = (User) session.getAttribute("user");
+
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        if (u.getRole_id() != 2) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        int instructorId = u.getId();
 
         String action = request.getParameter("action");
         String mode = request.getParameter("mode");
@@ -103,13 +155,12 @@ public class InstructorTestController extends HttpServlet {
 
         Integer duration = getInt(request, "duration");
         Integer minGrade = getInt(request, "minGrade");
-
         String code = request.getParameter("code");
         String title = request.getParameter("title");
         String desc = request.getParameter("description");
 
-        // CREATE
         if ("create".equals(action)) {
+
             Test t = new Test();
             t.setCode(code);
             t.setTitle(title);
@@ -120,9 +171,17 @@ public class InstructorTestController extends HttpServlet {
             t.setCourseSectionId(sectionId);
             t.setCreatedBy(instructorId);
             t.setUpdatedBy(instructorId);
-
+            if (testDAO.isCodeOrTitleExisted(code, title, null)) {
+                request.setAttribute("error", "Code hoặc tiêu đề đã tồn tại.");
+                doGet(request, response);
+                return;
+            }
+            if (testDAO.isSectionTestExisted(courseId, sectionId, null)) {
+                request.setAttribute("error", "Bài học này đã có bài test.");
+                doGet(request, response);
+                return;
+            }
             int id = testDAO.createTest(t);
-
             if (id <= 0) {
                 request.setAttribute("error", "Không thể tạo test");
                 doGet(request, response);
@@ -132,7 +191,6 @@ public class InstructorTestController extends HttpServlet {
             processQuiz(mode, id, request);
         }
 
-        // UPDATE
         if ("update".equals(action)) {
 
             Integer id = getInt(request, "id");
@@ -147,45 +205,57 @@ public class InstructorTestController extends HttpServlet {
             t.setCourseId(courseId);
             t.setCourseSectionId(sectionId);
             t.setUpdatedBy(instructorId);
-
+            if (testDAO.isCodeOrTitleExisted(code, title, id)) {
+                request.setAttribute("error", "Code hoặc tiêu đề đã tồn tại.");
+                doGet(request, response);
+                return;
+            }
+            if (testDAO.isSectionTestExisted(courseId, sectionId, id)) {
+                request.setAttribute("error", "Mỗi bài học chỉ được có 1 bài test.");
+                doGet(request, response);
+                return;
+            }
             testDAO.updateTest(t);
-            quizTestDAO.deleteQuizByTest(id);
 
+            quizTestDAO.deleteQuizByTest(id);
+            
+            
             processQuiz(mode, id, request);
         }
 
-        response.sendRedirect(request.getContextPath() + "/instructor/test");
+        response.sendRedirect(request.getContextPath() + "/managerTest");
     }
 
-   private void processQuiz(String mode, int testId, HttpServletRequest request) {
+    private void processQuiz(String mode, int testId, HttpServletRequest request) {
 
-    // ===== CUSTOM MODE =====
-    if ("custom".equals(mode)) {
-        String[] quizIds = request.getParameterValues("quizId");
-        if (quizIds != null) {
-            for (String q : quizIds) {
-                quizTestDAO.addQuizToTest(testId, Integer.parseInt(q));
+        if ("custom".equals(mode)) {
+            String[] quizIds = request.getParameterValues("quizId");
+            if (quizIds != null) {
+                for (String q : quizIds) {
+                    quizTestDAO.addQuizToTest(testId, Integer.parseInt(q));
+                }
+            }
+            return;
+        }
+
+        if ("random".equals(mode)) {
+            Integer count = getInt(request, "randomCount");
+            if (count == null || count <= 0) {
+                return;
+            }
+
+            List<Quiz> all = quizDAO.getAllQuizzes();
+            if (count > all.size()) {
+                request.setAttribute("error", "Không đủ số lượng quiz trong ngân hàng.");
+                return;
+            }
+
+            Collections.shuffle(all);
+            for (int i = 0; i < count; i++) {
+                quizTestDAO.addQuizToTest(testId, all.get(i).getId());
             }
         }
-        return; // 🔥 QUAN TRỌNG: DỪNG Ở ĐÂY, KHÔNG XỬ LÝ RANDOM
+
     }
-
-    // ===== RANDOM MODE =====
-    if ("random".equals(mode)) {
-        Integer count = getInt(request, "randomCount");
-
-        if (count == null || count <= 0) {
-            System.out.println("⚠ randomCount is null → skip random");
-            return; // hoặc throw lỗi tuỳ bạn
-        }
-
-        List<Quiz> all = quizDAO.getAllQuizzes();
-        Collections.shuffle(all);
-
-        for (int i = 0; i < Math.min(count, all.size()); i++) {
-            quizTestDAO.addQuizToTest(testId, all.get(i).getId());
-        }
-    }
-}
 
 }

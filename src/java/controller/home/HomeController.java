@@ -11,8 +11,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.util.List;
 import model.Course;
+import model.User;
 import service.CourseServices;
 
 /**
@@ -33,6 +35,19 @@ public class HomeController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        HttpSession session = request.getSession(false);
+
+        if (session != null) {
+            User u = (User) session.getAttribute("user");
+
+            if (u != null) {
+                if (u.getRole_id() == 2) {
+                    response.sendRedirect(request.getContextPath() + "/instructor/courses");
+                    return;
+                }
+            }
+        }
 
         List<Course> cList = _courseService.getAllCourses(8, 0, "", "", 0, "Active", "created_at desc");
 

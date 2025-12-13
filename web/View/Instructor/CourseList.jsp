@@ -234,8 +234,8 @@
                                                                         <span class="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 rounded">${course.category.name}</span>
                                                                         <span class="px-2 py-1 text-xs font-semibold ${course.status == 'Active' ? 'text-green-600 bg-green-100' : 'text-yellow-600 bg-yellow-100'} rounded">${course.status == "Active" ? "Hoạt động" : "Không hoạt động"}</span>
                                                                     </div>
-                                                                    <h3 class="text-xl font-bold text-gray-900 mb-2">${course.title}</h3>
-                                                                    <p class="text-sm text-gray-600 mb-3">${course.description}</p>
+                                                                    <h3 class="text-xl font-bold text-gray-900 mb-2 line-clamp-2">${course.title}</h3>
+                                                                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">${course.description}</p>
                                                                 </div>
                                                             </div>
 
@@ -266,7 +266,7 @@
                                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                                                     </svg>
-                                                                    Edit
+                                                                    Chỉnh sửa
                                                                 </a>
 <!--                                                                <a href="course?action=content&id=${course.id}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">
                                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -284,7 +284,7 @@
                                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                                                     </svg>
-                                                                    Delete
+                                                                    Xoá
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -368,11 +368,11 @@
                         url: "${pageContext.request.contextPath}/instructor/courses?cid=" + courseId,
                         type: "DELETE",
                         success: function (response) {
-                            showToast("Course deleted successfully!", "success", 2500);
+                            showToast("Xoá khoá học thành công!", "success", 2500);
                             setTimeout(() => location.reload(), 1500);
                         },
                         error: function (xhr) {
-                            showToast("Error deleting course. Please try again!", "error", 2500);
+                            showToast("Hiện tại đã có học viên tham già vào khoá học và làm bài, không thể xoá khoá học này!", "error", 2500);
                         }
                     });
                 });

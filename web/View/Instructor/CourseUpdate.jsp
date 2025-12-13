@@ -48,9 +48,13 @@
                                         id="title" 
                                         name="title" 
                                         value="${course.title}"
+                                        maxlength="200"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                         placeholder="e.g., Complete Web Development Bootcamp"
                                         required>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <span id="titleCount">0</span>/200 ký tự
+                                    </p>
                                 </div>
 
                                 <div>
@@ -60,10 +64,14 @@
                                     <textarea 
                                         id="description" 
                                         name="description" 
-                                        rows="5"
+                                        rows="10"
+                                        maxlength="2000"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                                         placeholder="Describe what students will learn in this course..."
                                         required>${course.description}</textarea>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        <span id="descCount">0</span>/2000 ký tự
+                                    </p>
                                 </div>
 
                                 <div>
@@ -201,16 +209,18 @@
                             </div>
                         </div>
 
+                        <!-- Trong phần radio buttons status -->
                         <div class="bg-white rounded-lg shadow-sm p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-4">Trạng thái khoá học</h2>
 
                             <div class="space-y-3">
-                                <label class="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                                <label class="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition ${empty sections ? 'opacity-50 cursor-not-allowed' : ''}">
                                     <input 
                                         type="radio" 
                                         name="status" 
                                         value="Active"
                                         ${course.status == 'Active' ? 'checked' : ''}
+                                        ${empty sections ? 'disabled' : ''}
                                         class="w-4 h-4 text-blue-600 focus:ring-blue-500">
                                     <div class="ml-3">
                                         <span class="block font-semibold text-gray-900">Hoạt động</span>
@@ -223,13 +233,24 @@
                                         type="radio" 
                                         name="status" 
                                         value="Inactive"
-                                        ${course.status == 'Inactive' ? 'checked' : ''}
+                                        ${course.status == 'Inactive' || empty sections ? 'checked' : ''}
                                         class="w-4 h-4 text-blue-600 focus:ring-blue-500">
                                     <div class="ml-3">
                                         <span class="block font-semibold text-gray-900">Không hoạt động</span>
                                         <span class="text-sm text-gray-600">Khoá học bị ẩn, không tiếp nhận học sinh mới</span>
                                     </div>
                                 </label>
+
+                                <c:if test="${empty sections}">
+                                    <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                        <div class="flex items-start gap-2">
+                                            <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                            </svg>
+                                            <p class="text-sm text-yellow-800">Khoá học cần có ít nhất 1 bài học để có thể đặt trạng thái Hoạt động</p>
+                                        </div>
+                                    </div>
+                                </c:if>
                             </div>
                         </div>
 
@@ -279,17 +300,33 @@
         <jsp:include page="/layout/importBottom.jsp" />
 
         <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const titleInput = document.getElementById('title');
+                const descInput = document.getElementById('description');
+
+                document.getElementById('titleCount').textContent = titleInput.value.length;
+                document.getElementById('descCount').textContent = descInput.value.length;
+
+                titleInput.addEventListener('input', function () {
+                    document.getElementById('titleCount').textContent = this.value.length;
+                });
+
+                descInput.addEventListener('input', function () {
+                    document.getElementById('descCount').textContent = this.value.length;
+                });
+            });
+
             document.getElementById('thumbnail').addEventListener('change', function (e) {
                 const file = e.target.files[0];
                 if (file) {
                     if (file.size > 5 * 1024 * 1024) {
-                        showToast('File size must be less than 5MB', 'error', 2500);
+                        showToast('File không được quá 5MB', 'error', 2500);
                         e.target.value = '';
                         return;
                     }
 
                     if (!file.type.startsWith('image/')) {
-                        showToast('Please select an image file', 'error', 2500);
+                        showToast('Hãy chọn file đúng định dạng hình ảnh!', 'error', 2500);
                         e.target.value = '';
                         return;
                     }
@@ -311,9 +348,41 @@
                 const categoryId = document.getElementById('categoryId').value;
                 const status = document.querySelector('input[name="status"]:checked').value;
                 const thumbnailFile = document.getElementById('thumbnail').files[0];
+                const hasSections = ${not empty sections};
 
-                if (!title || !description || !categoryId) {
-                    showToast('Hãy điền vào các ô cần điền (Không được điền chỉ có khoảng cách)', 'error', 2500);
+                if (!title) {
+                    showToast('Tên khoá học không được để trống', 'error', 2500);
+                    document.getElementById('title').focus();
+                    return false;
+                }
+
+                if (title.length > 200) {
+                    showToast('Tên khoá học không được vượt quá 200 ký tự', 'error', 2500);
+                    document.getElementById('title').focus();
+                    return false;
+                }
+
+                if (!description) {
+                    showToast('Mô tả khoá học không được để trống', 'error', 2500);
+                    document.getElementById('description').focus();
+                    return false;
+                }
+
+                if (description.length > 2000) {
+                    showToast('Mô tả khoá học không được vượt quá 500 ký tự', 'error', 2500);
+                    document.getElementById('description').focus();
+                    return false;
+                }
+
+                if (!categoryId) {
+                    showToast('Vui lòng chọn đề mục', 'error', 2500);
+                    document.getElementById('categoryId').focus();
+                    return false;
+                }
+
+                // Kiểm tra nếu không có bài học và muốn set Active
+                if (!hasSections && status === 'Active') {
+                    showToast('Khoá học cần có ít nhất 1 bài học để có thể đặt trạng thái Hoạt động', 'error', 3000);
                     return false;
                 }
 
@@ -338,7 +407,7 @@
                     success: function (response) {
                         formModified = false;
                         showToast("Cập nhật khoá học thành công!", "success", 2500);
-//                        setTimeout(() => window.location.reload(), 1500);
+                        setTimeout(() => window.location.reload(), 1500);
                     },
                     error: function (xhr) {
                         const errorMsg = xhr.responseJSON?.message || "Có lỗi xảy ra trong quá trình cập nhật khoá học, vui lòng thử lại sau";
@@ -371,7 +440,7 @@
                             setTimeout(() => window.location.href = "courses", 1500);
                         },
                         error: function (xhr) {
-                            showToast("Có lỗi xảy ra trong quá trình xoá khoá học, vui lòng thử lại sau", "error", 2500);
+                            showToast("Hiện tại đã có học viên tham gia khoá học và làm bài, không thể xoá!", "error", 2500);
                         }
                     });
                 });

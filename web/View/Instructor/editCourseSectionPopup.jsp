@@ -27,9 +27,13 @@
                     type="text" 
                     id="editSectionTitle" 
                     name="title"
+                    maxlength="200"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Nhập tên bài học..."
                     required>
+                <p class="text-xs text-gray-500 mt-1">
+                    <span id="editSectionTitleCount">0</span>/200 ký tự
+                </p>
             </div>
 
             <div>
@@ -40,9 +44,13 @@
                     id="editSectionDescription" 
                     name="description"
                     rows="3"
+                    maxlength="500"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                     placeholder="Mô tả ngắn gọn về bài học..."
                     required></textarea>
+                <p class="text-xs text-gray-500 mt-1">
+                    <span id="editSectionDescCount">0</span>/500 ký tự
+                </p>
             </div>
 
             <div>
@@ -266,6 +274,17 @@
             document.getElementById('editVideoPreviewContainer').classList.remove('hidden');
             document.getElementById('editVideoButtonText').textContent = 'Thay đổi video';
         }
+
+        document.getElementById('editSectionTitleCount').textContent = section.title.length;
+        document.getElementById('editSectionDescCount').textContent = section.description.length;
+
+        document.getElementById('editSectionTitle').addEventListener('input', function () {
+            document.getElementById('editSectionTitleCount').textContent = this.value.length;
+        });
+
+        document.getElementById('editSectionDescription').addEventListener('input', function () {
+            document.getElementById('editSectionDescCount').textContent = this.value.length;
+        });
     }
 
     function closeEditSectionModal() {
@@ -384,8 +403,45 @@
         const position = document.getElementById('editSectionPosition').value;
         const status = document.querySelector('input[name="editStatus"]:checked').value;
 
-        if (!title || !description || !type || !content || !position) {
-            showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error', 2500);
+        if (!title) {
+            showToast('Tên bài học không được để trống', 'error', 2500);
+            document.getElementById('editSectionTitle').focus();
+            return;
+        }
+
+        if (title.length > 200) {
+            showToast('Tên bài học không được vượt quá 200 ký tự', 'error', 2500);
+            document.getElementById('editSectionTitle').focus();
+            return;
+        }
+
+        if (!description) {
+            showToast('Mô tả bài học không được để trống', 'error', 2500);
+            document.getElementById('editSectionDescription').focus();
+            return;
+        }
+
+        if (description.length > 500) {
+            showToast('Mô tả bài học không được vượt quá 500 ký tự', 'error', 2500);
+            document.getElementById('editSectionDescription').focus();
+            return;
+        }
+
+        if (!type) {
+            showToast('Vui lòng chọn thể loại', 'error', 2500);
+            document.getElementById('editSectionType').focus();
+            return;
+        }
+
+        if (!content) {
+            showToast('Nội dung bài học không được để trống', 'error', 2500);
+            document.getElementById('editSectionContent').focus();
+            return;
+        }
+
+        if (!position) {
+            showToast('Vui lòng nhập vị trí', 'error', 2500);
+            document.getElementById('editSectionPosition').focus();
             return;
         }
 

@@ -4,12 +4,20 @@
  */
 package controller.instructor;
 
+import constant.httpStatus;
 import dao.QuizDAO;
+import dao.CategoryDAO;
+import service.QuizServices;
 import model.Quiz;
+import model.User;
+import model.Category;
+import util.AuthUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -32,12 +40,16 @@ public class InstructorQuizController extends HttpServlet {
 
     private final Logger logger = Logger.getLogger(this.getClass().getName());
     private QuizDAO quizDAO;
+    private CategoryDAO categoryDAO;
+    private QuizServices quizServices;
     private static final int ITEMS_PER_PAGE = 10;
 
     @Override
     public void init() throws ServletException {
         super.init();
         quizDAO = new QuizDAO();
+        categoryDAO = new CategoryDAO();
+        quizServices = new QuizServices();
     }
 
     /**
@@ -47,9 +59,14 @@ public class InstructorQuizController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String action = request.getParameter("action");
-
         try {
+            User authResult = AuthUtils.doAuthorize(request, response, 2);
+            if (authResult == null) {
+                return;
+            }
+
+            String action = request.getParameter("action");
+
             if (action == null || action.isEmpty()) {
                 showQuizList(request, response);
             } else {
@@ -68,10 +85,9 @@ public class InstructorQuizController extends HttpServlet {
                         break;
                 }
             }
-        } catch (Exception e) {
+        } catch (ServletException | IOException e) {
             logger.log(Level.SEVERE, "Error in QuizController doGet", e);
-            request.setAttribute("error", "An error occurred: " + e.getMessage());
-            request.getRequestDispatcher("../Error/error.jsp").forward(request, response);
+            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
     }
 
@@ -82,9 +98,14 @@ public class InstructorQuizController extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String action = request.getParameter("action");
-
         try {
+            User authResult = AuthUtils.doAuthorize(request, response, 2);
+            if (authResult == null) {
+                return;
+            }
+
+            String action = request.getParameter("action");
+
             if (action == null) {
                 showQuizList(request, response);
             } else {
@@ -103,10 +124,9 @@ public class InstructorQuizController extends HttpServlet {
                         break;
                 }
             }
-        } catch (Exception e) {
+        } catch (ServletException | IOException e) {
             logger.log(Level.SEVERE, "Error in QuizController doPost", e);
-            request.setAttribute("error", "An error occurred: " + e.getMessage());
-            request.getRequestDispatcher("../Error/error.jsp").forward(request, response);
+            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
     }
 
@@ -117,152 +137,175 @@ public class InstructorQuizController extends HttpServlet {
     private void showQuizList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Get filter parameters
-        String categoryIdParam = request.getParameter("categoryId");
-        String typeParam = request.getParameter("type");
-        String searchParam = request.getParameter("search");
-        String sortBy = request.getParameter("sortBy");
-        String pageParam = request.getParameter("page");
+        try {
+            // Get filter parameters
+            String categoryIdParam = request.getParameter("categoryId");
+            String typeParam = request.getParameter("type");
+            String searchParam = request.getParameter("search");
+            String sortBy = request.getParameter("sortBy");
+            String pageParam = request.getParameter("page");
 
-        // Get all quizzes first
-        List<Quiz> allQuizzes = quizDAO.getAllQuizzes();
-        List<Quiz> filteredQuizzes = new ArrayList<>(allQuizzes);
+            // Fetch all categories for filter dropdown
+            List<Category> categories = categoryDAO.getCategories();
 
-        // Apply category filter
-        if (categoryIdParam != null && !categoryIdParam.isEmpty()) {
-            try {
-                int categoryId = Integer.parseInt(categoryIdParam);
+            // Create a map of category IDs to names for easy lookup in JSP
+            Map<Integer, String> categoryMap = new HashMap<>();
+            if (categories != null) {
+                for (Category category : categories) {
+                    categoryMap.put(category.getId(), category.getName());
+                }
+            }
+
+            // Get all quizzes with categories properly loaded
+            List<Quiz> allQuizzes = quizServices.getAllQuizzes();
+            List<Quiz> filteredQuizzes = new ArrayList<>(allQuizzes);
+
+            // Apply category filter with validation
+            if (categoryIdParam != null && !categoryIdParam.isEmpty()) {
+                try {
+                    int categoryId = Integer.parseInt(categoryIdParam);
+                    filteredQuizzes = filteredQuizzes.stream()
+                            .filter(q -> q.getCategory_id() == categoryId)
+                            .collect(Collectors.toList());
+                } catch (NumberFormatException e) {
+                    logger.log(Level.WARNING, "Invalid categoryId: " + categoryIdParam);
+                    response.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+                    return;
+                }
+            }
+
+            // Apply type filter
+            if (typeParam != null && !typeParam.isEmpty()) {
                 filteredQuizzes = filteredQuizzes.stream()
-                        .filter(q -> q.getCategory_id() == categoryId)
+                        .filter(q -> typeParam.equals(q.getType()))
                         .collect(Collectors.toList());
-            } catch (NumberFormatException e) {
-                logger.log(Level.WARNING, "Invalid categoryId: " + categoryIdParam);
             }
-        }
 
-        // Apply type filter
-        if (typeParam != null && !typeParam.isEmpty()) {
-            filteredQuizzes = filteredQuizzes.stream()
-                    .filter(q -> typeParam.equals(q.getType()))
-                    .collect(Collectors.toList());
-        }
-
-        // Apply search filter
-        if (searchParam != null && !searchParam.trim().isEmpty()) {
-            String searchLower = searchParam.trim().toLowerCase();
-            filteredQuizzes = filteredQuizzes.stream()
-                    .filter(q -> q.getQuestion() != null &&
-                            q.getQuestion().toLowerCase().contains(searchLower))
-                    .collect(Collectors.toList());
-        }
-
-        // Apply sorting
-        if (sortBy != null && !sortBy.isEmpty()) {
-            switch (sortBy) {
-                case "question_asc":
-                    filteredQuizzes.sort(Comparator.comparing(
-                            Quiz::getQuestion,
-                            Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
-                    break;
-                case "created_desc":
-                    filteredQuizzes.sort((q1, q2) -> {
-                        if (q2.getCreated_at() == null)
-                            return -1;
-                        if (q1.getCreated_at() == null)
-                            return 1;
-                        return q2.getCreated_at().compareTo(q1.getCreated_at());
-                    });
-                    break;
-                case "created_asc":
-                    filteredQuizzes.sort((q1, q2) -> {
-                        if (q1.getCreated_at() == null)
-                            return -1;
-                        if (q2.getCreated_at() == null)
-                            return 1;
-                        return q1.getCreated_at().compareTo(q2.getCreated_at());
-                    });
-                    break;
-                case "updated_desc":
-                default:
-                    filteredQuizzes.sort((q1, q2) -> {
-                        if (q2.getUpdated_at() == null)
-                            return -1;
-                        if (q1.getUpdated_at() == null)
-                            return 1;
-                        return q2.getUpdated_at().compareTo(q1.getUpdated_at());
-                    });
-                    break;
+            // Apply search filter
+            if (searchParam != null && !searchParam.trim().isEmpty()) {
+                String searchLower = searchParam.trim().toLowerCase();
+                filteredQuizzes = filteredQuizzes.stream()
+                        .filter(q -> q.getQuestion() != null &&
+                                q.getQuestion().toLowerCase().contains(searchLower))
+                        .collect(Collectors.toList());
             }
-        } else {
-            // Default sort by updated_at desc
-            filteredQuizzes.sort((q1, q2) -> {
-                if (q2.getUpdated_at() == null)
-                    return -1;
-                if (q1.getUpdated_at() == null)
-                    return 1;
-                return q2.getUpdated_at().compareTo(q1.getUpdated_at());
-            });
-        }
 
-        // Calculate statistics from all quizzes (before pagination)
-        int totalQuizzes = filteredQuizzes.size();
-        long multipleChoiceCount = allQuizzes.stream()
-                .filter(q -> "Multiple Choice".equals(q.getType()))
-                .count();
-        long trueFalseCount = allQuizzes.stream()
-                .filter(q -> "True/False".equals(q.getType()))
-                .count();
-        long otherTypesCount = allQuizzes.stream()
-                .filter(q -> q.getType() != null &&
-                        !"Multiple Choice".equals(q.getType()) &&
-                        !"True/False".equals(q.getType()))
-                .count();
-
-        // Pagination
-        int currentPage = 1;
-        if (pageParam != null && !pageParam.isEmpty()) {
-            try {
-                currentPage = Integer.parseInt(pageParam);
-                if (currentPage < 1)
-                    currentPage = 1;
-            } catch (NumberFormatException e) {
-                currentPage = 1;
+            // Apply sorting
+            if (sortBy != null && !sortBy.isEmpty()) {
+                switch (sortBy) {
+                    case "question_asc":
+                        filteredQuizzes.sort(Comparator.comparing(
+                                Quiz::getQuestion,
+                                Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)));
+                        break;
+                    case "created_desc":
+                        filteredQuizzes.sort((q1, q2) -> {
+                            if (q2.getCreated_at() == null)
+                                return -1;
+                            if (q1.getCreated_at() == null)
+                                return 1;
+                            return q2.getCreated_at().compareTo(q1.getCreated_at());
+                        });
+                        break;
+                    case "created_asc":
+                        filteredQuizzes.sort((q1, q2) -> {
+                            if (q1.getCreated_at() == null)
+                                return -1;
+                            if (q2.getCreated_at() == null)
+                                return 1;
+                            return q1.getCreated_at().compareTo(q2.getCreated_at());
+                        });
+                        break;
+                    case "updated_desc":
+                    default:
+                        filteredQuizzes.sort((q1, q2) -> {
+                            if (q2.getUpdated_at() == null)
+                                return -1;
+                            if (q1.getUpdated_at() == null)
+                                return 1;
+                            return q2.getUpdated_at().compareTo(q1.getUpdated_at());
+                        });
+                        break;
+                }
+            } else {
+                // Default sort by updated_at desc
+                filteredQuizzes.sort((q1, q2) -> {
+                    if (q2.getUpdated_at() == null)
+                        return -1;
+                    if (q1.getUpdated_at() == null)
+                        return 1;
+                    return q2.getUpdated_at().compareTo(q1.getUpdated_at());
+                });
             }
+
+            // Calculate statistics from all quizzes (before pagination)
+            int totalQuizzes = filteredQuizzes.size();
+            long multipleChoiceCount = allQuizzes.stream()
+                    .filter(q -> "Multiple Choice".equals(q.getType()))
+                    .count();
+            long trueFalseCount = allQuizzes.stream()
+                    .filter(q -> "True/False".equals(q.getType()))
+                    .count();
+            long otherTypesCount = allQuizzes.stream()
+                    .filter(q -> q.getType() != null &&
+                            !"Multiple Choice".equals(q.getType()) &&
+                            !"True/False".equals(q.getType()))
+                    .count();
+
+            // Pagination with validation
+            int currentPage = 1;
+            if (pageParam != null && !pageParam.isEmpty()) {
+                try {
+                    currentPage = Integer.parseInt(pageParam);
+                    if (currentPage < 1)
+                        currentPage = 1;
+                } catch (NumberFormatException e) {
+                    logger.log(Level.WARNING, "Invalid page parameter: " + pageParam);
+                    response.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
+                    return;
+                }
+            }
+
+            int totalItems = filteredQuizzes.size();
+            int totalPages = (int) Math.ceil((double) totalItems / ITEMS_PER_PAGE);
+            if (totalPages < 1)
+                totalPages = 1;
+            if (currentPage > totalPages)
+                currentPage = totalPages;
+
+            int startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+
+            List<Quiz> paginatedQuizzes;
+            if (startIndex < totalItems) {
+                paginatedQuizzes = filteredQuizzes.subList(startIndex, endIndex);
+            } else {
+                paginatedQuizzes = new ArrayList<>();
+            }
+
+            // Calculate display items
+            int startItem = totalItems > 0 ? startIndex + 1 : 0;
+            int endItem = endIndex;
+
+            // Set request attributes for the view
+            request.setAttribute("quizList", paginatedQuizzes);
+            request.setAttribute("totalQuizzes", totalQuizzes);
+            request.setAttribute("multipleChoiceCount", multipleChoiceCount);
+            request.setAttribute("trueFalseCount", trueFalseCount);
+            request.setAttribute("otherTypesCount", otherTypesCount);
+            request.setAttribute("page", currentPage);
+            request.setAttribute("totalPages", totalPages);
+            request.setAttribute("startItem", startItem);
+            request.setAttribute("endItem", endItem);
+            request.setAttribute("categories", categories);
+            request.setAttribute("categoryMap", categoryMap);
+
+            request.getRequestDispatcher("../View/Instructor/QuizList.jsp").forward(request, response);
+
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error in showQuizList", e);
+            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
-
-        int totalItems = filteredQuizzes.size();
-        int totalPages = (int) Math.ceil((double) totalItems / ITEMS_PER_PAGE);
-        if (totalPages < 1)
-            totalPages = 1;
-        if (currentPage > totalPages)
-            currentPage = totalPages;
-
-        int startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
-
-        List<Quiz> paginatedQuizzes;
-        if (startIndex < totalItems) {
-            paginatedQuizzes = filteredQuizzes.subList(startIndex, endIndex);
-        } else {
-            paginatedQuizzes = new ArrayList<>();
-        }
-
-        // Calculate display items
-        int startItem = totalItems > 0 ? startIndex + 1 : 0;
-        int endItem = endIndex;
-
-        // Set request attributes for the view
-        request.setAttribute("quizList", paginatedQuizzes);
-        request.setAttribute("totalQuizzes", totalQuizzes);
-        request.setAttribute("multipleChoiceCount", multipleChoiceCount);
-        request.setAttribute("trueFalseCount", trueFalseCount);
-        request.setAttribute("otherTypesCount", otherTypesCount);
-        request.setAttribute("page", currentPage);
-        request.setAttribute("totalPages", totalPages);
-        request.setAttribute("startItem", startItem);
-        request.setAttribute("endItem", endItem);
-
-        request.getRequestDispatcher("../View/Instructor/QuizList.jsp").forward(request, response);
     }
 
     /**
@@ -270,6 +313,10 @@ public class InstructorQuizController extends HttpServlet {
      */
     private void showCreateForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Fetch categories for dropdown
+        List<Category> categories = categoryDAO.getCategories();
+        request.setAttribute("categories", categories);
+
         request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
     }
 
@@ -286,20 +333,17 @@ public class InstructorQuizController extends HttpServlet {
 
         // Validate input
         if (question == null || question.trim().isEmpty()) {
-            request.setAttribute("error", "Question is required.");
-            request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Question is required.");
             return;
         }
 
         if (type == null || type.trim().isEmpty()) {
-            request.setAttribute("error", "Question type is required.");
-            request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Question type is required.");
             return;
         }
 
         if (categoryIdParam == null || categoryIdParam.trim().isEmpty()) {
-            request.setAttribute("error", "Category is required.");
-            request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Category is required.");
             return;
         }
 
@@ -307,17 +351,14 @@ public class InstructorQuizController extends HttpServlet {
         try {
             categoryId = Integer.parseInt(categoryIdParam);
         } catch (NumberFormatException e) {
-            request.setAttribute("error", "Invalid category ID.");
-            request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
+            logger.log(Level.WARNING, "Invalid category ID: " + categoryIdParam);
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Invalid category ID.");
             return;
         }
 
-        // Get user ID from session (assuming user is logged in)
+        // Get user from session - we know it exists due to authorization check
         HttpSession session = request.getSession();
-        Integer userId = (Integer) session.getAttribute("userId");
-        if (userId == null) {
-            userId = 1; // Default fallback for testing
-        }
+        User user = (User) session.getAttribute("user");
 
         // Create quiz object
         Quiz quiz = new Quiz();
@@ -326,15 +367,15 @@ public class InstructorQuizController extends HttpServlet {
         quiz.setCategory_id(categoryId);
 
         // Save to database
-        Quiz createdQuiz = quizDAO.createQuiz(quiz, userId);
+        Quiz createdQuiz = quizServices.createQuiz(quiz, user.getId());
 
         if (createdQuiz != null) {
             session.setAttribute("notification", "Quiz created successfully!");
             session.setAttribute("notificationType", "success");
             response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
         } else {
-            request.setAttribute("error", "Failed to create quiz. Please try again.");
-            request.getRequestDispatcher("../View/Instructor/AddQuiz.jsp").forward(request, response);
+            logger.log(Level.SEVERE, "Failed to create quiz for user: " + user.getId());
+            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
     }
 
@@ -346,31 +387,23 @@ public class InstructorQuizController extends HttpServlet {
 
         String idParam = request.getParameter("id");
         if (idParam == null || idParam.isEmpty()) {
-            HttpSession session = request.getSession();
-            session.setAttribute("notification", "Quiz ID is required.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
             return;
         }
 
         try {
             int quizId = Integer.parseInt(idParam);
-            Quiz quiz = quizDAO.getQuizById(quizId);
+            Quiz quiz = quizServices.getQuizById(quizId);
 
             if (quiz != null) {
                 request.setAttribute("quiz", quiz);
                 request.getRequestDispatcher("../View/Instructor/editQuiz.jsp").forward(request, response);
             } else {
-                HttpSession session = request.getSession();
-                session.setAttribute("notification", "Quiz not found.");
-                session.setAttribute("notificationType", "error");
-                response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+                response.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
             }
         } catch (NumberFormatException e) {
-            HttpSession session = request.getSession();
-            session.setAttribute("notification", "Invalid Quiz ID.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            logger.log(Level.WARNING, "Invalid Quiz ID: " + idParam);
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), httpStatus.BAD_REQUEST.getMessage());
         }
     }
 
@@ -382,6 +415,9 @@ public class InstructorQuizController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
+        // Get authorized user - we know this exists because authorization was checked in doPost
+        User user = (User) session.getAttribute("user");
+
         // Get form parameters
         String idParam = request.getParameter("id");
         String question = request.getParameter("question");
@@ -390,9 +426,7 @@ public class InstructorQuizController extends HttpServlet {
 
         // Validate quiz ID
         if (idParam == null || idParam.isEmpty()) {
-            session.setAttribute("notification", "Quiz ID is required.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Quiz ID is required.");
             return;
         }
 
@@ -400,9 +434,8 @@ public class InstructorQuizController extends HttpServlet {
         try {
             quizId = Integer.parseInt(idParam);
         } catch (NumberFormatException e) {
-            session.setAttribute("notification", "Invalid Quiz ID.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            logger.log(Level.WARNING, "Invalid Quiz ID: " + idParam);
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Invalid Quiz ID.");
             return;
         }
 
@@ -427,16 +460,18 @@ public class InstructorQuizController extends HttpServlet {
         try {
             categoryId = Integer.parseInt(categoryIdParam);
         } catch (NumberFormatException e) {
+            logger.log(Level.WARNING, "Invalid category ID: " + categoryIdParam);
             session.setAttribute("notification", "Invalid category ID.");
             session.setAttribute("notificationType", "error");
             response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
             return;
         }
 
-        // Get user ID from session
-        Integer userId = (Integer) session.getAttribute("userId");
-        if (userId == null) {
-            userId = 1; // Default fallback for testing
+        // Check if quiz exists
+        Quiz existingQuiz = quizServices.getQuizById(quizId);
+        if (existingQuiz == null) {
+            response.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
+            return;
         }
 
         // Create quiz object with updated data
@@ -446,13 +481,14 @@ public class InstructorQuizController extends HttpServlet {
         quiz.setType(type);
         quiz.setCategory_id(categoryId);
 
-        // Update in database
-        Quiz updatedQuiz = quizDAO.updateQuiz(quiz, userId);
+        // Update in database using the authorized user's ID
+        boolean updated = quizServices.updateQuiz(quiz, user.getId());
 
-        if (updatedQuiz != null) {
+        if (updated) {
             session.setAttribute("notification", "Quiz updated successfully!");
             session.setAttribute("notificationType", "success");
         } else {
+            logger.log(Level.SEVERE, "Failed to update quiz ID: " + quizId + " for user: " + user.getId());
             session.setAttribute("notification", "Failed to update quiz. Please try again.");
             session.setAttribute("notificationType", "error");
         }
@@ -473,9 +509,7 @@ public class InstructorQuizController extends HttpServlet {
 
         // Validate quiz ID
         if (idParam == null || idParam.isEmpty()) {
-            session.setAttribute("notification", "Quiz ID is required.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Quiz ID is required.");
             return;
         }
 
@@ -483,19 +517,26 @@ public class InstructorQuizController extends HttpServlet {
         try {
             quizId = Integer.parseInt(idParam);
         } catch (NumberFormatException e) {
-            session.setAttribute("notification", "Invalid Quiz ID.");
-            session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            logger.log(Level.WARNING, "Invalid Quiz ID: " + idParam);
+            response.sendError(httpStatus.BAD_REQUEST.getCode(), "Invalid Quiz ID.");
+            return;
+        }
+
+        // Check if quiz exists before attempting to delete
+        Quiz existingQuiz = quizServices.getQuizById(quizId);
+        if (existingQuiz == null) {
+            response.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
             return;
         }
 
         // Delete from database
-        boolean deleted = quizDAO.deleteQuiz(quizId);
+        boolean deleted = quizServices.deleteQuiz(quizId);
 
         if (deleted) {
             session.setAttribute("notification", "Quiz deleted successfully!");
             session.setAttribute("notificationType", "success");
         } else {
+            logger.log(Level.SEVERE, "Failed to delete quiz ID: " + quizId);
             session.setAttribute("notification", "Failed to delete quiz. It may have linked data.");
             session.setAttribute("notificationType", "error");
         }

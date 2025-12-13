@@ -6,19 +6,19 @@
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<header>
+<header class="sticky z-20 top-0">
     <nav class="bg-white border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-8">
                     <div class="flex items-center">
                         <a href="${pageContext.request.contextPath}/home">
-                            <span class="text-2xl font-bold text-blue-600">LabEdu</span>
+                            <span class="text-2xl font-bold text-blue-600">EduLAB</span>
                         </a>
                     </div>
                     <div class="">
                         <div class="relative w-[500px]">
-                            <form action="courses">
+                            <form action="${pageContext.request.contextPath}/courses">
                                 <input 
                                     type="text" 
                                     placeholder="Bạn muốn học gì?" 
@@ -38,9 +38,11 @@
                 <c:choose>
                     <c:when test="${not empty sessionScope.user}">
                         <div class="flex items-center space-x-4">
-<!--                            <a href="${pageContext.request.contextPath}/my-courses" class="text-gray-700 hover:text-blue-600 text-sm font-medium">
-                                My Courses
-                            </a>-->
+                            <!-- <c:if test="${sessionScope.user.role_id == 2}">
+                                <a href="${pageContext.request.contextPath}/instructor/courses" class="text-gray-700 hover:text-blue-600 text-sm font-medium">
+                                    My Courses
+                                </a>
+                            </c:if> -->
 
                             <div class="relative" id="userDropdown">
                                 <button class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 focus:outline-none" id="userMenuButton">
@@ -76,15 +78,35 @@
                                             </svg>
                                             My Profile
                                         </div>
-                                    </a>
-                                    <a href="${pageContext.request.contextPath}/my-courses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                        <div class="flex items-center">
-                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                            </svg>
-                                            My Learning
-                                        </div>
-                                    </a>-->
+                                    </a> -->                                    
+                                    <c:if test="${sessionScope.user.role_id == 2}">
+                                        <a href="${pageContext.request.contextPath}/instructor/courses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <div class="flex items-center">
+                                                My Course
+                                            </div>
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${sessionScope.user.role_id == 2}">
+                                        <a href="${pageContext.request.contextPath}/instructor/quizes" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <div class="flex items-center">
+                                                My Quiz
+                                            </div>
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${sessionScope.user.role_id == 2}">
+                                        <a href="${pageContext.request.contextPath}/instructor/quiz-answers" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <div class="flex items-center">
+                                                My Quiz Answer
+                                            </div>
+                                        </a>
+                                    </c:if>
+                                    <c:if test="${sessionScope.user.role_id == 2}">
+                                        <a href="${pageContext.request.contextPath}/managerTest" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <div class="flex items-center">
+                                                My Test
+                                            </div>
+                                        </a>
+                                    </c:if>
                                     <div class="border-t border-gray-200 mt-2 pt-2">
                                         <form action="${pageContext.request.contextPath}/logout" method="POST">
                                             <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">

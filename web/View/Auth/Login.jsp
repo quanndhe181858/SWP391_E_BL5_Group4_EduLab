@@ -3,10 +3,10 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Login - Learning Platform</title>
+        <title>Login - EduLAB</title>
         <jsp:include page="/layout/import.jsp" />
     </head>
-    <body class="bg-gradient-to-br from-blue-500 via-blue-600 to-cyan-700 min-h-screen flex items-center justify-center p-4">
+    <body class="bg-gradient-to-br from-red-500 via-blue-600 to-cyan-700 min-h-screen flex items-center justify-center p-4">
 
         <div class="w-full max-w-md">
             <div class="bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300">
@@ -109,8 +109,7 @@
                     </form>
                 </div>
             </div>
-
-           
+        </div>
 
         <script>
             $(document).ready(function () {
