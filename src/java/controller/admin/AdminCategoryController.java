@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,15 +92,27 @@ public class AdminCategoryController extends HttpServlet {
         } else {
             cates = cateDAO.getCategories();
         }
+        List<Category> parents = new ArrayList<>();
+        Map<Integer, List<Category>> childrenMap = new HashMap<>();
 
+        for (Category c : cates) {
+            if (c.getParent_id() == 0) {
+                parents.add(c);
+            } else {
+                childrenMap
+                        .computeIfAbsent(c.getParent_id(), k -> new ArrayList<>())
+                        .add(c);
+            }
+        }
         Map<Integer, Integer> countMap = new HashMap<>();
-        for (Category cate : cates) {
-            int count = courseDAO.countCoursesByCategoryId(cate.getId());
-            countMap.put(cate.getId(), count);
+        for (Category c : cates) {
+            int count = courseDAO.countCoursesByCategoryId(c.getId());
+            countMap.put(c.getId(), count);
         }
 
         request.setAttribute("total", cateDAO.countCategories());
-        request.setAttribute("listcategory", cates);
+        request.setAttribute("parents", parents);
+        request.setAttribute("childrenMap", childrenMap);
         request.setAttribute("countMap", countMap);
         request.setAttribute("keyword", keyword);
 
@@ -242,6 +255,19 @@ public class AdminCategoryController extends HttpServlet {
             }
 
             if (parentId != null && id == parentId) {
+                if (parentId == id) {
+                    session.setAttribute("error",
+                            "Danh mục không thể là cha của chính nó!");
+                    response.sendRedirect(request.getContextPath() + "/manager_category");
+                    return;
+                }
+                if (cateDAO.isCircular(id, parentId)) {
+                    session.setAttribute("error",
+                            "Không thể chọn danh mục con làm cha (tạo vòng lặp)!");
+                    response.sendRedirect(request.getContextPath() + "/manager_category");
+                    return;
+                }
+
                 session.setAttribute("error", "⚠️ Danh mục không thể là danh mục cha của chính nó!");
                 response.sendRedirect(request.getContextPath() + "/manager_category");
                 return;
