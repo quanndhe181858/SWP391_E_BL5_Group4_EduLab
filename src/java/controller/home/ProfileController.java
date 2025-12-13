@@ -98,14 +98,16 @@ public class ProfileController extends HttpServlet {
             Media currentMedia = mediaDao.getMediaByIdAndType("user", user.getId());
             String oldPath = (currentMedia != null) ? currentMedia.getPath() : null;
 
-            String newPath = FileUtils.saveFile(avatarPart, "image", getServletContext());
+            String newPath = FileUtils.saveFile(avatarPart, "avatar", getServletContext());
 
             if (oldPath != null && !oldPath.isEmpty()) {
-                FileUtils.deleteFile(oldPath, getServletContext());
+                if (!oldPath.equalsIgnoreCase("/media/avatar/default-avatar.avif")) {
+                    FileUtils.deleteFile(oldPath, getServletContext());
+                }
             }
 
             HttpSession session = request.getSession();
-            
+
             if (currentMedia != null) {
                 currentMedia.setPath(newPath);
                 mediaDao.updateMedia(currentMedia);
@@ -118,7 +120,7 @@ public class ProfileController extends HttpServlet {
                 mediaDao.createMedia(newMedia, user.getId());
                 session.setAttribute("avatar", newMedia);
             }
-            
+
             session.setAttribute("user", userDao.getUserById(user.getId()));
 
             out.print("{\"success\": true, \"message\": \"Cập nhật avatar thành công\", \"path\": \"" + newPath + "\"}");

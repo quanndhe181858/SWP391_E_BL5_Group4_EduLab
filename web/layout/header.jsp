@@ -46,9 +46,15 @@
 
                             <div class="relative" id="userDropdown">
                                 <button class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 focus:outline-none" id="userMenuButton">
-                                    <div class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                                        <img class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold" 
-                                             src="${pageContext.request.contextPath}/${sessionScope.avatar.path}" />
+                                    <div class="w-10 h-10 border border-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                                        <c:if test="${not empty sessionScope.avatar}">
+                                            <img class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold" 
+                                                 src="${pageContext.request.contextPath}/${sessionScope.avatar.path}" />
+                                        </c:if>
+                                        <c:if test="${empty sessionScope.avatar}">
+                                            <img class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold" 
+                                                 src="${pageContext.request.contextPath}/media/avatar/default-avatar.avif" />
+                                        </c:if>
                                     </div>
                                     <span class="text-sm font-medium">
                                         <c:out value="${not empty sessionScope.user.first_name ? sessionScope.user.first_name : 'User'}" />
@@ -119,10 +125,10 @@
                     <c:otherwise>
                         <div class="flex items-center space-x-4">
                             <a href="${pageContext.request.contextPath}/login" class="text-blue-600 text-sm font-medium hover:underline">
-                                Log In
+                                Đăng nhập
                             </a>
                             <a href="${pageContext.request.contextPath}/register" class="px-4 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded hover:bg-blue-50">
-                                Join for Free
+                                Tham gia ngay
                             </a>
                         </div>
                     </c:otherwise>
