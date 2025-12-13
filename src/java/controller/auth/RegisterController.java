@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.Media;
 import model.User;
+import util.Email;
 import util.Hash;
 import util.ValidateUtils;
 
@@ -102,6 +103,8 @@ public class RegisterController extends HttpServlet {
 
             if (isRegistered) {
                 // Đăng ký thành công - chuyển đến trang login
+                Email.sendEmail(email, "Đăng kí tài khoản EduLAB thành công.", "Ban da dang ki tai khoan EduLAB thanh cong, cam on ban da tin tuong.");
+
                 request.setAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
                 response.sendRedirect(request.getContextPath() + "/login");
             } else {

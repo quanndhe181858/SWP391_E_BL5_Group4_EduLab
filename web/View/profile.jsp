@@ -24,6 +24,43 @@
                 border-bottom: 2px solid #3b82f6;
                 color: #3b82f6;
             }
+
+            .error-message {
+                display: none;
+                color: #dc2626;
+                font-size: 0.875rem;
+                margin-top: 0.25rem;
+            }
+            .error-message.show {
+                display: block;
+            }
+            .input-error {
+                border-color: #dc2626 !important;
+            }
+            .password-strength {
+                height: 4px;
+                background: #e5e7eb;
+                border-radius: 2px;
+                margin-top: 0.5rem;
+                overflow: hidden;
+            }
+            .password-strength-bar {
+                height: 100%;
+                transition: all 0.3s ease;
+                width: 0%;
+            }
+            .strength-weak {
+                background: #ef4444;
+                width: 33%;
+            }
+            .strength-medium {
+                background: #f59e0b;
+                width: 66%;
+            }
+            .strength-strong {
+                background: #10b981;
+                width: 100%;
+            }
         </style>
     </head>
     <body class="bg-gray-50">
@@ -173,7 +210,7 @@
                     </div>
 
                     <div id="content-security" class="p-6 hidden">
-                        <form action="${pageContext.request.contextPath}/profile" method="POST" onsubmit="return validatePasswordForm()">
+                        <form action="${pageContext.request.contextPath}/change-password" method="POST" id="passwordForm" onsubmit="return validatePasswordForm()">
                             <input type="hidden" name="action" value="changePassword">
 
                             <div class="max-w-md">
@@ -181,37 +218,91 @@
 
                                 <div class="space-y-4">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <label for="curPassword" class="block text-gray-700 text-sm font-semibold mb-2">
                                             Mật khẩu hiện tại <span class="text-red-500">*</span>
                                         </label>
-                                        <input type="password" 
-                                               name="currentPassword" 
-                                               id="currentPassword"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                               required>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                            </div>
+                                            <input type="password" 
+                                                   id="curPassword" 
+                                                   name="curPassword" 
+                                                   class="w-full pl-10 pr-12 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+                                                   placeholder="••••••••"
+                                                   required>
+                                            <button type="button" 
+                                                    id="toggleCurPassword"
+                                                    class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                                <svg class="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <p class="error-message" id="curPasswordError"></p>
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <label for="newPassword" class="block text-gray-700 text-sm font-semibold mb-2">
                                             Mật khẩu mới <span class="text-red-500">*</span>
                                         </label>
-                                        <input type="password" 
-                                               name="newPassword" 
-                                               id="newPassword"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                               required>
-                                        <p class="text-xs text-gray-500 mt-1">Mật khẩu phải có ít nhất 8 ký tự</p>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                            </div>
+                                            <input type="password" 
+                                                   id="newPassword" 
+                                                   name="newPassword" 
+                                                   class="w-full pl-10 pr-12 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+                                                   placeholder="••••••••"
+                                                   required>
+                                            <button type="button" 
+                                                    id="toggleNewPassword"
+                                                    class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                                <svg class="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="password-strength">
+                                            <div class="password-strength-bar" id="newPasswordStrengthBar"></div>
+                                        </div>
+                                        <p class="error-message" id="newPasswordError"></p>
+                                        <p class="text-xs text-gray-500 mt-1">Ít nhất 8 ký tự, 1 chữ hoa, 1 chữ thường, 1 số, 1 ký tự đặc biệt</p>
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        <label for="rePassword" class="block text-gray-700 text-sm font-semibold mb-2">
                                             Xác nhận mật khẩu mới <span class="text-red-500">*</span>
                                         </label>
-                                        <input type="password" 
-                                               name="confirmPassword" 
-                                               id="confirmPassword"
-                                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                               required>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                            </div>
+                                            <input type="password" 
+                                                   id="rePassword" 
+                                                   name="rePassword" 
+                                                   class="w-full pl-10 pr-12 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+                                                   placeholder="••••••••"
+                                                   required>
+                                            <button type="button" 
+                                                    id="toggleRePassword"
+                                                    class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                                <svg class="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <p class="error-message" id="rePasswordError"></p>
                                     </div>
                                 </div>
 
@@ -245,18 +336,205 @@
         <jsp:include page="/layout/footer.jsp" />
         <jsp:include page="/layout/importBottom.jsp" />
         <script>
-            document.addEventListener("DOMContentLoaded", () => {
-                const error = '${error}';
-                const ok = '${ok}';
+            function setupPasswordToggle(buttonId, inputId) {
+                const button = document.getElementById(buttonId);
+                const input = document.getElementById(inputId);
 
-                if (error) {
-                    showToast(error, 'error');
+                if (!button || !input)
+                    return;
+
+                button.addEventListener('click', function () {
+                    const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+
+                    const svg = this.querySelector('svg');
+                    if (type === 'text') {
+                        svg.innerHTML = `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            `;
+                    } else {
+                        svg.innerHTML = `
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            `;
+                    }
+                });
+            }
+
+            function checkPasswordStrength(password) {
+                let strength = 0;
+
+                if (password.length >= 8)
+                    strength++;
+                if (password.length >= 12)
+                    strength++;
+                if (/[a-z]/.test(password))
+                    strength++;
+                if (/[A-Z]/.test(password))
+                    strength++;
+                if (/[0-9]/.test(password))
+                    strength++;
+                if (/[^a-zA-Z0-9]/.test(password))
+                    strength++;
+
+                return strength;
+            }
+
+            function updatePasswordStrength(password, barId) {
+                const strengthBar = document.getElementById(barId);
+                if (!strengthBar)
+                    return;
+
+                const strength = checkPasswordStrength(password);
+
+                strengthBar.className = 'password-strength-bar';
+
+                if (password.length === 0) {
+                    strengthBar.style.width = '0%';
+                } else if (strength <= 2) {
+                    strengthBar.classList.add('strength-weak');
+                } else if (strength <= 4) {
+                    strengthBar.classList.add('strength-medium');
+                } else {
+                    strengthBar.classList.add('strength-strong');
+                }
+            }
+
+            function validatePassword(password) {
+                const minLength = 8;
+                const hasUpperCase = /[A-Z]/.test(password);
+                const hasLowerCase = /[a-z]/.test(password);
+                const hasNumber = /[0-9]/.test(password);
+                const hasSpecialChar = /[^a-zA-Z0-9]/.test(password);
+
+                if (password.length < minLength) {
+                    return 'Mật khẩu phải có ít nhất 8 ký tự';
+                }
+                if (!hasUpperCase) {
+                    return 'Mật khẩu phải có ít nhất 1 chữ hoa';
+                }
+                if (!hasLowerCase) {
+                    return 'Mật khẩu phải có ít nhất 1 chữ thường';
+                }
+                if (!hasNumber) {
+                    return 'Mật khẩu phải có ít nhất 1 số';
+                }
+                if (!hasSpecialChar) {
+                    return 'Mật khẩu phải có ít nhất 1 ký tự đặc biệt';
                 }
 
-                if (ok) {
-                    showToast(ok, 'success');
+                return '';
+            }
+
+            function showError(elementId, message) {
+                const errorElement = document.getElementById(elementId);
+                if (errorElement) {
+                    errorElement.textContent = message;
+                    errorElement.classList.add('show');
                 }
-            });
+            }
+
+            function clearError(elementId) {
+                const errorElement = document.getElementById(elementId);
+                if (errorElement) {
+                    errorElement.textContent = '';
+                    errorElement.classList.remove('show');
+                }
+            }
+
+            function clearAllPasswordErrors() {
+                clearError('curPasswordError');
+                clearError('newPasswordError');
+                clearError('rePasswordError');
+            }
+
+            function validatePasswordForm() {
+                let isValid = true;
+
+                const curPassword = document.getElementById('curPassword').value.trim();
+                const newPassword = document.getElementById('newPassword').value.trim();
+                const rePassword = document.getElementById('rePassword').value.trim();
+
+                clearAllPasswordErrors();
+
+                if (!curPassword) {
+                    showError('curPasswordError', 'Vui lòng nhập mật khẩu hiện tại');
+                    isValid = false;
+                }
+
+                if (!newPassword) {
+                    showError('newPasswordError', 'Vui lòng nhập mật khẩu mới');
+                    isValid = false;
+                } else {
+                    const passwordError = validatePassword(newPassword);
+                    if (passwordError) {
+                        showError('newPasswordError', passwordError);
+                        isValid = false;
+                    } else if (curPassword && newPassword === curPassword) {
+                        showError('newPasswordError', 'Mật khẩu mới phải khác mật khẩu hiện tại');
+                        isValid = false;
+                    }
+                }
+
+                if (!rePassword) {
+                    showError('rePasswordError', 'Vui lòng xác nhận mật khẩu mới');
+                    isValid = false;
+                } else if (newPassword !== rePassword) {
+                    showError('rePasswordError', 'Mật khẩu xác nhận không khớp');
+                    isValid = false;
+                }
+
+                return isValid;
+            }
+
+            function resetPasswordForm() {
+                const passwordForm = document.getElementById('passwordForm');
+                if (passwordForm) {
+                    passwordForm.reset();
+                }
+
+                clearAllPasswordErrors();
+
+                const strengthBar = document.getElementById('newPasswordStrengthBar');
+                if (strengthBar) {
+                    strengthBar.style.width = '0%';
+                    strengthBar.className = 'password-strength-bar';
+                }
+            }
+
+            function validateProfileForm() {
+                const firstName = document.getElementById('firstName');
+                const lastName = document.getElementById('lastName');
+                const bodInput = document.getElementById('bod');
+
+                if (!firstName || !lastName)
+                    return true;
+
+                const firstNameValue = firstName.value.trim();
+                const lastNameValue = lastName.value.trim();
+
+                if (!firstNameValue || !lastNameValue) {
+                    showToast('Vui lòng điền đầy đủ họ và tên!', 'error');
+                    return false;
+                }
+
+                if (bodInput && bodInput.value) {
+                    const selectedDate = new Date(bodInput.value);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    if (selectedDate > today) {
+                        showToast('Ngày sinh không được nằm trong tương lai!', 'error');
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            function resetForm() {
+                location.reload();
+            }
 
             function switchTab(tabName) {
                 document.querySelectorAll('[id^="tab-"]').forEach(tab => {
@@ -268,9 +546,17 @@
                     content.classList.add('hidden');
                 });
 
-                document.getElementById('tab-' + tabName).classList.add('tab-active', 'text-blue-600');
-                document.getElementById('tab-' + tabName).classList.remove('text-gray-500');
-                document.getElementById('content-' + tabName).classList.remove('hidden');
+                const selectedTab = document.getElementById('tab-' + tabName);
+                const selectedContent = document.getElementById('content-' + tabName);
+
+                if (selectedTab) {
+                    selectedTab.classList.add('tab-active', 'text-blue-600');
+                    selectedTab.classList.remove('text-gray-500');
+                }
+
+                if (selectedContent) {
+                    selectedContent.classList.remove('hidden');
+                }
             }
 
             function previewAvatar(input) {
@@ -293,7 +579,10 @@
 
                     const reader = new FileReader();
                     reader.onload = function (e) {
-                        document.getElementById('avatarPreview').src = e.target.result;
+                        const avatarPreview = document.getElementById('avatarPreview');
+                        if (avatarPreview) {
+                            avatarPreview.src = e.target.result;
+                        }
                     };
                     reader.readAsDataURL(file);
 
@@ -307,10 +596,15 @@
                 formData.append('action', 'uploadAvatar');
 
                 const avatarPreview = document.getElementById('avatarPreview');
-                const originalSrc = avatarPreview.src;
-                avatarPreview.style.opacity = '0.5';
+                const originalSrc = avatarPreview ? avatarPreview.src : '';
 
-                fetch('${pageContext.request.contextPath}/profile', {
+                if (avatarPreview) {
+                    avatarPreview.style.opacity = '0.5';
+                }
+
+                const contextPath = document.querySelector('meta[name="context-path"]')?.content || '';
+
+                fetch(contextPath + '/profile', {
                     method: 'POST',
                     body: formData
                 })
@@ -321,13 +615,15 @@
                             return response.json();
                         })
                         .then(data => {
-                            avatarPreview.style.opacity = '1';
+                            if (avatarPreview) {
+                                avatarPreview.style.opacity = '1';
+                            }
 
                             if (data.success) {
                                 showToast('Cập nhật avatar thành công!', 'success');
 
-                                if (data.path) {
-                                    avatarPreview.src = '${pageContext.request.contextPath}/' + data.path + '?t=' + new Date().getTime();
+                                if (data.path && avatarPreview) {
+                                    avatarPreview.src = contextPath + '/' + data.path + '?t=' + new Date().getTime();
                                 }
 
                                 setTimeout(() => {
@@ -335,98 +631,87 @@
                                 }, 1000);
                             } else {
                                 showToast(data.message || 'Không thể cập nhật avatar!', 'error');
-                                avatarPreview.src = originalSrc;
+                                if (avatarPreview && originalSrc) {
+                                    avatarPreview.src = originalSrc;
+                                }
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            avatarPreview.style.opacity = '1';
-                            avatarPreview.src = originalSrc;
+                            if (avatarPreview) {
+                                avatarPreview.style.opacity = '1';
+                                if (originalSrc) {
+                                    avatarPreview.src = originalSrc;
+                                }
+                            }
                             showToast('Có lỗi xảy ra khi upload avatar!', 'error');
                         });
             }
 
-            function validateProfileForm() {
-                const firstName = document.getElementById('firstName').value.trim();
-                const lastName = document.getElementById('lastName').value.trim();
-                const bodInput = document.getElementById("bod");
-                const bodValue = bodInput.value;
+            document.addEventListener('DOMContentLoaded', function () {
+                const tab = '${tab}';
+                const error = '${error}';
+                const ok = '${ok}';
 
-                if (!firstName || !lastName) {
-                    showToast("Vui lòng điền đầy đủ họ và tên!", 'error');
-                    return false;
+                if (tab) {
+                    switchTab(tab);
                 }
 
-                if (bodValue) {
-                    const selectedDate = new Date(bodValue);
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-
-                    if (selectedDate > today) {
-                        showToast("Ngày sinh không được nằm trong tương lai!", "error");
-                        return false;
-                    }
+                if (error) {
+                    showToast(error, 'error');
                 }
 
-                return true;
-            }
-
-            function validatePasswordForm() {
-                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
-
-                const currentPassword = document.getElementById('currentPassword').value;
-                const newPassword = document.getElementById('newPassword').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-
-                if (!currentPassword || !newPassword || !confirmPassword) {
-                    showToast("Vui lòng điền đầy đủ thông tin!", 'error');
-                    return false;
+                if (ok) {
+                    showToast(ok, 'success');
                 }
 
-                if (newPassword.length < 8) {
-                    showToast("Mật khẩu mới phải có ít nhất 8 ký tự!", 'error');
-                    return false;
+                setupPasswordToggle('toggleCurPassword', 'curPassword');
+                setupPasswordToggle('toggleNewPassword', 'newPassword');
+                setupPasswordToggle('toggleRePassword', 'rePassword');
+
+                const newPasswordInput = document.getElementById('newPassword');
+                if (newPasswordInput) {
+                    newPasswordInput.addEventListener('input', function () {
+                        updatePasswordStrength(this.value, 'newPasswordStrengthBar');
+                    });
                 }
 
-                if (!passwordRegex.test(newPassword)) {
-                    showToast("Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!", 'error');
-                    return false;
+                const curPasswordInput = document.getElementById('curPassword');
+                if (curPasswordInput) {
+                    curPasswordInput.addEventListener('blur', function () {
+                        if (!this.value.trim()) {
+                            showError('curPasswordError', 'Vui lòng nhập mật khẩu hiện tại');
+                        } else {
+                            clearError('curPasswordError');
+                        }
+                    });
                 }
 
-                if (newPassword !== confirmPassword) {
-                    showToast("Mật khẩu mới và xác nhận mật khẩu không khớp!", 'error');
-                    return false;
+                if (newPasswordInput) {
+                    newPasswordInput.addEventListener('blur', function () {
+                        const error = validatePassword(this.value.trim());
+                        if (error) {
+                            showError('newPasswordError', error);
+                        } else {
+                            clearError('newPasswordError');
+                        }
+                    });
                 }
 
-                if (currentPassword === newPassword) {
-                    showToast("Vui lòng điền đầy đủ họ và tên!", 'error');
-                    return false;
+                const rePasswordInput = document.getElementById('rePassword');
+                if (rePasswordInput) {
+                    rePasswordInput.addEventListener('blur', function () {
+                        const newPassword = document.getElementById('newPassword')?.value.trim() || '';
+                        if (!this.value.trim()) {
+                            showError('rePasswordError', 'Vui lòng xác nhận mật khẩu mới');
+                        } else if (this.value.trim() !== newPassword) {
+                            showError('rePasswordError', 'Mật khẩu xác nhận không khớp');
+                        } else {
+                            clearError('rePasswordError');
+                        }
+                    });
                 }
-
-                return true;
-            }
-
-            function resetForm() {
-                location.reload();
-            }
-
-            function resetPasswordForm() {
-                document.getElementById('currentPassword').value = '';
-                document.getElementById('newPassword').value = '';
-                document.getElementById('confirmPassword').value = '';
-            }
-
-            function showNotification(message, type) {
-                const bgColor = type === 'success' ? 'bg-green-100 border-green-400 text-green-700' : 'bg-red-100 border-red-400 text-red-700';
-                const notification = document.createElement('div');
-                notification.className = `fixed top-4 right-4 ${bgColor} px-4 py-3 rounded shadow-lg z-50`;
-                notification.innerHTML = message;
-                document.body.appendChild(notification);
-
-                setTimeout(() => {
-                    notification.remove();
-                }, 3000);
-            }
+            });
         </script>
     </body>
 </html>
