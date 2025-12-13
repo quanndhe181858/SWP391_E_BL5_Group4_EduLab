@@ -24,18 +24,25 @@ public class ViewCertificateController extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("account"); 
-        // ✅ project bạn đang dùng "account"
+        User user = (User) session.getAttribute("account");
 
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
 
-        int courseId = Integer.parseInt(request.getParameter("courseId"));
+        // FINAL EXAM certificate → truyền testId
+        String testIdRaw = request.getParameter("testId");
+        if (testIdRaw == null) {
+            request.setAttribute("error", "Invalid certificate request.");
+            request.getRequestDispatcher("/View/Error/error.jsp").forward(request, response);
+            return;
+        }
+
+        int testId = Integer.parseInt(testIdRaw);
 
         certificateDAO dao = new certificateDAO();
-        Certificate cert = dao.getCertificate(user.getId(), courseId);
+        Certificate cert = dao.getCertificate(user.getId(), testId);
 
         if (cert == null) {
             request.setAttribute("error", "You have not earned this certificate yet.");
@@ -44,7 +51,7 @@ public class ViewCertificateController extends HttpServlet {
         }
 
         request.setAttribute("cert", cert);
-        request.getRequestDispatcher("/View/Trainee/Certificate.jsp")
-                .forward(request, response);
+        request.getRequestDispatcher("/View/Trainee/certificate.jsp")
+               .forward(request, response);
     }
 }

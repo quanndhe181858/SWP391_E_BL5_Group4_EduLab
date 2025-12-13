@@ -8,21 +8,21 @@ package controller.trainee;
  *
  * @author vomin
  */
+import dao.CourseProgressDAO;
 import dao.QuizAnswerDAO;
 import dao.QuizDAO;
 import dao.QuizTestDAO;
+import dao.TestsDAO;
 import dao.testAttemptDao;
-import jakarta.servlet.ServletException;
+import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import model.Question;
-import model.QuestionResult;
+import model.Quiz;
 import model.QuizAnswer;
-import model.User;
+
+import java.io.IOException;
+import java.util.List;
+import model.Test;
 
 @WebServlet("/trainee/submit-test")
 public class SubmitTestController extends HttpServlet {
@@ -43,10 +43,15 @@ public class SubmitTestController extends HttpServlet {
 
         int testId = Integer.parseInt(req.getParameter("testId"));
 
-        testAttemptDao attemptDao = new testAttemptDao();
+        // 🔥 PHÂN BIỆT SECTION TEST vs FINAL EXAM
+        TestsDAO testsDAO = new TestsDAO();
+        Test test = testsDAO.getById(testId);
+        boolean isFinalExam = test.getCourseSectionId() == 0;
+
+        QuizTestDAO quizTestDAO = new QuizTestDAO();
         QuizDAO quizDAO = new QuizDAO();
         QuizAnswerDAO answerDAO = new QuizAnswerDAO();
-        QuizTestDAO quizTestDAO = new QuizTestDAO();
+        testAttemptDao attemptDao = new testAttemptDao();
 
         int currentAttempt = attemptDao.getCurrentAttempt(userId, testId);
         if (currentAttempt >= MAX_ATTEMPT) {
@@ -55,72 +60,61 @@ public class SubmitTestController extends HttpServlet {
         }
 
         List<Integer> quizIds = quizTestDAO.getQuizIdsByTest(testId);
-        List<QuestionResult> results = new ArrayList<>();
-
-        int correctCount = 0;
+        int correct = 0;
 
         for (int quizId : quizIds) {
-
-            Question q = quizDAO.getQuestionById(quizId);
             List<QuizAnswer> answers = answerDAO.getQuizAnswersByQuizId(quizId);
 
-            boolean isMultiple = "Multiple Choice".equalsIgnoreCase(q.getType());
-
-            // ✅ User selected
-            List<Integer> selectedIds = new ArrayList<>();
-            if (isMultiple) {
-                String[] arr = req.getParameterValues("q" + quizId);
-                if (arr != null) {
-                    for (String s : arr) {
-                        selectedIds.add(Integer.parseInt(s));
-                    }
-                }
-            } else {
-                String s = req.getParameter("q" + quizId);
-                if (s != null) {
-                    selectedIds.add(Integer.parseInt(s));
-                }
+            String selectedRaw = req.getParameter("q" + quizId);
+            if (selectedRaw == null) {
+                continue;
             }
 
-            // ✅ Correct answers
-            List<Integer> correctIds = answers.stream()
-                    .filter(QuizAnswer::isIs_true)
-                    .map(QuizAnswer::getId)
-                    .toList();
+            int selectedAnswerId = Integer.parseInt(selectedRaw);
 
-            QuestionResult qr = new QuestionResult();
-            qr.setQuestionId(quizId);
-            qr.setContent(q.getContent());
-            qr.setType(q.getType());
-            qr.setAnswers(answers);
-            qr.setSelectedAnswerIds(selectedIds);
-            qr.setCorrectAnswerIds(correctIds);
+            boolean isCorrect = answers.stream()
+                    .anyMatch(a -> a.isIs_true() && a.getId() == selectedAnswerId);
 
-            if (qr.isCorrect()) {
-                correctCount++;
+            if (isCorrect) {
+                correct++;
             }
-
-            results.add(qr);
         }
 
-        int total = quizIds.size();
-        double score = total == 0 ? 0 : (correctCount * 10.0 / total);
+        double score = quizIds.isEmpty()
+                ? 0
+                : correct * 10.0 / quizIds.size();
 
-        attemptDao.saveAttempt(
-                userId,
-                testId,
-                currentAttempt + 1,
-                score,
-                score >= 4 ? "pass" : "fail"
-        );
+        String status = score >= 4 ? "pass" : "fail";
 
+        attemptDao.saveAttempt(userId, testId, currentAttempt + 1, score, status);
+
+        // SECTION TEST 
+        if (!isFinalExam) {
+
+            int courseId = Integer.parseInt(req.getParameter("courseId"));
+            int sectionId = Integer.parseInt(req.getParameter("sectionId"));
+
+        // ⭐ KHỞI TẠO DAO ⭐
+            CourseProgressDAO progressDAO = new CourseProgressDAO();
+
+        // ⭐ ĐÁNH DẤU TEST HOÀN THÀNH ⭐
+            progressDAO.markTestDone(userId, courseId, sectionId);
+
+            resp.sendRedirect(
+                    req.getContextPath()
+                    + "/learn?courseId=" + courseId
+                    + "&sectionId=" + sectionId
+            );
+            return;
+
+        }
+
+        //  FINAL EXAM  
         req.setAttribute("score", score);
         req.setAttribute("passed", score >= 4);
-        req.setAttribute("results", results);
         req.setAttribute("allowRetake", currentAttempt + 1 < MAX_ATTEMPT);
         req.setAttribute("testId", testId);
 
-        req.getRequestDispatcher("/View/Trainee/TestResult.jsp")
-                .forward(req, resp);
+        req.getRequestDispatcher("/View/Trainee/TestResult.jsp").forward(req, resp);
     }
 }
