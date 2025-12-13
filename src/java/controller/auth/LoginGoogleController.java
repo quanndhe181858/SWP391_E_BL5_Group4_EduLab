@@ -6,6 +6,7 @@ package controller.auth;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import dao.MediaDAO;
 import dao.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -15,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.util.ResourceBundle;
+import model.Media;
 import model.User;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.fluent.Form;
@@ -32,6 +34,7 @@ public class LoginGoogleController extends HttpServlet {
 
     static final ResourceBundle bundle = ResourceBundle.getBundle("configuration.google");
     static final UserDAO userDao = new UserDAO();
+    static final MediaDAO mediaDao = new MediaDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -180,6 +183,9 @@ public class LoginGoogleController extends HttpServlet {
             }
 
             User newU = userDao.getAuthUserByEmail(email);
+
+            Media media = new Media(u.getId(), "user", avatar);
+            mediaDao.createMedia(media, newU.getId());
 
             session.setAttribute("user", newU);
 

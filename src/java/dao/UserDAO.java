@@ -6,6 +6,8 @@ package dao;
 
 import database.dao;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.sql.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.User;
@@ -24,7 +26,7 @@ public class UserDAO extends dao {
 
     public static void main(String[] args) {
         UserDAO dao = new UserDAO();
-        System.out.println(dao.getAuthUser("instructor@gmail.com", "ba3253876aed6bc22d4a6ff53d8406c6ad864195ed144ab5c87621b6c233b548baeae6956df346ec8c17f5ea10f35ee3cbc514797ed7ddd3145464e2a0bab413"));
+        System.out.println(dao.updateUserInfo("Test", "Test", null, 1));
     }
 
     public User getAuthUser(String email, String password) {
@@ -49,6 +51,42 @@ public class UserDAO extends dao {
                 u.setFirst_name(rs.getString("first_name"));
                 u.setLast_name(rs.getString("last_name"));
                 u.setEmail(email);
+                u.setBod(rs.getDate("bod"));
+                u.setStatus(rs.getString("status"));
+                u.setRole_id(rs.getInt("role_id"));
+                u.setCreated_at(rs.getTimestamp("created_at"));
+                u.setUpdated_at(rs.getTimestamp("updated_at"));
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return null;
+        }
+
+        return u;
+    }
+
+    public User getUserById(int userId) {
+        User u = null;
+        String sql = """
+                     SELECT * FROM user WHERE id = ?;
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, userId);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                u = new User();
+                u.setId(rs.getInt("id"));
+                u.setUuid(rs.getString("uuid"));
+                u.setFirst_name(rs.getString("first_name"));
+                u.setLast_name(rs.getString("last_name"));
+                u.setEmail(rs.getString("email"));
                 u.setBod(rs.getDate("bod"));
                 u.setStatus(rs.getString("status"));
                 u.setRole_id(rs.getInt("role_id"));
@@ -148,6 +186,66 @@ public class UserDAO extends dao {
             ps.setString(4, user.getHash_password());
             ps.setString(5, "Active");
             ps.setInt(6, 3);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    public boolean updateUserInfo(String firstName, String lastName, LocalDate bod, int userId) {
+        String sql = """
+                 UPDATE user
+                 SET
+                     first_name = ?,
+                     last_name = ?
+                 """;
+
+        if (bod != null) {
+            sql += ", bod = ?";
+        }
+
+        sql += " WHERE id = ?;";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            int index = 1;
+
+            ps.setString(index++, firstName);
+            ps.setString(index++, lastName);
+
+            if (bod != null) {
+                ps.setDate(index++, Date.valueOf(bod));
+            }
+
+            ps.setInt(index, userId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    public boolean updatePassword(String newPassword, int userId) {
+        String sql = """
+                     UPDATE user
+                     SET
+                     hash_password = ?
+                     WHERE id = ?;
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, newPassword);
+            ps.setInt(2, userId);
 
             return ps.executeUpdate() > 0;
 
