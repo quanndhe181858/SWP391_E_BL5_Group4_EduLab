@@ -248,4 +248,40 @@ public class CategoryDAO extends dao {
             this.closeResources();
         }
     }
+
+    public Integer getParentId(int categoryId) {
+        String sql = "SELECT parent_id FROM category WHERE id = ?";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, categoryId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                int parentId = rs.getInt("parent_id");
+                return rs.wasNull() ? null : parentId; // ⭐ QUAN TRỌNG
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+
+        return null;
+    }
+
+    public boolean isCircular(int currentId, int newParentId) {
+        Integer parent = newParentId;
+
+        while (parent != null && parent != 0) {
+            if (parent == currentId) {
+                return true; 
+            }
+            parent = getParentId(parent);
+        }
+        return false;
+    }
+
 }
