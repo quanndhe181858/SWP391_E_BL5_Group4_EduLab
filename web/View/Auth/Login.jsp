@@ -3,7 +3,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Login - EduLAB</title>
+        <title>Đăng nhập - EduLAB</title>
         <jsp:include page="/layout/import.jsp" />
     </head>
     <body class="bg-gradient-to-br from-red-500 via-blue-600 to-cyan-700 min-h-screen flex items-center justify-center p-4">
@@ -162,8 +162,5 @@
                 });
             });
         </script>
-
-        <jsp:include page="/layout/footer.jsp" />
-        <jsp:include page="/layout/importBottom.jsp" />
     </body>
 </html>

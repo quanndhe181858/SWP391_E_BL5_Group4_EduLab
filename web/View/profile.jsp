@@ -50,10 +50,18 @@
                     <div class="px-6 pb-6">
                         <div class="flex flex-col md:flex-row items-center md:items-end -mt-16 md:-mt-12">
                             <div class="relative">
-                                <img id="avatarPreview" 
-                                     src="${pageContext.request.contextPath}/${media.path}" 
-                                     alt="Avatar" 
-                                     class="profile-avatar border-4 border-white shadow-lg">
+                                <c:if test="${not empty sessionScope.avatar}">
+                                    <img id="avatarPreview" 
+                                         src="${pageContext.request.contextPath}/${media.path}" 
+                                         alt="Avatar" 
+                                         class="profile-avatar border-4 border-white shadow-lg">
+                                </c:if>
+                                <c:if test="${empty sessionScope.avatar}">
+                                    <img id="avatarPreview" 
+                                         src="${pageContext.request.contextPath}/media/avatar/default-avatar.avif"
+                                         alt="Avatar" 
+                                         class="profile-avatar border-4 border-white shadow-lg">
+                                </c:if>
                                 <button onclick="document.getElementById('avatarInput').click()" 
                                         class="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
