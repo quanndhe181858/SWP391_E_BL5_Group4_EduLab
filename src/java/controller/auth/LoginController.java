@@ -4,6 +4,7 @@
  */
 package controller.auth;
 
+import dao.MediaDAO;
 import dao.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Media;
 import model.User;
 import util.Hash;
 
@@ -23,6 +25,7 @@ import util.Hash;
 public class LoginController extends HttpServlet {
 
     private UserDAO uDao = new UserDAO();
+    private MediaDAO mDao = new MediaDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -62,17 +65,26 @@ public class LoginController extends HttpServlet {
             request.setAttribute("error", "Sai email hoặc mật khẩu.");
             request.getRequestDispatcher("View/Auth/Login.jsp").forward(request, response);
         } else {
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user);
 
-            int roleId = user.getRole_id();
+            if (user.getStatus().equals("Active")) {
+                HttpSession session = request.getSession();
+                Media m = mDao.getMediaByIdAndType("user", user.getId());
 
-            if (roleId == 1) {
+                session.setAttribute("user", user);
+                session.setAttribute("avatar", m);
 
-            } else if (roleId == 2) {
-                response.sendRedirect(request.getContextPath() + "/instructor/courses");
+                int roleId = user.getRole_id();
+
+                if (roleId == 1) {
+                    response.sendRedirect(request.getContextPath() + "/admin_dashboard");
+                } else if (roleId == 2) {
+                    response.sendRedirect(request.getContextPath() + "/instructor/courses");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/home");
+                }
             } else {
-                response.sendRedirect(request.getContextPath() + "/home");
+                request.setAttribute("error", "Tài khoản đã bị dừng hoạt động.");
+                request.getRequestDispatcher("View/Auth/Login.jsp").forward(request, response);
             }
         }
     }

@@ -27,7 +27,17 @@ public class Course {
     private int created_by;
     private int updated_by;
 
+    private int totalSections;
+
     public Course() {
+    }
+
+    public int getTotalSections() {
+        return totalSections;
+    }
+
+    public void setTotalSections(int totalSections) {
+        this.totalSections = totalSections;
     }
 
     public int getId() {
