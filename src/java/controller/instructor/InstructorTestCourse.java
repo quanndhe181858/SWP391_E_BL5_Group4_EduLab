@@ -17,7 +17,7 @@ import model.Quiz;
 import model.Test;
 import model.User;
 
-@WebServlet(name = "InstructorTestCourse", urlPatterns = {"/instructor/test-course"})
+@WebServlet(name = "InstructorTestCourse", urlPatterns = {"/instructor/test-course"})//khoa hoc
 public class InstructorTestCourse extends HttpServlet {
 
     private final TestsDAO testDAO = new TestsDAO();
@@ -223,7 +223,7 @@ public class InstructorTestCourse extends HttpServlet {
             quizTestDAO.deleteQuizByTest(id);
             processQuiz(mode, id, request);
 
-            response.sendRedirect(request.getContextPath() + "/instructor/test-course?courseId=" + courseId);
+            response.sendRedirect(request.getContextPath() + "/managerTest");
         }
     }
 
