@@ -28,8 +28,34 @@ public class Course {
     private int updated_by;
 
     private int totalSections;
+    private String categoryName;
+    private int enrollmentCount;
 
     public Course() {
+    }
+
+    public Course(int id, String title, String thumbnail, String categoryName, int enrollmentCount) {
+        this.id = id;
+        this.title = title;
+        this.thumbnail = thumbnail;
+        this.categoryName = categoryName;
+        this.enrollmentCount = enrollmentCount;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public int getEnrollmentCount() {
+        return enrollmentCount;
+    }
+
+    public void setEnrollmentCount(int enrollmentCount) {
+        this.enrollmentCount = enrollmentCount;
     }
 
     public int getTotalSections() {

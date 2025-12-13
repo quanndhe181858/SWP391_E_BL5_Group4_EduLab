@@ -28,7 +28,7 @@
             <p class="px-3 py-2 text-xs font-semibold text-blue-200 uppercase tracking-wide">
                 Tổng quan
             </p>
-            <a href="?page=dashboard" 
+            <a href="${pageContext.request.contextPath}/admin_dashboard?page=dashboard" 
                class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all <%= currentPage.equals("dashboard") ? "bg-white text-blue-600 font-semibold shadow-lg" : "text-white hover:bg-blue-500/30" %>">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
@@ -43,7 +43,7 @@
                 Học tập
             </p>
             <div class="space-y-1">
-                <a href="?page=courses" 
+<!--                <a href="?page=courses" 
                    class="flex items-center justify-between px-3 py-2.5 rounded-lg transition-all <%= currentPage.equals("courses") ? "bg-white text-blue-600 font-semibold shadow-lg" : "text-white hover:bg-blue-500/30" %>">
                     <div class="flex items-center gap-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,10 +71,10 @@
                         <span>Bài kiểm tra</span>
                     </div>
                     <span class="px-2 py-0.5 text-xs font-semibold bg-red-500 rounded-full">5</span>
-                </a>
+                </a>-->
 
-                <a href="manager_category" 
-                   class="flex items-center justify-between px-3 py-2.5 rounded-lg transition-all <%= currentPage.equals("assignments") ? "bg-white text-blue-600 font-semibold shadow-lg" : "text-white hover:bg-blue-500/30" %>">
+                <a href="${pageContext.request.contextPath}/manager_category?page=categories" 
+                   class="flex items-center justify-between px-3 py-2.5 rounded-lg transition-all <%= currentPage.equals("categories") ? "bg-white text-blue-600 font-semibold shadow-lg" : "text-white hover:bg-blue-500/30" %>">
                     <div class="flex items-center gap-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -131,25 +131,7 @@
             </div>
         </div>
 
-        <!-- GIAO TIẾP -->
-        <div class="mb-6">
-            <p class="px-3 py-2 text-xs font-semibold text-blue-200 uppercase tracking-wide">
-                Giao tiếp
-            </p>
-            <a href="?page=messages" 
-               class="flex items-center justify-between px-3 py-2.5 rounded-lg transition-all <%= currentPage.equals("messages") ? "bg-white text-blue-600 font-semibold shadow-lg" : "text-white hover:bg-blue-500/30" %>">
-                <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
-                    </svg>
-                    <span>Tin nhắn</span>
-                </div>
-                <span class="px-2 py-0.5 text-xs font-semibold bg-red-500 rounded-full animate-pulse">3</span>
-            </a>
-        </div>
-
-        <!-- HỆ THỐNG -->
-        <div class="mb-6">
+<!--        <div class="mb-6">
             <p class="px-3 py-2 text-xs font-semibold text-blue-200 uppercase tracking-wide">
                 Hệ thống
             </p>
@@ -161,7 +143,7 @@
                 </svg>
                 <span>Cài đặt</span>
             </a>
-        </div>
+        </div>-->
     </nav>
 </aside>
 
