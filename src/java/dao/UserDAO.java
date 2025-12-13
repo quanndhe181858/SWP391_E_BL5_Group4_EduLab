@@ -64,4 +64,96 @@ public class UserDAO extends dao {
         return u;
     }
 
+    public User getAuthUserByEmail(String email) {
+        User u = null;
+        String sql = """
+                     SELECT * FROM user WHERE email = ?;
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, email);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                u = new User();
+                u.setId(rs.getInt("id"));
+                u.setUuid(rs.getString("uuid"));
+                u.setFirst_name(rs.getString("first_name"));
+                u.setLast_name(rs.getString("last_name"));
+                u.setEmail(email);
+                u.setBod(rs.getDate("bod"));
+                u.setStatus(rs.getString("status"));
+                u.setRole_id(rs.getInt("role_id"));
+                u.setCreated_at(rs.getTimestamp("created_at"));
+                u.setUpdated_at(rs.getTimestamp("updated_at"));
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return null;
+        }
+
+        return u;
+    }
+
+    public boolean isEmailExisted(String email) {
+        String sql = """
+                     SELECT COUNT(*) FROM user WHERE email = ?;
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, email);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+            return false;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        }
+    }
+
+    public boolean doRegister(User user) {
+        String sql = """
+                     INSERT INTO `edulab`.`user`
+                     (`first_name`,
+                     `last_name`,
+                     `email`,
+                     `hash_password`,
+                     `status`,
+                     `role_id`)
+                     VALUES
+                     (?, ?, ?, ?, ?, ?);
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, user.getFirst_name());
+            ps.setString(2, user.getLast_name());
+            ps.setString(3, user.getEmail());
+            ps.setString(4, user.getHash_password());
+            ps.setString(5, "Active");
+            ps.setInt(6, 3);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        }
+    }
 }
