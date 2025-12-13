@@ -28,35 +28,7 @@ public class CourseDAO extends dao {
 
     public static void main(String[] args) {
         CourseDAO dao = new CourseDAO();
-
-//        Course c = new Course();
-//        c.setTitle("Java Web Development");
-//        c.setDescription("Learn MVC, Servlet, JDBC");
-//        c.setStatus("active");
-//        c.setCategory_id(2);
-//
-//        Course created = dao.createCourse(c, 1); // uid = 1 (creator)
-//        System.out.println("Created Course:");
-//        System.out.println(created);
-//
-//        Course found = dao.getCourseById(created.getId());
-//        System.out.println("Found Course:");
-//        System.out.println(found);
-//
-//        found.setTitle("Updated Java Web Development");
-//        found.setStatus("inactive");
-//
-//        Course updated = dao.updateCourse(found, 1); // uid = 1 (updater)
-//        System.out.println("Updated Course:");
-//        System.out.println(updated);
-//
-//        boolean deleted = dao.deleteCourse(updated.getId());
-//        System.out.println("Deleted? " + deleted);
-//        System.out.println(dao.getCoursesByInstructorId(10, 0, "", "", 0, "", "", 1));
-//        System.out.println(dao.countCourses("", "", 0, ""));
-//        System.out.println(dao.getCoursesByInstructorId(10, 0, "", "", 0, "", "", 1).size());
-//        System.out.println(dao.countCoursesByInstructorId(1, "active"));
-        System.out.println(dao.deleteCourse(7));
+        System.out.println(dao.countCoursesByCategoryId(5));
     }
 
     public Course createCourse(Course course, int uid) {
@@ -794,4 +766,57 @@ public class CourseDAO extends dao {
 
         return 0;
     }
+
+    public int countCoursesByCategoryId(int categoryId) {
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) FROM edulab.course WHERE 1 = 1"
+        );
+
+        List<Object> params = new ArrayList<>();
+
+        if (categoryId > 0) {
+            List<Integer> allCategoryIds = new ArrayList<>();
+            allCategoryIds.add(categoryId);
+
+            List<Integer> children = categoryDao.getChildCategoryIds(categoryId);
+            if (children != null && !children.isEmpty()) {
+                allCategoryIds.addAll(children);
+            }
+
+            sql.append(" AND category_id IN (");
+            for (int i = 0; i < allCategoryIds.size(); i++) {
+                sql.append("?");
+                if (i < allCategoryIds.size() - 1) {
+                    sql.append(",");
+                }
+                params.add(allCategoryIds.get(i));
+            }
+            sql.append(")");
+        }
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+
+            int index = 1;
+            for (Object p : params) {
+                ps.setObject(index++, p);
+            }
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error in countCoursesByCategoryId()", e);
+        } finally {
+            this.closeResources();
+        }
+
+        return 0;
+    }
+
 }

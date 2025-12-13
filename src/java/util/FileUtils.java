@@ -19,6 +19,7 @@ public class FileUtils {
 
     private static final String IMAGE_DIR = "media/image";
     private static final String VIDEO_DIR = "media/video";
+    private static final String AVATAR_DIR = "media/avatar";
 
     private static final String[] IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".jfif"};
     private static final String[] VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".wmv", ".flv", ".mkv", ".webm"};
@@ -44,7 +45,14 @@ public class FileUtils {
 
         String uniqueFileName = generateUniqueFileName(extension);
 
-        String targetDir = fileType.equals("image") ? IMAGE_DIR : VIDEO_DIR;
+        String targetDir;
+        if (fileType.equals("image")) {
+            targetDir = IMAGE_DIR;
+        } else if (fileType.equals("avatar")) {
+            targetDir = AVATAR_DIR;
+        } else {
+            targetDir = VIDEO_DIR;
+        }
         String relativePath = targetDir + "/" + uniqueFileName;
 
         String buildPath = servletContext.getRealPath("/") + relativePath;
@@ -229,6 +237,22 @@ public class FileUtils {
             if (fileSize > MAX_VIDEO_SIZE) {
                 throw new IllegalArgumentException("Video size exceeds maximum allowed size of "
                         + (MAX_VIDEO_SIZE / 1024 / 1024) + "MB");
+            }
+        } else if (fileType.equals("avatar")) {
+            for (String ext : IMAGE_EXTENSIONS) {
+                if (ext.equalsIgnoreCase(extension)) {
+                    validExtension = true;
+                    break;
+                }
+            }
+            if (!validExtension) {
+                throw new IllegalArgumentException("Invalid image format. Allowed: "
+                        + String.join(", ", IMAGE_EXTENSIONS));
+            }
+
+            if (fileSize > MAX_IMAGE_SIZE) {
+                throw new IllegalArgumentException("Image size exceeds maximum allowed size of "
+                        + (MAX_IMAGE_SIZE / 1024 / 1024) + "MB");
             }
         } else {
             throw new IllegalArgumentException("Invalid file type. Must be 'image' or 'video'");

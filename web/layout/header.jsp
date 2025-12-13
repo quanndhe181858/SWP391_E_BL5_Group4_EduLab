@@ -46,13 +46,15 @@
 
                             <div class="relative" id="userDropdown">
                                 <button class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 focus:outline-none" id="userMenuButton">
-                                    <div class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                                        <c:choose>
-                                            <c:when test="${not empty sessionScope.user.first_name}">
-                                                ${sessionScope.user.first_name.substring(0, 1).toUpperCase()}
-                                            </c:when>
-                                            <c:otherwise>U</c:otherwise>
-                                        </c:choose>
+                                    <div class="w-10 h-10 border border-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                                        <c:if test="${not empty sessionScope.avatar}">
+                                            <img class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold" 
+                                                 src="${pageContext.request.contextPath}/${sessionScope.avatar.path}" />
+                                        </c:if>
+                                        <c:if test="${empty sessionScope.avatar}">
+                                            <img class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold" 
+                                                 src="${pageContext.request.contextPath}/media/avatar/default-avatar.avif" />
+                                        </c:if>
                                     </div>
                                     <span class="text-sm font-medium">
                                         <c:out value="${not empty sessionScope.user.first_name ? sessionScope.user.first_name : 'User'}" />
@@ -70,40 +72,37 @@
                                         <p class="text-xs text-gray-500 truncate">
                                             <c:out value="${sessionScope.user.email}" />
                                         </p>
-                                    </div>
-<!--                                    <a href="${pageContext.request.contextPath}/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    </div> 
+                                    <a href="${pageContext.request.contextPath}/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                         <div class="flex items-center">
-                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                            </svg>
-                                            My Profile
+                                            Trang cá nhân
                                         </div>
-                                    </a> -->                                    
+                                    </a>
                                     <c:if test="${sessionScope.user.role_id == 2}">
                                         <a href="${pageContext.request.contextPath}/instructor/courses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                             <div class="flex items-center">
-                                                My Course
+                                                Quản lí khoá học
                                             </div>
                                         </a>
                                     </c:if>
                                     <c:if test="${sessionScope.user.role_id == 2}">
                                         <a href="${pageContext.request.contextPath}/instructor/quizes" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                             <div class="flex items-center">
-                                                My Quiz
+                                                Quản lí câu hỏi
                                             </div>
                                         </a>
                                     </c:if>
                                     <c:if test="${sessionScope.user.role_id == 2}">
                                         <a href="${pageContext.request.contextPath}/instructor/quiz-answers" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                             <div class="flex items-center">
-                                                My Quiz Answer
+                                                Quản lí câu trả lời
                                             </div>
                                         </a>
                                     </c:if>
                                     <c:if test="${sessionScope.user.role_id == 2}">
                                         <a href="${pageContext.request.contextPath}/managerTest" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                             <div class="flex items-center">
-                                                My Test
+                                                Quản lí bài kiểm tra
                                             </div>
                                         </a>
                                     </c:if>
@@ -114,7 +113,7 @@
                                                     <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                                                     </svg>
-                                                    Log Out
+                                                    Đăng xuất
                                                 </div>
                                             </button>
                                         </form>
@@ -126,10 +125,10 @@
                     <c:otherwise>
                         <div class="flex items-center space-x-4">
                             <a href="${pageContext.request.contextPath}/login" class="text-blue-600 text-sm font-medium hover:underline">
-                                Log In
+                                Đăng nhập
                             </a>
                             <a href="${pageContext.request.contextPath}/register" class="px-4 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded hover:bg-blue-50">
-                                Join for Free
+                                Tham gia ngay
                             </a>
                         </div>
                     </c:otherwise>

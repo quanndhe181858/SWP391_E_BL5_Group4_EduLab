@@ -65,7 +65,6 @@ public class LoginController extends HttpServlet {
             request.setAttribute("error", "Sai email hoặc mật khẩu.");
             request.getRequestDispatcher("View/Auth/Login.jsp").forward(request, response);
         } else {
-
             if (user.getStatus().equals("Active")) {
                 HttpSession session = request.getSession();
                 Media m = mDao.getMediaByIdAndType("user", user.getId());
