@@ -177,6 +177,22 @@ public class ProfileController extends HttpServlet {
             return;
         }
 
+        if (firstName.length() > 50) {
+            request.setAttribute("error", "Họ không được dài quá 50 từ!");
+            Media m = mediaDao.getMediaByIdAndType("user", u.getId());
+            request.setAttribute("media", m);
+            request.getRequestDispatcher("View/profile.jsp").forward(request, response);
+            return;
+        }
+
+        if (lastName.length() > 50) {
+            request.setAttribute("error", "Tên không được dài quá 50 từ!");
+            Media m = mediaDao.getMediaByIdAndType("user", u.getId());
+            request.setAttribute("media", m);
+            request.getRequestDispatcher("View/profile.jsp").forward(request, response);
+            return;
+        }
+
         userDao.updateUserInfo(firstName, lastName, bod, userId);
 
         u = userDao.getUserById(userId);
@@ -184,6 +200,7 @@ public class ProfileController extends HttpServlet {
 
         request.setAttribute("ok", "Cập nhật thông tin thành công!");
         request.setAttribute("media", m);
+        request.setAttribute("tab", "info");
         session.setAttribute("user", u);
         request.getRequestDispatcher("View/profile.jsp").forward(request, response);
     }

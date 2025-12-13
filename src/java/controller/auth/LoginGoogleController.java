@@ -171,11 +171,11 @@ public class LoginGoogleController extends HttpServlet {
                         + "<head><meta charset=\"UTF-8\"></head>"
                         + "<body>"
                         + "<h2>Xin chào " + fullName + "!</h2>"
-                        + "<p>Bạn đã đăng kí thành công tài khoản thông qua phương thức Google.</p>"
-                        + "<p>Dưới đây là mật khẩu bảo mật của bạn, vui lòng không chia sẻ với bất kì ai, "
-                        + "đổi mật khẩu khi lần đầu đăng nhập.</p>"
-                        + "<p><strong>Mật khẩu: " + random_string + "</strong></p>"
-                        + "<p>Trân trọng,<br>Đội ngũ EduLAB</p>"
+                        + "<p>Ban da dang ki thanh cong tai khoan EduLAB thong qua phuong thuc Google.</p>"
+                        + "<p>Duoi day la mat khau bao mat của ban, vui long khong chia se voi bat ki ai. "
+                        + "Vui long doi mat khau sau khi dang nhap.</p>"
+                        + "<p><strong>Mat khau: " + random_string + "</strong></p>"
+                        + "<p>Tran trong,<br>Doi ngu EduLAB</p>"
                         + "</body>"
                         + "</html>";
 
