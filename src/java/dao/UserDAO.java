@@ -26,7 +26,8 @@ public class UserDAO extends dao {
 
     public static void main(String[] args) {
         UserDAO dao = new UserDAO();
-        System.out.println(dao.updateUserInfo("Test", "Test", null, 1));
+        User u = new User("test", "test", "test@gmail.com", "test");
+        System.out.println(dao.doRegister(u));
     }
 
     public User getAuthUser(String email, String password) {
