@@ -68,7 +68,7 @@ public class LoginController extends HttpServlet {
             int roleId = user.getRole_id();
 
             if (roleId == 1) {
-
+                response.sendRedirect(request.getContextPath() + "/admin_dashboard");
             } else if (roleId == 2) {
                 response.sendRedirect(request.getContextPath() + "/instructor/courses");
             } else {
