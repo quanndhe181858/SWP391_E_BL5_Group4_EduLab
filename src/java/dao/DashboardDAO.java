@@ -5,8 +5,10 @@
 package dao;
 
 import database.dao;
+import dtos.CategoriesStatisticDTO;
 import dtos.DashboardStatisticDTO;
 import dtos.RecentActivityDTO;
+import dtos.UsersStatisticDTO;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,27 +16,24 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Course;
 import model.User;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.time.LocalDateTime;
 
 /**
  *
  * @author quan
  */
 public class DashboardDAO extends dao {
-
+    
     public static void main(String[] args) {
         DashboardDAO dao = new DashboardDAO();
         System.out.println(dao.getNewestUsers(5));
     }
-
+    
     private final Logger logger = Logger.getLogger(this.getClass().getName());
-
+    
     private void log(Level level, String msg, Throwable e) {
         this.logger.log(level, msg, e);
     }
-
+    
     public DashboardStatisticDTO getAdminStatistic() {
         DashboardStatisticDTO stat = null;
         String sql = """
@@ -52,12 +51,12 @@ public class DashboardDAO extends dao {
                          (SELECT COUNT(*) FROM quiz) as totalQuizzes,
                          (SELECT COUNT(*) FROM media) as totalMedia;
                      """;
-
+        
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
-
+            
             if (rs.next()) {
                 stat = new DashboardStatisticDTO(
                         rs.getInt("totalUsers"),
@@ -74,7 +73,7 @@ public class DashboardDAO extends dao {
                         rs.getInt("totalMedia")
                 );
             }
-
+            
             return stat;
         } catch (SQLException e) {
             this.log(Level.SEVERE, e.getMessage(), e);
@@ -83,7 +82,7 @@ public class DashboardDAO extends dao {
             this.closeResources();
         }
     }
-
+    
     public List<User> getNewestUsers(int limit) {
         List<User> uList = new ArrayList<>();
         String sql = """
@@ -100,37 +99,37 @@ public class DashboardDAO extends dao {
                          ORDER BY u.created_at DESC
                          LIMIT ?;
                      """;
-
+        
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
-
+            
             ps.setInt(1, limit);
-
+            
             rs = ps.executeQuery();
-
+            
             while (rs.next()) {
                 User u = new User();
-
+                
                 u.setId(rs.getInt("id"));
                 u.setFirst_name(rs.getString("firstName"));
                 u.setLast_name(rs.getString("lastName"));
                 u.setEmail(rs.getString("email"));
                 u.setStatus(rs.getString("status"));
                 u.setCreated_at(rs.getTimestamp("createdAt"));
-
+                
                 uList.add(u);
             }
-
+            
         } catch (SQLException e) {
             this.log(Level.SEVERE, e.getMessage(), e);
         } finally {
             this.closeResources();
         }
-
+        
         return uList;
     }
-
+    
     public List<Course> getPopularCourses(int limit) {
         List<Course> cList = new ArrayList<>();
         String sql = """
@@ -148,15 +147,15 @@ public class DashboardDAO extends dao {
                      ORDER BY enrollmentCount DESC
                      LIMIT ?;
                      """;
-
+        
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
-
+            
             ps.setInt(1, limit);
-
+            
             rs = ps.executeQuery();
-
+            
             while (rs.next()) {
                 Course c = new Course(
                         rs.getInt("id"),
@@ -165,19 +164,19 @@ public class DashboardDAO extends dao {
                         rs.getString("categoryName"),
                         rs.getInt("enrollmentCount")
                 );
-
+                
                 cList.add(c);
             }
-
+            
         } catch (SQLException e) {
             this.log(Level.SEVERE, e.getMessage(), e);
         } finally {
             this.closeResources();
         }
-
+        
         return cList;
     }
-
+    
     public List<RecentActivityDTO> getRecentActivity(int limit) {
         List<RecentActivityDTO> recentList = new ArrayList<>();
 
@@ -226,7 +225,7 @@ public class DashboardDAO extends dao {
                  ORDER BY activityTime DESC
                  LIMIT ?
                  """;
-
+        
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
@@ -237,7 +236,7 @@ public class DashboardDAO extends dao {
             ps.setInt(3, limit);  // LIMIT cho kết quả cuối cùng
 
             rs = ps.executeQuery();
-
+            
             while (rs.next()) {
                 RecentActivityDTO ra = new RecentActivityDTO(
                         rs.getString("type"),
@@ -247,13 +246,82 @@ public class DashboardDAO extends dao {
                 );
                 recentList.add(ra);
             }
-
+            
         } catch (SQLException e) {
             this.log(Level.SEVERE, e.getMessage(), e);
         } finally {
             this.closeResources();
         }
-
+        
         return recentList;
+    }
+    
+    public List<UsersStatisticDTO> getUsersStatisticChartData(int dayCount) {
+        List<UsersStatisticDTO> usList = new ArrayList<>();
+        String sql = """
+                     SELECT 
+                         DATE(created_at) as date,
+                         DAYNAME(created_at) as dayName,
+                         COUNT(*) as userCount
+                     FROM user
+                     WHERE created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL ? DAY)
+                     GROUP BY DATE(created_at), DAYNAME(created_at)
+                     ORDER BY date ASC;
+                     """;
+        
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            
+            ps.setInt(1, dayCount);
+            
+            rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                UsersStatisticDTO us = new UsersStatisticDTO(rs.getDate("date"), rs.getString("dayName"), rs.getInt("userCount"));
+                usList.add(us);
+            }
+            
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+        
+        return usList;
+    }
+    
+    public List<CategoriesStatisticDTO> getCategoriesStatisticChartData() {
+        List<CategoriesStatisticDTO> csList = new ArrayList<>();
+        String sql = """
+                     SELECT 
+                         parent_cat.name as categoryName,
+                         COUNT(c.id) as courseCount,
+                         ROUND((COUNT(c.id) * 100.0 / NULLIF((SELECT COUNT(*) FROM course), 0)), 1) as percentage
+                     FROM category parent_cat
+                     LEFT JOIN category child_cat ON parent_cat.id = child_cat.parent_id OR parent_cat.id = child_cat.id
+                     LEFT JOIN course c ON child_cat.id = c.category_id
+                     WHERE parent_cat.parent_id IS NULL
+                     GROUP BY parent_cat.id, parent_cat.name
+                     ORDER BY courseCount DESC;
+                     """;
+        
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                CategoriesStatisticDTO cs = new CategoriesStatisticDTO(rs.getString(1), rs.getInt(2), rs.getFloat(3));
+                csList.add(cs);
+            }
+            
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+        
+        return csList;
     }
 }

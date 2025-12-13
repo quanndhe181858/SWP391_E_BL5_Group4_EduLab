@@ -28,7 +28,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                             </svg>
                         </div>
-                        <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded">+12%</span>
                     </div>
                     <h3 class="text-gray-500 text-sm font-medium">Tổng Người Dùng</h3>
                     <p class="text-3xl font-bold text-gray-900 mt-2">${ds.totalUsers}</p>
@@ -44,7 +43,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                             </svg>
                         </div>
-                        <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">+5%</span>
                     </div>
                     <h3 class="text-gray-500 text-sm font-medium">Tổng Khóa Học</h3>
                     <p class="text-3xl font-bold text-gray-900 mt-2">${ds.totalCourses}</p>
@@ -60,7 +58,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                         </div>
-                        <span class="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-1 rounded">+18%</span>
                     </div>
                     <h3 class="text-gray-500 text-sm font-medium">Lượt Đăng Ký</h3>
                     <p class="text-3xl font-bold text-gray-900 mt-2">${ds.totalEnrollments}</p>
@@ -76,12 +73,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                             </svg>
                         </div>
-                        <span class="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded">+3%</span>
                     </div>
                     <h3 class="text-gray-500 text-sm font-medium">Tỷ Lệ Hoàn Thành</h3>
                     <p class="text-3xl font-bold text-gray-900 mt-2">${ds.completionRate}%</p>
                     <p class="text-xs text-gray-500 mt-2">
-                        <span class="text-orange-600 font-medium">${ds.completionRate}</span> khóa hoàn thành
+                        <span class="text-orange-600 font-medium">${ds.completedCourse}</span> khóa hoàn thành
                     </p>
                 </div>
             </div>
@@ -90,10 +86,10 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-lg font-semibold text-gray-900">Tăng Trưởng Người Dùng</h2>
-                        <select class="text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                            <option>7 ngày qua</option>
-                            <option>30 ngày qua</option>
-                            <option>3 tháng qua</option>
+                        <select id="userChartDayFilter" class="text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            <option value="7" ${currentFilter == 7 ? 'selected' : ''}>7 ngày qua</option>
+                            <option value="30" ${currentFilter == 30 ? 'selected' : ''}>30 ngày qua</option>
+                            <option value="90" ${currentFilter == 90 ? 'selected' : ''}>3 tháng qua</option>
                         </select>
                     </div>
                     <div style="height: 250px;">
@@ -104,7 +100,7 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-lg font-semibold text-gray-900">Phân Bố Danh Mục</h2>
-                        <button class="text-sm text-blue-600 hover:text-blue-700 font-medium">Xem tất cả</button>
+                        <a href="${pageContext.request.contextPath}/manager_category?page=categories"><button class="text-sm text-blue-600 hover:text-blue-700 font-medium">Xem tất cả</button></a>
                     </div>
                     <div style="height: 250px;">
                         <canvas id="categoryChart"></canvas>
@@ -262,69 +258,94 @@
         </main>
 
         <script>
+            const usersStatisticData = [
+            <c:forEach items="${usList}" var="stat" varStatus="status">
+            {
+            dayName: '${stat.dayName}',
+                    userCount: ${stat.userCount}
+            }${!status.last ? ',' : ''}
+            </c:forEach>
+            ];
+            const categoriesStatisticData = [
+            <c:forEach items="${csList}" var="cateStat" varStatus="cateStatus">
+            {
+            categoryName: '${cateStat.categoryName}',
+                    percentage: '${cateStat.percentage}',
+                    courseCount: ${cateStat.courseCount}
+            }${!cateStatus.last ? ',' : ''}
+            </c:forEach>
+            ];
             const userCtx = document.getElementById('userGrowthChart').getContext('2d');
+            // Tách labels và data từ usersStatisticData
+            const userLabels = usersStatisticData.map(item => item.dayName);
+            const userData = usersStatisticData.map(item => item.userCount);
             new Chart(userCtx, {
-                type: 'line',
-                data: {
-                    labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
-                    datasets: [{
+            type: 'line',
+                    data: {
+                    labels: userLabels,
+                            datasets: [{
                             label: 'Người dùng mới',
-                            data: [12, 19, 15, 25, 22, 30, 28],
-                            borderColor: 'rgb(59, 130, 246)',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
+                                    data: userData,
+                                    borderColor: 'rgb(59, 130, 246)',
+                                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                    tension: 0.4,
+                                    fill: true
+                            }]
                     },
-                    scales: {
-                        y: {
+                    options: {
+                    responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                            legend: {
+                            display: false
+                            }
+                            },
+                            scales: {
+                            y: {
                             beginAtZero: true,
-                            grid: {
-                                display: true,
-                                drawBorder: false
+                                    grid: {
+                                    display: true,
+                                            drawBorder: false
+                                    }
+                            },
+                                    x: {
+                                    grid: {
+                                    display: false
+                                    }
+                                    }
                             }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
                     }
-                }
             });
-
+            const cateLabels = categoriesStatisticData.map(item => item.categoryName);
+            const cateData = categoriesStatisticData.map(item => item.courseCount);
             const catCtx = document.getElementById('categoryChart').getContext('2d');
             new Chart(catCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Lập trình', 'Thiết kế', 'Kinh doanh', 'Marketing'],
-                    datasets: [{
-                            data: [35, 25, 20, 20],
-                            backgroundColor: [
-                                'rgb(59, 130, 246)',
-                                'rgb(34, 197, 94)',
-                                'rgb(168, 85, 247)',
-                                'rgb(249, 115, 22)'
-                            ]
-                        }]
-                },
-                options: {
+            type: 'doughnut',
+                    data: {
+                    labels: cateLabels,
+                            datasets: [{
+                            data: cateData,
+                                    backgroundColor: [
+                                            'rgb(59, 130, 246)',
+                                            'rgb(34, 197, 94)',
+                                            'rgb(168, 85, 247)',
+                                            'rgb(249, 115, 22)'
+                                    ]
+                            }]
+                    },
+                    options: {
                     responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
+                            maintainAspectRatio: false,
+                            plugins: {
+                            legend: {
                             position: 'bottom'
-                        }
+                            }
+                            }
                     }
-                }
+            });
+            $('#userChartDayFilter').on('change', () => {
+            const selectedBox = $('#userChartDayFilter').val();
+            window.location.href = "${pageContext.request.contextPath}/admin_dashboard?chartDayFilter=" + selectedBox;
             });
         </script>
     </body>
