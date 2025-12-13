@@ -87,7 +87,8 @@ public class InstructorQuizController extends HttpServlet {
             }
         } catch (ServletException | IOException e) {
             logger.log(Level.SEVERE, "Error in QuizController doGet", e);
-            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(),
+                    httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
     }
 
@@ -126,7 +127,8 @@ public class InstructorQuizController extends HttpServlet {
             }
         } catch (ServletException | IOException e) {
             logger.log(Level.SEVERE, "Error in QuizController doPost", e);
-            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(),
+                    httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
     }
 
@@ -304,7 +306,8 @@ public class InstructorQuizController extends HttpServlet {
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error in showQuizList", e);
-            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(),
+                    httpStatus.INTERNAL_SERVER_ERROR.getMessage());
         }
     }
 
@@ -317,7 +320,7 @@ public class InstructorQuizController extends HttpServlet {
         List<Category> categories = categoryDAO.getCategories();
         request.setAttribute("categories", categories);
 
-        request.getRequestDispatcher("../View/Instructor/QuizManage.jsp").forward(request, response);
+        request.getRequestDispatcher("../View/Instructor/QuizCreate.jsp").forward(request, response);
     }
 
     /**
@@ -356,6 +359,37 @@ public class InstructorQuizController extends HttpServlet {
             return;
         }
 
+        // Get answer parameters
+        String[] answerContents = request.getParameterValues("answerContent");
+        String[] answerIsCorrectIndices = request.getParameterValues("answerIsCorrect");
+
+        // Validate answers (at least 2 answers, 1 correct)
+        if (answerContents == null || answerContents.length < 2) {
+            request.setAttribute("notification", "Vui lòng nhập ít nhất 2 câu trả lời.");
+            request.setAttribute("notificationType", "error");
+            // Preserve input
+            request.setAttribute("question", question);
+            request.setAttribute("type", type);
+            request.setAttribute("categoryId", categoryIdParam);
+            request.setAttribute("answerContents", answerContents);
+            // Forward back to create form
+            showCreateForm(request, response);
+            return;
+        }
+
+        if (answerIsCorrectIndices == null || answerIsCorrectIndices.length < 1) {
+            request.setAttribute("notification", "Vui lòng chọn ít nhất 1 câu trả lời đúng.");
+            request.setAttribute("notificationType", "error");
+            // Preserve input
+            request.setAttribute("question", question);
+            request.setAttribute("type", type);
+            request.setAttribute("categoryId", categoryIdParam);
+            request.setAttribute("answerContents", answerContents);
+            // Forward back to create form
+            showCreateForm(request, response);
+            return;
+        }
+
         // Get user from session - we know it exists due to authorization check
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
@@ -370,13 +404,46 @@ public class InstructorQuizController extends HttpServlet {
         Quiz createdQuiz = quizServices.createQuiz(quiz, user.getId());
 
         if (createdQuiz != null) {
-            session.setAttribute("notification", "Câu hỏi đã được tạo thành công! Bây giờ bạn có thể thêm câu trả lời.");
+            // Create answers
+            dao.QuizAnswerDAO quizAnswerDAO = new dao.QuizAnswerDAO();
+            boolean allAnswersCreated = true;
+
+            // Convert correct indices to list for easier checking
+            List<String> correctIndexList = java.util.Arrays.asList(answerIsCorrectIndices);
+
+            for (int i = 0; i < answerContents.length; i++) {
+                String content = answerContents[i];
+                if (content != null && !content.trim().isEmpty()) {
+                    model.QuizAnswer answer = new model.QuizAnswer();
+                    answer.setQuiz_id(createdQuiz.getId());
+                    answer.setContent(content.trim());
+                    answer.setType(type); // Inherit type from quiz
+                    // Check if this index is in the correct list
+                    // The view should send indices corresponding to the array position (0, 1, 2...)
+                    answer.setIs_true(correctIndexList.contains(String.valueOf(i)));
+
+                    model.QuizAnswer created = quizAnswerDAO.createQuizAnswer(answer, user.getId());
+                    if (created == null) {
+                        allAnswersCreated = false;
+                        logger.log(Level.SEVERE,
+                                "Failed to create answer index " + i + " for quiz " + createdQuiz.getId());
+                    }
+                }
+            }
+
+            session.setAttribute("notification", "Câu hỏi và câu trả lời đã được tạo thành công!");
             session.setAttribute("notificationType", "success");
-            // Redirect to edit page to add answers
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + createdQuiz.getId());
+            // Redirect to list
+            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
         } else {
             logger.log(Level.SEVERE, "Failed to create quiz for user: " + user.getId());
-            response.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+            request.setAttribute("notification", "Có lỗi xảy ra khi tạo câu hỏi. Vui lòng thử lại.");
+            request.setAttribute("notificationType", "error");
+            // Preserve input
+            request.setAttribute("question", question);
+            request.setAttribute("type", type);
+            request.setAttribute("categoryId", categoryIdParam);
+            showCreateForm(request, response);
         }
     }
 
@@ -425,7 +492,8 @@ public class InstructorQuizController extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        // Get authorized user - we know this exists because authorization was checked in doPost
+        // Get authorized user - we know this exists because authorization was checked
+        // in doPost
         User user = (User) session.getAttribute("user");
 
         // Get form parameters
