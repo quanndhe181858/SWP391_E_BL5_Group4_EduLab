@@ -94,6 +94,19 @@
                             Đăng nhập
                         </button>
 
+                        <div class="text-center mt-6">
+                            <span>
+                                <a href="https://accounts.google.com/o/oauth2/auth?scope=profile%20email%20openid%20
+                                   https://www.googleapis.com/auth/userinfo.profile%20
+                                   https://www.googleapis.com/auth/userinfo.email%20
+                                   https://www.googleapis.com/auth/user.phonenumbers.read%20
+                                   https://www.googleapis.com/auth/user.gender.read
+                                   &redirect_uri=http://localhost:8080/SWP391_E_BL5_Group4_LabEdu/auth/google&response_type=code&client_id=301095774546-t0dvfvp0v7lhqhkumtmlemeomkt1j514.apps.googleusercontent.com&approval_prompt=force">
+                                    <i class="fa-brands fa-google fa-xl" style="color: red;"> oogle</i>
+                                </a>
+                            </span>
+                        </div>
+
                         <p class="text-center text-gray-600 text-sm mt-6">
                             Không có tài khoản? 
                             <a href="<%= request.getContextPath()%>/register" class="text-blue-600 hover:text-blue-700 font-semibold">
@@ -109,10 +122,6 @@
                     </form>
                 </div>
             </div>
-
-            <p class="text-center text-white text-sm mt-6 opacity-90">
-                Bản quyền thuộc về © 2025 EduLAB.
-            </p>
         </div>
 
         <script>
