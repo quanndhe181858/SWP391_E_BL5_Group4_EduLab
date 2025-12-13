@@ -81,7 +81,6 @@
                         </svg>
                         <span>Danh mục</span>
                     </div>
-                    <span class="px-2 py-0.5 text-xs font-semibold bg-orange-500 rounded-full">8</span>
                 </a>
             </div>
         </div>
