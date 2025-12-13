@@ -47,12 +47,8 @@
                             <div class="relative" id="userDropdown">
                                 <button class="flex items-center space-x-2 text-gray-700 hover:text-blue-600 focus:outline-none" id="userMenuButton">
                                     <div class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                                        <c:choose>
-                                            <c:when test="${not empty sessionScope.user.first_name}">
-                                                ${sessionScope.user.first_name.substring(0, 1).toUpperCase()}
-                                            </c:when>
-                                            <c:otherwise>U</c:otherwise>
-                                        </c:choose>
+                                        <img class="w-9 h-9 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold" 
+                                             src="${pageContext.request.contextPath}/${sessionScope.avatar.path}" />
                                     </div>
                                     <span class="text-sm font-medium">
                                         <c:out value="${not empty sessionScope.user.first_name ? sessionScope.user.first_name : 'User'}" />

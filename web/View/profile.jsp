@@ -96,7 +96,7 @@
 
                     <div id="content-info" class="p-6">
                         <form action="${pageContext.request.contextPath}/profile" method="POST" onsubmit="return validateProfileForm()">
-                            <input type="hidden" name="action" value="updateInfo">
+                            <input type="hidden" name="userId" value="${sessionScope.user.id}">
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
@@ -136,6 +136,7 @@
                                     <p class="text-xs text-gray-500 mt-1">Email không thể thay đổi</p>
                                 </div>
 
+                                <fmt:formatDate value="<%= new java.util.Date()%>" pattern="yyyy-MM-dd" var="today"/>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">
                                         Ngày sinh
@@ -144,6 +145,7 @@
                                            name="bod" 
                                            id="bod"
                                            value="${sessionScope.user.bod}" 
+                                           max="${today}"
                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 </div>
                             </div>
@@ -235,6 +237,19 @@
         <jsp:include page="/layout/footer.jsp" />
         <jsp:include page="/layout/importBottom.jsp" />
         <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const error = '${error}';
+                const ok = '${ok}';
+
+                if (error) {
+                    showToast(error, 'error');
+                }
+
+                if (ok) {
+                    showToast(ok, 'success');
+                }
+            });
+
             function switchTab(tabName) {
                 document.querySelectorAll('[id^="tab-"]').forEach(tab => {
                     tab.classList.remove('tab-active', 'text-blue-600');
@@ -252,13 +267,29 @@
 
             function previewAvatar(input) {
                 if (input.files && input.files[0]) {
+                    const file = input.files[0];
+
+                    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!validTypes.includes(file.type)) {
+                        showToast('Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)!', 'error');
+                        input.value = '';
+                        return;
+                    }
+
+                    const maxSize = 5 * 1024 * 1024;
+                    if (file.size > maxSize) {
+                        showToast('Kích thước file không được vượt quá 5MB!', 'error');
+                        input.value = '';
+                        return;
+                    }
+
                     const reader = new FileReader();
                     reader.onload = function (e) {
                         document.getElementById('avatarPreview').src = e.target.result;
                     };
-                    reader.readAsDataURL(input.files[0]);
+                    reader.readAsDataURL(file);
 
-                    uploadAvatar(input.files[0]);
+                    uploadAvatar(file);
                 }
             }
 
@@ -267,57 +298,100 @@
                 formData.append('avatar', file);
                 formData.append('action', 'uploadAvatar');
 
+                const avatarPreview = document.getElementById('avatarPreview');
+                const originalSrc = avatarPreview.src;
+                avatarPreview.style.opacity = '0.5';
+
                 fetch('${pageContext.request.contextPath}/profile', {
                     method: 'POST',
                     body: formData
                 })
-                        .then(response => response.json())
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
                         .then(data => {
+                            avatarPreview.style.opacity = '1';
+
                             if (data.success) {
-                                showNotification('Cập nhật avatar thành công!', 'success');
+                                showToast('Cập nhật avatar thành công!', 'success');
+
+                                if (data.path) {
+                                    avatarPreview.src = '${pageContext.request.contextPath}/' + data.path + '?t=' + new Date().getTime();
+                                }
+
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1000);
                             } else {
-                                showNotification('Không thể cập nhật avatar!', 'error');
+                                showToast(data.message || 'Không thể cập nhật avatar!', 'error');
+                                avatarPreview.src = originalSrc;
                             }
                         })
                         .catch(error => {
-                            showNotification('Có lỗi xảy ra!', 'error');
+                            console.error('Error:', error);
+                            avatarPreview.style.opacity = '1';
+                            avatarPreview.src = originalSrc;
+                            showToast('Có lỗi xảy ra khi upload avatar!', 'error');
                         });
             }
 
             function validateProfileForm() {
                 const firstName = document.getElementById('firstName').value.trim();
                 const lastName = document.getElementById('lastName').value.trim();
+                const bodInput = document.getElementById("bod");
+                const bodValue = bodInput.value;
 
                 if (!firstName || !lastName) {
-                    alert('Vui lòng điền đầy đủ họ và tên!');
+                    showToast("Vui lòng điền đầy đủ họ và tên!", 'error');
                     return false;
+                }
+
+                if (bodValue) {
+                    const selectedDate = new Date(bodValue);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    if (selectedDate > today) {
+                        showToast("Ngày sinh không được nằm trong tương lai!", "error");
+                        return false;
+                    }
                 }
 
                 return true;
             }
 
             function validatePasswordForm() {
+                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
                 const currentPassword = document.getElementById('currentPassword').value;
                 const newPassword = document.getElementById('newPassword').value;
                 const confirmPassword = document.getElementById('confirmPassword').value;
 
                 if (!currentPassword || !newPassword || !confirmPassword) {
-                    alert('Vui lòng điền đầy đủ thông tin!');
+                    showToast("Vui lòng điền đầy đủ thông tin!", 'error');
                     return false;
                 }
 
                 if (newPassword.length < 8) {
-                    alert('Mật khẩu mới phải có ít nhất 8 ký tự!');
+                    showToast("Mật khẩu mới phải có ít nhất 8 ký tự!", 'error');
+                    return false;
+                }
+
+                if (!passwordRegex.test(newPassword)) {
+                    showToast("Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!", 'error');
                     return false;
                 }
 
                 if (newPassword !== confirmPassword) {
-                    alert('Mật khẩu mới và xác nhận mật khẩu không khớp!');
+                    showToast("Mật khẩu mới và xác nhận mật khẩu không khớp!", 'error');
                     return false;
                 }
 
                 if (currentPassword === newPassword) {
-                    alert('Mật khẩu mới phải khác mật khẩu hiện tại!');
+                    showToast("Vui lòng điền đầy đủ họ và tên!", 'error');
                     return false;
                 }
 

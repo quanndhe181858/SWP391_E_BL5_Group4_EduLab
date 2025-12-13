@@ -4,6 +4,7 @@
  */
 package controller.auth;
 
+import dao.MediaDAO;
 import dao.UserDAO;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -12,6 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Media;
 import model.User;
 import util.Hash;
 
@@ -23,6 +25,7 @@ import util.Hash;
 public class LoginController extends HttpServlet {
 
     private UserDAO uDao = new UserDAO();
+    private MediaDAO mDao = new MediaDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -63,7 +66,10 @@ public class LoginController extends HttpServlet {
             request.getRequestDispatcher("View/Auth/Login.jsp").forward(request, response);
         } else {
             HttpSession session = request.getSession();
+            Media m = mDao.getMediaByIdAndType("user", user.getId());
+            
             session.setAttribute("user", user);
+            session.setAttribute("avatar", m);
 
             int roleId = user.getRole_id();
 
