@@ -20,7 +20,7 @@
 
     <!-- HEADER -->
     <jsp:include page="/layout/header.jsp" />
-
+    
     <!-- Main Container -->
     <div class="max-w-7xl mx-auto px-6 py-8">
 
@@ -309,7 +309,6 @@
     </div>
 
     <!-- FOOTER -->
-    <jsp:include page="/layout/footer.jsp" />
     <jsp:include page="/layout/importBottom.jsp" />
 
     <!-- Search Script -->

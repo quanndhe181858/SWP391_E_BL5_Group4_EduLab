@@ -261,7 +261,6 @@
     </div>
 
     <!-- FOOTER -->
-    <jsp:include page="/layout/footer.jsp" />
     <jsp:include page="/layout/importBottom.jsp" />
 
     <!-- Form Validation Script -->
