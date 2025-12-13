@@ -29,10 +29,12 @@ public class Email {
 
     public static boolean sendEmail(String to, String subject, String content) {
         Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com"); // SMTP HOST
-        props.put("mail.smtp.port", "587"); // TLS 587 SSL 465
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
+
+        props.put("mail.mime.charset", "UTF-8");
 
         Authenticator auth = new Authenticator() {
             @Override
@@ -41,45 +43,41 @@ public class Email {
             }
         };
 
-        // Tạo phiên làm việc
         Session session = Session.getInstance(props, auth);
 
-        // Tạo một tin nhắn
-        MimeMessage msg = new MimeMessage(session);
-
         try {
-            // Kiểu nội dung
-            msg.addHeader("Content-type", "text/HTML; charset=UTF-8");
+            MimeMessage msg = new MimeMessage(session);
 
             // Người gửi
-            msg.setFrom(new InternetAddress(EMAIL_FROM));
+            msg.setFrom(new InternetAddress(EMAIL_FROM, "EduLAB", "UTF-8"));
 
             // Người nhận
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
 
             // Tiêu đề email
-            msg.setSubject(subject);
+            msg.setSubject(subject, "UTF-8");
 
             // Ngày gửi
             msg.setSentDate(new Date());
 
             // Nội dung
-            msg.setContent(content, "text/HTML; charset=UTF-8");
+            msg.setContent(content, "text/html; charset=UTF-8");
+            msg.setText(content, "UTF-8", "html");
 
             // Gửi email
             Transport.send(msg);
             System.out.println("Gửi email thành công");
             return true;
-        } catch (MessagingException e) {
-            // Chỉ in thông điệp lỗi
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
             System.err.println("Gặp lỗi trong quá trình gửi email: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
 
     public static void main(String[] args) {
         for (int i = 0; i < 1; i++) {
-            boolean result = sendEmail("quanngo20311@gmail.com",
+            boolean result = sendEmail("hoanganh220104@gmail.com",
                     "Lêu lêu FA " + System.currentTimeMillis(),
                     "Đây là phần nội dung trêu mấy đứa FA " + System.currentTimeMillis());
             if (result) {

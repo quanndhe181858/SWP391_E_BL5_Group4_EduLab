@@ -18,7 +18,7 @@ public class RandomUtils {
     private static final String LOWER = "abcdefghijklmnopqrstuvwxyz";
     private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String DIGIT = "0123456789";
-    private static final String SPECIAL = "!@#$%^&*()-_=+[]{}|;:,.<>?";
+    private static final String SPECIAL = "!@";
 
     private static final SecureRandom random = new SecureRandom();
 

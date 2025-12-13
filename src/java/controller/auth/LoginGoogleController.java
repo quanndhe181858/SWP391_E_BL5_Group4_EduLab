@@ -14,12 +14,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import java.util.Random;
 import java.util.ResourceBundle;
 import model.User;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.fluent.Form;
 import org.apache.http.client.fluent.Request;
+import util.Email;
 import util.Hash;
 import util.RandomUtils;
 
@@ -122,6 +122,10 @@ public class LoginGoogleController extends HttpServlet {
     private void doAuthorizeGoogleUser(String email, String fName, String lName, String avatar,
             HttpSession session, HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html; charset=UTF-8");
+
         boolean isEmailExisted = userDao.isEmailExisted(email);
         if (isEmailExisted) {
             User u = userDao.getAuthUserByEmail(email);
@@ -154,7 +158,27 @@ public class LoginGoogleController extends HttpServlet {
             u.setEmail(email);
             u.setHash_password(hash_password);
 
-            userDao.doRegister(u);
+            boolean registerSuccess = userDao.doRegister(u);
+
+            if (registerSuccess) {
+                String subject = "Chúc mừng bạn đã đăng kí thành công tài khoản mới tại EduLAB!";
+                String fullName = fName + " " + lName;
+                String content = "<!DOCTYPE html>"
+                        + "<html>"
+                        + "<head><meta charset=\"UTF-8\"></head>"
+                        + "<body>"
+                        + "<h2>Xin chào " + fullName + "!</h2>"
+                        + "<p>Bạn đã đăng kí thành công tài khoản thông qua phương thức Google.</p>"
+                        + "<p>Dưới đây là mật khẩu bảo mật của bạn, vui lòng không chia sẻ với bất kì ai, "
+                        + "đổi mật khẩu khi lần đầu đăng nhập.</p>"
+                        + "<p><strong>Mật khẩu: " + random_string + "</strong></p>"
+                        + "<p>Trân trọng,<br>Đội ngũ EduLAB</p>"
+                        + "</body>"
+                        + "</html>";
+
+                Email.sendEmail(u.getEmail(), subject, content);
+            }
+
             User newU = userDao.getAuthUserByEmail(email);
 
             session.setAttribute("user", newU);
