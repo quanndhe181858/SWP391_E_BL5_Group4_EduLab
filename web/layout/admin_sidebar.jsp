@@ -91,7 +91,7 @@
                 Quản lý
             </p>
             <div class="space-y-1">
-                <a href="?page=students" 
+                <a href="${pageContext.request.contextPath}/admin/users?role=3" 
                    class="flex items-center justify-between px-3 py-2.5 rounded-lg transition-all <%= currentPage.equals("students") ? "bg-white text-blue-600 font-semibold shadow-lg" : "text-white hover:bg-blue-500/30" %>">
                     <div class="flex items-center gap-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,7 +102,7 @@
                     <span class="px-2 py-0.5 text-xs font-semibold bg-green-500 rounded-full">248</span>
                 </a>
 
-                <a href="?page=instructors" 
+                <a href="${pageContext.request.contextPath}/admin/users?role=2" 
                    class="flex items-center justify-between px-3 py-2.5 rounded-lg transition-all <%= currentPage.equals("instructors") ? "bg-white text-blue-600 font-semibold shadow-lg" : "text-white hover:bg-blue-500/30" %>">
                     <div class="flex items-center gap-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
