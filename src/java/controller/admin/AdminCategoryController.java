@@ -64,7 +64,7 @@ public class AdminCategoryController extends HttpServlet {
 //            return;
 //        }
 //
-//        if (u.getRole_id() != 2) {
+//        if (u.getRole_id() != 1) {
 //            response.sendRedirect(request.getContextPath() + "/logout");
 //            return;
 //        }
@@ -167,26 +167,28 @@ public class AdminCategoryController extends HttpServlet {
             return;
         }
 
-        int parentId = 0;
+        // Xử lý parent_id: rỗng hoặc "0" thì set = 0 (category cha)
+        Integer parentId = null;
         if (parentIdStr != null && !parentIdStr.trim().isEmpty()) {
             try {
-                parentId = Integer.parseInt(parentIdStr);
+                int pid = Integer.parseInt(parentIdStr);
+                parentId = (pid > 0) ? pid : null;
             } catch (NumberFormatException e) {
-                parentId = 0;
+                parentId = null;
             }
         }
 
         Category category = new Category();
         category.setName(name.trim());
         category.setDescription(description != null ? description.trim() : "");
-        category.setParent_id(parentId);
+        category.setParent_id(parentId != null ? parentId : 0);
 
         boolean success = cateDAO.createCategory(category);
 
         if (success) {
-            session.setAttribute("success", "✅ Thêm danh mục thành công!");
+            session.setAttribute("success", "Thêm danh mục thành công!");
         } else {
-            session.setAttribute("error", "❌ Thêm danh mục thất bại!");
+            session.setAttribute("error", "Thêm danh mục thất bại!");
         }
 
         // Redirect để tránh resubmit form khi F5
@@ -212,14 +214,14 @@ public class AdminCategoryController extends HttpServlet {
 
         try {
             int id = Integer.parseInt(idStr);
-            int parentId = 0;
 
+            Integer parentId = null;
             if (parentIdStr != null && !parentIdStr.trim().isEmpty()) {
-                parentId = Integer.parseInt(parentIdStr);
+                int pid = Integer.parseInt(parentIdStr);
+                parentId = (pid > 0) ? pid : null;
             }
 
-            // Không cho phép category làm cha của chính nó
-            if (id == parentId) {
+            if (parentId != null && id == parentId) {
                 session.setAttribute("error", "⚠️ Danh mục không thể là danh mục cha của chính nó!");
                 response.sendRedirect(request.getContextPath() + "/manager_category");
                 return;
@@ -229,14 +231,14 @@ public class AdminCategoryController extends HttpServlet {
             category.setId(id);
             category.setName(name.trim());
             category.setDescription(description != null ? description.trim() : "");
-            category.setParent_id(parentId);
+            category.setParent_id(parentId != null ? parentId : 0);
 
             boolean success = cateDAO.updateCategory(category);
 
             if (success) {
-                session.setAttribute("success", "✅ Cập nhật danh mục thành công!");
+                session.setAttribute("success", "Cập nhật danh mục thành công!");
             } else {
-                session.setAttribute("error", "❌ Cập nhật danh mục thất bại!");
+                session.setAttribute("error", "Cập nhật danh mục thất bại!");
             }
 
         } catch (NumberFormatException e) {

@@ -220,19 +220,25 @@
                         <p class="text-xs text-gray-500 mt-1">Tối đa 500 ký tự</p>
                     </div>
 
-                    <!-- ID DANH MỤC CHA -->
+                    <!-- DANH MỤC CHA -->
                     <div>
                         <label for="categoryParentId" class="block text-sm font-semibold text-gray-700 mb-2">
-                            ID Danh mục cha
+                            Danh mục cha
                         </label>
-                        <input 
-                            type="number" 
+                        <select 
                             id="categoryParentId"
                             name="parent_id" 
-                            min="0"
-                            value="0"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                            placeholder="Nhập số">
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors">
+                            <option value="">— Không có (Tạo danh mục cha) —</option>
+                            <c:forEach var="p" items="${listcategory}">
+                                <c:if test="${empty p.parent_id || p.parent_id == 0}">
+                                    <option value="${p.id}">${p.name}</option>
+                                </c:if>
+                            </c:forEach>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Chọn danh mục cha nếu muốn tạo danh mục con
+                        </p>
                     </div>
 
                     <!-- ACTION BUTTONS -->
@@ -253,6 +259,7 @@
                 </form>
             </div>
         </div>
+
 
         <script>
             function openAddModal() {

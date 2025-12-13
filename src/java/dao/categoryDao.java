@@ -171,7 +171,12 @@ public class CategoryDAO extends dao {
             ps = con.prepareStatement(sql);
             ps.setString(1, category.getName());
             ps.setString(2, category.getDescription());
-            ps.setInt(3, category.getParent_id());
+
+            if (category.getParent_id() == 0) {
+                ps.setNull(3, java.sql.Types.INTEGER);
+            } else {
+                ps.setInt(3, category.getParent_id());
+            }
 
             int rows = ps.executeUpdate();
             return rows > 0;
@@ -192,7 +197,13 @@ public class CategoryDAO extends dao {
             ps = con.prepareStatement(sql);
             ps.setString(1, category.getName());
             ps.setString(2, category.getDescription());
-            ps.setInt(3, category.getParent_id());
+
+            if (category.getParent_id() == 0) {
+                ps.setNull(3, java.sql.Types.INTEGER);
+            } else {
+                ps.setInt(3, category.getParent_id());
+            }
+
             ps.setInt(4, category.getId());
 
             int rows = ps.executeUpdate();
