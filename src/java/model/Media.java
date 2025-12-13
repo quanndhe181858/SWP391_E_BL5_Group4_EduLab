@@ -20,6 +20,12 @@ public class Media {
     private Timestamp created_at;
     private int created_by;
 
+    public Media(int objectId, String type, String path) {
+        this.objectId = objectId;
+        this.type = type;
+        this.path = path;
+    }
+
     public Media() {
     }
 
