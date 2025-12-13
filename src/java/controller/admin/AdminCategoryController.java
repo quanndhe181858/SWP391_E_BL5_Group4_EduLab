@@ -158,6 +158,7 @@ public class AdminCategoryController extends HttpServlet {
 
         String name = request.getParameter("name");
         String description = request.getParameter("description");
+        String type = request.getParameter("category_type");
         String parentIdStr = request.getParameter("parent_id");
 
         // Validate
@@ -169,15 +170,23 @@ public class AdminCategoryController extends HttpServlet {
 
         // Xử lý parent_id: rỗng hoặc "0" thì set = 0 (category cha)
         Integer parentId = null;
-        if (parentIdStr != null && !parentIdStr.trim().isEmpty()) {
-            try {
-                int pid = Integer.parseInt(parentIdStr);
-                parentId = (pid > 0) ? pid : null;
-            } catch (NumberFormatException e) {
-                parentId = null;
+        if ("child".equals(type)) {
+            if (parentIdStr == null || parentIdStr.isEmpty()) {
+                session.setAttribute("error", "⚠️ Vui lòng chọn danh mục cha!");
+                response.sendRedirect(request.getContextPath() + "/manager_category");
+                return;
             }
+            parentId = Integer.parseInt(parentIdStr);
         }
 
+//        if (parentIdStr != null && !parentIdStr.trim().isEmpty()) {
+//            try {
+//                int pid = Integer.parseInt(parentIdStr);
+//                parentId = (pid > 0) ? pid : null;
+//            } catch (NumberFormatException e) {
+//                parentId = null;
+//            }
+//        }
         Category category = new Category();
         category.setName(name.trim());
         category.setDescription(description != null ? description.trim() : "");
@@ -203,6 +212,7 @@ public class AdminCategoryController extends HttpServlet {
         String idStr = request.getParameter("id");
         String name = request.getParameter("name");
         String description = request.getParameter("description");
+        String type = request.getParameter("category_type");
         String parentIdStr = request.getParameter("parent_id");
 
         // Validate
@@ -215,10 +225,20 @@ public class AdminCategoryController extends HttpServlet {
         try {
             int id = Integer.parseInt(idStr);
 
-            Integer parentId = null;
-            if (parentIdStr != null && !parentIdStr.trim().isEmpty()) {
-                int pid = Integer.parseInt(parentIdStr);
-                parentId = (pid > 0) ? pid : null;
+//            Integer parentId = null;
+//            if (parentIdStr != null && !parentIdStr.trim().isEmpty()) {
+//                int pid = Integer.parseInt(parentIdStr);
+//                parentId = (pid > 0) ? pid : null;
+//            }
+            Integer parentId = 0;
+
+            if ("child".equals(type)) {
+                if (parentIdStr == null || parentIdStr.isEmpty()) {
+                    session.setAttribute("error", "⚠️ Vui lòng chọn danh mục cha!");
+                    response.sendRedirect(request.getContextPath() + "/manager_category");
+                    return;
+                }
+                parentId = Integer.parseInt(parentIdStr);
             }
 
             if (parentId != null && id == parentId) {
