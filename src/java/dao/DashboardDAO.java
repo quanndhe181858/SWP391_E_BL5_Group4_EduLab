@@ -6,8 +6,14 @@ package dao;
 
 import database.dao;
 import dtos.CategoriesStatisticDTO;
+import dtos.CoursePerformanceDTO;
 import dtos.DashboardStatisticDTO;
+import dtos.EngagementStatisticDTO;
+import dtos.InstructorActivityDTO;
+import dtos.InstructorCourseDTO;
+import dtos.InstructorDashboardStatisticDTO;
 import dtos.RecentActivityDTO;
+import dtos.TopStudentDTO;
 import dtos.UsersStatisticDTO;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,18 +28,18 @@ import model.User;
  * @author quan
  */
 public class DashboardDAO extends dao {
-    
+
     public static void main(String[] args) {
         DashboardDAO dao = new DashboardDAO();
         System.out.println(dao.getNewestUsers(5));
     }
-    
+
     private final Logger logger = Logger.getLogger(this.getClass().getName());
-    
+
     private void log(Level level, String msg, Throwable e) {
         this.logger.log(level, msg, e);
     }
-    
+
     public DashboardStatisticDTO getAdminStatistic() {
         DashboardStatisticDTO stat = null;
         String sql = """
@@ -51,12 +57,12 @@ public class DashboardDAO extends dao {
                          (SELECT COUNT(*) FROM quiz) as totalQuizzes,
                          (SELECT COUNT(*) FROM media) as totalMedia;
                      """;
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
-            
+
             if (rs.next()) {
                 stat = new DashboardStatisticDTO(
                         rs.getInt("totalUsers"),
@@ -73,7 +79,7 @@ public class DashboardDAO extends dao {
                         rs.getInt("totalMedia")
                 );
             }
-            
+
             return stat;
         } catch (SQLException e) {
             this.log(Level.SEVERE, e.getMessage(), e);
@@ -82,7 +88,7 @@ public class DashboardDAO extends dao {
             this.closeResources();
         }
     }
-    
+
     public List<User> getNewestUsers(int limit) {
         List<User> uList = new ArrayList<>();
         String sql = """
@@ -99,37 +105,37 @@ public class DashboardDAO extends dao {
                          ORDER BY u.created_at DESC
                          LIMIT ?;
                      """;
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
-            
+
             ps.setInt(1, limit);
-            
+
             rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 User u = new User();
-                
+
                 u.setId(rs.getInt("id"));
                 u.setFirst_name(rs.getString("firstName"));
                 u.setLast_name(rs.getString("lastName"));
                 u.setEmail(rs.getString("email"));
                 u.setStatus(rs.getString("status"));
                 u.setCreated_at(rs.getTimestamp("createdAt"));
-                
+
                 uList.add(u);
             }
-            
+
         } catch (SQLException e) {
             this.log(Level.SEVERE, e.getMessage(), e);
         } finally {
             this.closeResources();
         }
-        
+
         return uList;
     }
-    
+
     public List<Course> getPopularCourses(int limit) {
         List<Course> cList = new ArrayList<>();
         String sql = """
@@ -147,15 +153,15 @@ public class DashboardDAO extends dao {
                      ORDER BY enrollmentCount DESC
                      LIMIT ?;
                      """;
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
-            
+
             ps.setInt(1, limit);
-            
+
             rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 Course c = new Course(
                         rs.getInt("id"),
@@ -164,19 +170,19 @@ public class DashboardDAO extends dao {
                         rs.getString("categoryName"),
                         rs.getInt("enrollmentCount")
                 );
-                
+
                 cList.add(c);
             }
-            
+
         } catch (SQLException e) {
             this.log(Level.SEVERE, e.getMessage(), e);
         } finally {
             this.closeResources();
         }
-        
+
         return cList;
     }
-    
+
     public List<RecentActivityDTO> getRecentActivity(int limit) {
         List<RecentActivityDTO> recentList = new ArrayList<>();
 
@@ -225,7 +231,7 @@ public class DashboardDAO extends dao {
                  ORDER BY activityTime DESC
                  LIMIT ?
                  """;
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
@@ -236,7 +242,7 @@ public class DashboardDAO extends dao {
             ps.setInt(3, limit);  // LIMIT cho kết quả cuối cùng
 
             rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 RecentActivityDTO ra = new RecentActivityDTO(
                         rs.getString("type"),
@@ -246,16 +252,16 @@ public class DashboardDAO extends dao {
                 );
                 recentList.add(ra);
             }
-            
+
         } catch (SQLException e) {
             this.log(Level.SEVERE, e.getMessage(), e);
         } finally {
             this.closeResources();
         }
-        
+
         return recentList;
     }
-    
+
     public List<UsersStatisticDTO> getUsersStatisticChartData(int dayCount) {
         List<UsersStatisticDTO> usList = new ArrayList<>();
         String sql = """
@@ -268,29 +274,29 @@ public class DashboardDAO extends dao {
                      GROUP BY DATE(created_at), DAYNAME(created_at)
                      ORDER BY date ASC;
                      """;
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
-            
+
             ps.setInt(1, dayCount);
-            
+
             rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 UsersStatisticDTO us = new UsersStatisticDTO(rs.getDate("date"), rs.getString("dayName"), rs.getInt("userCount"));
                 usList.add(us);
             }
-            
+
         } catch (SQLException e) {
             this.log(Level.SEVERE, e.getMessage(), e);
         } finally {
             this.closeResources();
         }
-        
+
         return usList;
     }
-    
+
     public List<CategoriesStatisticDTO> getCategoriesStatisticChartData() {
         List<CategoriesStatisticDTO> csList = new ArrayList<>();
         String sql = """
@@ -305,23 +311,405 @@ public class DashboardDAO extends dao {
                      GROUP BY parent_cat.id, parent_cat.name
                      ORDER BY courseCount DESC;
                      """;
-        
+
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
-            
+
             while (rs.next()) {
                 CategoriesStatisticDTO cs = new CategoriesStatisticDTO(rs.getString(1), rs.getInt(2), rs.getFloat(3));
                 csList.add(cs);
             }
-            
+
         } catch (SQLException e) {
             this.log(Level.SEVERE, e.getMessage(), e);
         } finally {
             this.closeResources();
         }
-        
+
         return csList;
+    }
+
+    public InstructorDashboardStatisticDTO getInstructorStatistic(int instructorId) {
+        InstructorDashboardStatisticDTO stat = null;
+        String sql = """
+                 SELECT 
+                     (SELECT COUNT(*) FROM course WHERE created_by = ?) as myCourses,
+                     (SELECT COUNT(*) FROM course WHERE created_by = ? AND status = 'Active') as activeCourses,
+                     (SELECT COUNT(DISTINCT e.user_id) FROM enrollment e 
+                      JOIN course c ON e.course_id = c.id 
+                      WHERE c.created_by = ?) as totalStudents,
+                     (SELECT COUNT(DISTINCT e.user_id) FROM enrollment e 
+                      JOIN course c ON e.course_id = c.id 
+                      JOIN course_progress cp ON e.user_id = cp.user_id AND e.course_id = cp.course_id
+                      WHERE c.created_by = ? AND YEARWEEK(cp.last_accessed_at, 1) = YEARWEEK(CURRENT_DATE(), 1)) as newStudentsThisWeek,
+                     (SELECT ROUND(AVG(completion_rate), 1) FROM (
+                         SELECT c.id, 
+                             COALESCE((COUNT(CASE WHEN cp.status = 'Completed' THEN 1 END) * 100.0 / NULLIF(COUNT(cp.id), 0)), 0) as completion_rate
+                         FROM course c
+                         LEFT JOIN course_progress cp ON c.id = cp.course_id
+                         WHERE c.created_by = ?
+                         GROUP BY c.id
+                     ) as course_completions) as avgCompletionRate,
+                     (SELECT COUNT(*) FROM enrollment e 
+                      JOIN course c ON e.course_id = c.id 
+                      WHERE c.created_by = ? AND e.status = 'Completed') as completedEnrollments,
+                     (SELECT COUNT(*) FROM test_attempt ta
+                      JOIN test t ON ta.test_id = t.id
+                      JOIN course c ON t.course_id = c.id
+                      WHERE c.created_by = ? AND ta.status IN ('Retaking', 'Failed')) as pendingTests,
+                     (SELECT COUNT(*) FROM test_attempt ta
+                      JOIN test t ON ta.test_id = t.id
+                      JOIN course c ON t.course_id = c.id
+                      WHERE c.created_by = ? 
+                      AND YEARWEEK(ta.test_id, 1) = YEARWEEK(CURRENT_DATE(), 1)) as testsThisWeek,
+                     (SELECT COUNT(*) FROM course_section cs
+                      JOIN course c ON cs.course_id = c.id
+                      WHERE c.created_by = ?) as totalSections,
+                     (SELECT COUNT(*) FROM test t
+                      JOIN course c ON t.course_id = c.id
+                      WHERE c.created_by = ?) as totalTests,
+                     (SELECT COUNT(*) FROM user_certificate uc
+                      JOIN certificate cert ON uc.certificate_id = cert.id
+                      JOIN course c ON cert.course_id = c.id
+                      WHERE c.created_by = ?) as certificatesIssued;
+                 """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            // Set instructorId cho tất cả các ? trong query
+            for (int i = 1; i <= 11; i++) {
+                ps.setInt(i, instructorId);
+            }
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                stat = new InstructorDashboardStatisticDTO(
+                        rs.getInt("myCourses"),
+                        rs.getInt("activeCourses"),
+                        rs.getInt("totalStudents"),
+                        rs.getInt("newStudentsThisWeek"),
+                        rs.getFloat("avgCompletionRate"),
+                        rs.getInt("completedEnrollments"),
+                        rs.getInt("pendingTests"),
+                        rs.getInt("testsThisWeek"),
+                        rs.getInt("totalSections"),
+                        rs.getInt("totalTests"),
+                        rs.getInt("certificatesIssued")
+                );
+            }
+
+            return stat;
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return stat;
+        } finally {
+            this.closeResources();
+        }
+    }
+
+    public List<InstructorCourseDTO> getInstructorCourses(int instructorId, int limit) {
+        List<InstructorCourseDTO> courseList = new ArrayList<>();
+        String sql = """
+                 SELECT 
+                     c.id,
+                     c.title,
+                     c.thumbnail,
+                     c.status,
+                     cat.name as categoryName,
+                     COUNT(DISTINCT e.user_id) as studentCount,
+                     COALESCE(ROUND((COUNT(CASE WHEN e.status = 'Completed' THEN 1 END) * 100.0 / NULLIF(COUNT(e.user_id), 0)), 1), 0) as completionRate
+                 FROM course c
+                 LEFT JOIN enrollment e ON c.id = e.course_id
+                 JOIN category cat ON c.category_id = cat.id
+                 WHERE c.created_by = ?
+                 GROUP BY c.id, c.title, c.thumbnail, c.status, cat.name
+                 ORDER BY c.created_at DESC
+                 LIMIT ?;
+                 """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, instructorId);
+            ps.setInt(2, limit);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                InstructorCourseDTO course = new InstructorCourseDTO(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("thumbnail"),
+                        rs.getString("status"),
+                        rs.getString("categoryName"),
+                        rs.getInt("studentCount"),
+                        rs.getFloat("completionRate")
+                );
+                courseList.add(course);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+
+        return courseList;
+    }
+
+    /**
+     * Lấy danh sách học viên xuất sắc của instructor
+     *
+     * @param instructorId ID của giảng viên
+     * @param limit Số lượng học viên
+     * @return List<TopStudentDTO>
+     */
+    public List<TopStudentDTO> getTopStudents(int instructorId, int limit) {
+        List<TopStudentDTO> studentList = new ArrayList<>();
+        String sql = """
+                 SELECT 
+                     u.id,
+                     u.first_name as firstName,
+                     u.last_name as lastName,
+                     COUNT(DISTINCT CASE WHEN e.status = 'Completed' THEN e.course_id END) as coursesCompleted,
+                     COALESCE(ROUND(AVG(ta.grade), 1), 0) as avgScore
+                 FROM user u
+                 JOIN enrollment e ON u.id = e.user_id
+                 JOIN course c ON e.course_id = c.id
+                 LEFT JOIN test_attempt ta ON u.id = ta.user_id
+                 LEFT JOIN test t ON ta.test_id = t.id AND t.course_id = c.id
+                 WHERE c.created_by = ?
+                 GROUP BY u.id, u.first_name, u.last_name
+                 HAVING coursesCompleted > 0
+                 ORDER BY coursesCompleted DESC, avgScore DESC
+                 LIMIT ?;
+                 """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, instructorId);
+            ps.setInt(2, limit);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                TopStudentDTO student = new TopStudentDTO(
+                        rs.getInt("id"),
+                        rs.getString("firstName"),
+                        rs.getString("lastName"),
+                        rs.getInt("coursesCompleted"),
+                        rs.getFloat("avgScore")
+                );
+                studentList.add(student);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+
+        return studentList;
+    }
+
+    public List<InstructorActivityDTO> getInstructorRecentActivities(int instructorId, int limit) {
+        List<InstructorActivityDTO> activityList = new ArrayList<>();
+        String sql = """
+                 (SELECT 
+                     'completed_section' as type,
+                     CONCAT(u.first_name, ' ', u.last_name, ' đã hoàn thành section "', cs.title, '"') as description,
+                     c.title as courseName,
+                     cp.last_accessed_at as activityTime,
+                     CASE 
+                         WHEN TIMESTAMPDIFF(MINUTE, cp.last_accessed_at, NOW()) < 60 
+                             THEN CONCAT(TIMESTAMPDIFF(MINUTE, cp.last_accessed_at, NOW()), ' phút trước')
+                         WHEN TIMESTAMPDIFF(HOUR, cp.last_accessed_at, NOW()) < 24 
+                             THEN CONCAT(TIMESTAMPDIFF(HOUR, cp.last_accessed_at, NOW()), ' giờ trước')
+                         ELSE CONCAT(TIMESTAMPDIFF(DAY, cp.last_accessed_at, NOW()), ' ngày trước')
+                     END as timeAgo
+                 FROM course_progress cp
+                 JOIN user u ON cp.user_id = u.id
+                 JOIN course c ON cp.course_id = c.id
+                 JOIN course_section cs ON cp.section_id = cs.id
+                 WHERE c.created_by = ? 
+                   AND cp.status = 'Completed'
+                   AND cp.completed_at IS NOT NULL
+                 ORDER BY cp.completed_at DESC
+                 LIMIT ?)
+                 
+                 UNION ALL
+                 
+                 (SELECT 
+                     'started_course' as type,
+                     CONCAT(u.first_name, ' ', u.last_name, ' đã bắt đầu học "', c.title, '"') as description,
+                     c.title as courseName,
+                     cp.last_accessed_at as activityTime,
+                     CASE 
+                         WHEN TIMESTAMPDIFF(MINUTE, cp.last_accessed_at, NOW()) < 60 
+                             THEN CONCAT(TIMESTAMPDIFF(MINUTE, cp.last_accessed_at, NOW()), ' phút trước')
+                         WHEN TIMESTAMPDIFF(HOUR, cp.last_accessed_at, NOW()) < 24 
+                             THEN CONCAT(TIMESTAMPDIFF(HOUR, cp.last_accessed_at, NOW()), ' giờ trước')
+                         ELSE CONCAT(TIMESTAMPDIFF(DAY, cp.last_accessed_at, NOW()), ' ngày trước')
+                     END as timeAgo
+                 FROM course_progress cp
+                 JOIN user u ON cp.user_id = u.id
+                 JOIN course c ON cp.course_id = c.id
+                 WHERE c.created_by = ?
+                   AND cp.progress_percent = 0
+                   AND cp.status = 'InProgress'
+                 ORDER BY cp.last_accessed_at DESC
+                 LIMIT ?)
+                 
+                 UNION ALL
+                 
+                 (SELECT 
+                     'passed_test' as type,
+                     CONCAT(u.first_name, ' ', u.last_name, ' đã hoàn thành bài kiểm tra "', t.title, '" với điểm ', ta.grade, '%') as description,
+                     c.title as courseName,
+                     NOW() as activityTime,
+                     CASE 
+                         WHEN TIMESTAMPDIFF(MINUTE, NOW(), NOW()) < 60 
+                             THEN CONCAT(TIMESTAMPDIFF(MINUTE, NOW(), NOW()), ' phút trước')
+                         WHEN TIMESTAMPDIFF(HOUR, NOW(), NOW()) < 24 
+                             THEN CONCAT(TIMESTAMPDIFF(HOUR, NOW(), NOW()), ' giờ trước')
+                         ELSE CONCAT(TIMESTAMPDIFF(DAY, NOW(), NOW()), ' ngày trước')
+                     END as timeAgo
+                 FROM test_attempt ta
+                 JOIN user u ON ta.user_id = u.id
+                 JOIN test t ON ta.test_id = t.id
+                 JOIN course c ON t.course_id = c.id
+                 WHERE c.created_by = ?
+                   AND ta.status = 'Passed'
+                 ORDER BY ta.test_id DESC
+                 LIMIT ?)
+                 
+                 ORDER BY activityTime DESC
+                 LIMIT ?;
+                 """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, instructorId);
+            ps.setInt(2, limit);
+            ps.setInt(3, instructorId);
+            ps.setInt(4, limit);
+            ps.setInt(5, instructorId);
+            ps.setInt(6, limit);
+            ps.setInt(7, limit);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                InstructorActivityDTO activity = new InstructorActivityDTO(
+                        rs.getString("type"),
+                        rs.getString("description"),
+                        rs.getString("courseName"),
+                        rs.getTimestamp("activityTime").toLocalDateTime(),
+                        rs.getString("timeAgo")
+                );
+                activityList.add(activity);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+
+        return activityList;
+    }
+
+    public List<EngagementStatisticDTO> getEngagementStatistic(int instructorId, int dayCount) {
+        List<EngagementStatisticDTO> engagementList = new ArrayList<>();
+        String sql = """
+                 SELECT 
+                     DATE(cp.last_accessed_at) as date,
+                     DAYNAME(cp.last_accessed_at) as dayName,
+                     COUNT(DISTINCT cp.user_id) as activeStudents
+                 FROM course_progress cp
+                 JOIN course c ON cp.course_id = c.id
+                 WHERE c.created_by = ?
+                   AND cp.last_accessed_at >= DATE_SUB(CURRENT_DATE(), INTERVAL ? DAY)
+                 GROUP BY DATE(cp.last_accessed_at), DAYNAME(cp.last_accessed_at)
+                 ORDER BY date ASC;
+                 """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, instructorId);
+            ps.setInt(2, dayCount);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                EngagementStatisticDTO engagement = new EngagementStatisticDTO(
+                        rs.getDate("date"),
+                        rs.getString("dayName"),
+                        rs.getInt("activeStudents")
+                );
+                engagementList.add(engagement);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+
+        return engagementList;
+    }
+
+    public List<CoursePerformanceDTO> getCoursePerformance(int instructorId, int limit) {
+        List<CoursePerformanceDTO> performanceList = new ArrayList<>();
+        String sql = """
+                 SELECT 
+                     c.id,
+                     c.title as courseName,
+                     COALESCE(ROUND((COUNT(CASE WHEN e.status = 'Completed' THEN 1 END) * 100.0 / NULLIF(COUNT(e.user_id), 0)), 1), 0) as completionRate
+                 FROM course c
+                 LEFT JOIN enrollment e ON c.id = e.course_id
+                 WHERE c.created_by = ?
+                 GROUP BY c.id, c.title
+                 ORDER BY completionRate DESC
+                 LIMIT ?;
+                 """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, instructorId);
+            ps.setInt(2, limit);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                CoursePerformanceDTO performance = new CoursePerformanceDTO(
+                        rs.getInt("id"),
+                        rs.getString("courseName"),
+                        rs.getFloat("completionRate")
+                );
+                performanceList.add(performance);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+
+        return performanceList;
     }
 }
