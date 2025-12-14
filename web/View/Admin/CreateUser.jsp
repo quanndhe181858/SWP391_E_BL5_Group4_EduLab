@@ -278,6 +278,21 @@
                                     return false;
                                 }
 
+                                // Date of Birth validation
+                                const bodInput = document.getElementById('bod');
+                                if (bodInput && bodInput.value) {
+                                    const bod = new Date(bodInput.value);
+                                    const today = new Date();
+                                    // Reset time to midnight for accurate date comparison
+                                    today.setHours(0, 0, 0, 0);
+
+                                    if (bod > today) {
+                                        e.preventDefault();
+                                        alert('Ngày sinh không được lớn hơn ngày hiện tại!');
+                                        return false;
+                                    }
+                                }
+
                                 return true;
                             });
 

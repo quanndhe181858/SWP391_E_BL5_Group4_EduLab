@@ -296,6 +296,15 @@ public class AdminUserController extends HttpServlet {
             if (bodStr != null && !bodStr.trim().isEmpty()) {
                 try {
                     Date bod = Date.valueOf(bodStr);
+                    
+                    // Validate BOD is not in the future
+                    java.util.Date today = new java.util.Date();
+                    if (bod.after(today)) {
+                         request.getSession().setAttribute("error", "Ngày sinh không được lớn hơn ngày hiện tại!");
+                         response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+                         return;
+                    }
+                    
                     user.setBod(bod);
                 } catch (IllegalArgumentException e) {
                     request.getSession().setAttribute("error", "Định dạng ngày sinh không hợp lệ!");
