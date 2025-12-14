@@ -4,12 +4,11 @@
  */
 package controller.trainee;
 
-import dao.CertificateDAO;
 import dao.CourseDAO;
 import dao.CourseProgressDAO;
-import dao.EnrollmentDAO;
-import dao.testAttemptDao;
-import dtos.AccomplishmentDTO;
+import dao.CourseSectionDAO;
+import dao.TestAttemptDAOv2;
+import dao.TestsDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -17,19 +16,18 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import java.sql.Timestamp;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import model.Course;
+import model.CourseProgress;
+import model.CourseSection;
+import model.Test;
+import model.TestAttempt;
 import model.User;
 
-/**
- *
- * @author quann
- */
-@WebServlet(name = "TraineeAccomplishmentController", urlPatterns = {"/trainee/accomplishments"})
-public class TraineeAccomplishmentController extends HttpServlet {
+@WebServlet(name = "TraineeAccomplishmentDetailController", urlPatterns = {"/trainee/accomplishment-detail"})
+public class TraineeAccomplishmentDetailController extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -48,36 +46,70 @@ public class TraineeAccomplishmentController extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet TraineeAccomplishmentController</title>");
+            out.println("<title>Servlet TraineeAccomplishmentDetailController</title>");
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet TraineeAccomplishmentController at " + request.getContextPath() + "</h1>");
+            out.println("<h1>Servlet TraineeAccomplishmentDetailController at " + request.getContextPath() + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
     }
 
-    private final CertificateDAO cerDAO = new CertificateDAO();
+    private final CourseDAO courseDAO = new CourseDAO();
+    private final CourseSectionDAO sectionDAO = new CourseSectionDAO();
+    private final TestsDAO testsDAO = new TestsDAO();
+    private final TestAttemptDAOv2 attemptDAO = new TestAttemptDAOv2();
+    private final CourseProgressDAO progressDAO = new CourseProgressDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
-        User user = (session != null) ? (User) session.getAttribute("user") : null;
-
+        User user = (User) request.getSession().getAttribute("user");
         if (user == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         int userId = user.getId();
-        List<AccomplishmentDTO> accomplishments
-                = cerDAO.getUserAccomplishments(userId);
+        int courseId = Integer.parseInt(request.getParameter("courseId"));
 
-        request.setAttribute("accomplishments", accomplishments);
-        request.getRequestDispatcher("/View/Trainee/AccomplishmentList.jsp")
-                .forward(request, response);
+        // 1. Course info
+        Course course = courseDAO.getCourseById(courseId);
 
+        // 2. Sections
+        List<CourseSection> sections =
+                sectionDAO.getAllCourseSectionsByCourseId(courseId);
+
+        // 3. Progress map
+        Map<Integer, CourseProgress> progressMap = new HashMap<>();
+        for (CourseSection s : sections) {
+            CourseProgress p = progressDAO.getProgress(userId, courseId, s.getId());
+            progressMap.put(s.getId(), p);
+        }
+
+        // 4. Test + attempts
+        Map<Integer, Test> testMap = new HashMap<>();
+        Map<Integer, List<TestAttempt>> attemptMap = new HashMap<>();
+
+        for (CourseSection s : sections) {
+            Test t = testsDAO.getTestBySectionId(s.getId());
+            if (t != null) {
+                testMap.put(s.getId(), t);
+                attemptMap.put(
+                    s.getId(),
+                    attemptDAO.getAttemptsByUserAndTest(userId, t.getId())
+                );
+            }
+        }
+
+        request.setAttribute("course", course);
+        request.setAttribute("sections", sections);
+        request.setAttribute("progressMap", progressMap);
+        request.setAttribute("testMap", testMap);
+        request.setAttribute("attemptMap", attemptMap);
+
+        request.getRequestDispatcher("/View/Trainee/AccomplishmentDetail.jsp")
+               .forward(request, response);
     }
 
     /**
