@@ -78,6 +78,25 @@
                                             Trang cá nhân
                                         </div>
                                     </a>
+
+                                    <c:if test="${sessionScope.user.role_id == 3}">
+                                        <a href="${pageContext.request.contextPath}/trainee/certificates" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <div class="flex items-center">
+                                                Xem chứng chỉ
+                                            </div>
+                                        </a>
+                                    </c:if> 
+                                    <c:if test="${sessionScope.user.role_id == 3}">
+                                        <a href="${pageContext.request.contextPath}/trainee/accomplishments" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <div class="flex items-center">
+                                                Xem quá trình học tập
+                                            </div>
+                                        </a>
+                                    </c:if>
+
+
+
+
                                     <c:if test="${sessionScope.user.role_id == 2}">
                                         <a href="${pageContext.request.contextPath}/instructor/courses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                             <div class="flex items-center">
