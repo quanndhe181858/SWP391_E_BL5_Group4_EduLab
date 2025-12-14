@@ -20,8 +20,7 @@ import jakarta.servlet.http.HttpSession;
 import model.Role;
 import model.User;
 
-
-@WebServlet(name = "AdminUserController", urlPatterns = {"/admin/users"})
+@WebServlet(name = "AdminUserController", urlPatterns = { "/admin/users" })
 public class AdminUserController extends HttpServlet {
 
     private final UserDAO userDAO = new UserDAO();
@@ -65,6 +64,9 @@ public class AdminUserController extends HttpServlet {
             case "list":
                 showUserList(request, response);
                 break;
+            case "create":
+                showCreateForm(request, response);
+                break;
             case "edit":
                 showEditForm(request, response);
                 break;
@@ -80,21 +82,38 @@ public class AdminUserController extends HttpServlet {
     private void showUserList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String roleFilter = request.getParameter("role");
+        int page = 1;
+        try {
+            page = Integer.parseInt(request.getParameter("page"));
+        } catch (NumberFormatException e) {
+            page = 1;
+        }
+
+        int limit = constant.paging.USER_LIST_ITEM_PER_PAGE;
+        int offset = (page - 1) * limit;
+        int totalUsers = 0;
         List<User> userList;
 
         if (roleFilter != null && !roleFilter.equals("all")) {
             try {
                 int roleId = Integer.parseInt(roleFilter);
-                userList = userDAO.getUsersByRole(roleId);
+                totalUsers = userDAO.getTotalUsersByRole(roleId);
+                userList = userDAO.getUsersByRole(roleId, limit, offset);
             } catch (NumberFormatException e) {
-                userList = userDAO.getAllUsers();
+                totalUsers = userDAO.getTotalUsers();
+                userList = userDAO.getAllUsers(limit, offset);
             }
         } else {
-            userList = userDAO.getAllUsers();
+            totalUsers = userDAO.getTotalUsers();
+            userList = userDAO.getAllUsers(limit, offset);
         }
+
+        int totalPages = (int) Math.ceil((double) totalUsers / limit);
 
         request.setAttribute("userList", userList);
         request.setAttribute("selectedRole", roleFilter);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/View/Admin/UserList.jsp").forward(request, response);
     }
 
@@ -179,6 +198,8 @@ public class AdminUserController extends HttpServlet {
 
         if ("update".equals(action)) {
             updateUser(request, response);
+        } else if ("add".equals(action)) {
+            addUser(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/admin/users");
         }
@@ -243,6 +264,87 @@ public class AdminUserController extends HttpServlet {
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/users");
+    }
+
+    private void showCreateForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<Role> roles = userDAO.getAllRoles();
+        request.setAttribute("roles", roles);
+        request.getRequestDispatcher("/View/Admin/CreateUser.jsp").forward(request, response);
+    }
+
+    private void addUser(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            String firstName = request.getParameter("firstName");
+            String lastName = request.getParameter("lastName");
+            String email = request.getParameter("email");
+            String password = request.getParameter("password");
+            String bodStr = request.getParameter("bod");
+            Integer roleId = getInt(request, "roleId");
+
+            // Validation
+            if (firstName == null || firstName.trim().isEmpty() ||
+                    lastName == null || lastName.trim().isEmpty() ||
+                    email == null || email.trim().isEmpty() ||
+                    password == null || password.trim().isEmpty() ||
+                    roleId == null) {
+                // Using httpStatus.BAD_REQUEST for error message context, though redirecting
+                request.getSession().setAttribute("error", constant.httpStatus.BAD_REQUEST.getMessage());
+                response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+                return;
+            }
+
+            if (userDAO.isEmailExisted(email.trim())) {
+                request.getSession().setAttribute("error", "Email đã tồn tại trong hệ thống!");
+                response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+                return;
+            }
+
+            User user = new User();
+            user.setFirst_name(firstName.trim());
+            user.setLast_name(lastName.trim());
+            user.setEmail(email.trim());
+            user.setHash_password(password); // Should be hashed in real app
+            user.setRole_id(roleId);
+
+            // Parse date if provided
+            if (bodStr != null && !bodStr.trim().isEmpty()) {
+                try {
+                    Date bod = Date.valueOf(bodStr);
+
+                    // Validate BOD is not in the future
+                    java.util.Date today = new java.util.Date();
+                    if (bod.after(today)) {
+                        request.getSession().setAttribute("error", "Ngày sinh không được lớn hơn ngày hiện tại!");
+                        response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+                        return;
+                    }
+
+                    user.setBod(bod);
+                } catch (IllegalArgumentException e) {
+                    request.getSession().setAttribute("error", "Định dạng ngày sinh không hợp lệ!");
+                    response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+                    return;
+                }
+            }
+
+            boolean success = userDAO.addUser(user);
+
+            if (success) {
+                request.getSession().setAttribute("success", constant.httpStatus.CREATED.getMessage());
+                response.sendRedirect(request.getContextPath() + "/admin/users");
+            } else {
+                request.getSession().setAttribute("error", constant.httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+                response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+            }
+
+        } catch (Exception e) {
+            // Using httpStatus.INTERNAL_SERVER_ERROR message
+            request.getSession().setAttribute("error",
+                    constant.httpStatus.INTERNAL_SERVER_ERROR.getMessage() + " " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+        }
     }
 
     @Override

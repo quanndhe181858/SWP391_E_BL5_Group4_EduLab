@@ -71,7 +71,6 @@
                                         <option value="">-- Chọn loại câu hỏi --</option>
                                         <option value="Multiple Choice" <c:if test="${quiz != null && quiz.type == 'Multiple Choice'}">selected</c:if>>Trắc nghiệm</option>
                                         <option value="True/False" <c:if test="${quiz != null && quiz.type == 'True/False'}">selected</c:if>>Đúng/Sai</option>
-                                        <option value="Short Answer" <c:if test="${quiz != null && quiz.type == 'Short Answer'}">selected</c:if>>Câu trả lời ngắn</option>
                                     </select>
                                 </div>
 

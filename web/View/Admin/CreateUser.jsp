@@ -1,4 +1,4 @@
-<%-- Document : UpdateUser Created on : Dec 12, 2025, 1:45:00 PM Author : Le Minh Duc --%>
+<%-- Document : CreateUser Created on : Dec 14, 2025, 9:35:00 PM Author : Le Minh Duc --%>
 
     <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
         <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -9,7 +9,7 @@
                 <head>
                     <meta charset="UTF-8" />
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Cập nhật Người dùng - Admin</title>
+                    <title>Tạo người dùng mới - Admin</title>
                     <jsp:include page="/layout/import.jsp" />
                 </head>
 
@@ -43,8 +43,7 @@
                                                     d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
                                                     clip-rule="evenodd" />
                                             </svg>
-                                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Cập nhật thông
-                                                tin</span>
+                                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Tạo mới</span>
                                         </div>
                                     </li>
                                 </ol>
@@ -53,16 +52,16 @@
 
                         <!-- Page Title -->
                         <div class="mb-8">
-                            <h1 class="text-3xl font-bold text-gray-800 mb-2">✏️ Cập nhật Thông tin Người dùng</h1>
-                            <p class="text-gray-600">Chỉnh sửa thông tin cá nhân và vai trò của người dùng</p>
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">➕ Tạo Người dùng Mới</h1>
+                            <p class="text-gray-600">Thêm người dùng mới vào hệ thống</p>
                         </div>
+
 
                         <!-- Form Card -->
                         <div class="bg-white rounded-xl shadow-md p-8">
                             <form method="POST" action="${pageContext.request.contextPath}/admin/users"
-                                id="updateUserForm">
-                                <input type="hidden" name="action" value="update">
-                                <input type="hidden" name="id" value="${user.id}">
+                                id="createUserForm">
+                                <input type="hidden" name="action" value="add">
 
                                 <!-- User Info Section -->
                                 <div class="mb-8">
@@ -81,8 +80,7 @@
                                             <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
                                                 Họ <span class="text-red-500">*</span>
                                             </label>
-                                            <input type="text" id="firstName" name="firstName"
-                                                value="${user.first_name}" required
+                                            <input type="text" id="firstName" name="firstName" required
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                         </div>
 
@@ -91,8 +89,7 @@
                                             <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
                                                 Tên <span class="text-red-500">*</span>
                                             </label>
-                                            <input type="text" id="lastName" name="lastName" value="${user.last_name}"
-                                                required
+                                            <input type="text" id="lastName" name="lastName" required
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                         </div>
 
@@ -101,7 +98,7 @@
                                             <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                                 Email <span class="text-red-500">*</span>
                                             </label>
-                                            <input type="email" id="email" name="email" value="${user.email}" required
+                                            <input type="email" id="email" name="email" required
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                         </div>
 
@@ -111,7 +108,15 @@
                                                 Ngày sinh
                                             </label>
                                             <input type="date" id="bod" name="bod"
-                                                value="${not empty user.bod ? user.bod : ''}"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        </div>
+
+                                        <!-- Password -->
+                                        <div>
+                                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Mật khẩu <span class="text-red-500">*</span>
+                                            </label>
+                                            <input type="password" id="password" name="password" required
                                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                         </div>
                                     </div>
@@ -136,9 +141,9 @@
 
                                         <c:forEach var="role" items="${roles}">
                                             <div
-                                                class="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all ${user.role_id == role.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}">
+                                                class="flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all border-gray-200 hover:border-gray-300">
                                                 <input type="radio" id="role${role.id}" name="roleId" value="${role.id}"
-                                                    ${user.role_id==role.id ? 'checked' : '' } required
+                                                    required
                                                     class="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
                                                 <label for="role${role.id}" class="ml-3 flex-1 cursor-pointer">
                                                     <div class="flex items-center justify-between">
@@ -193,68 +198,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Additional Info Section -->
-                                <div class="mb-8">
-                                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                                        <svg class="w-5 h-5 mr-2 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                        Thông tin bổ sung
-                                    </h2>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg">
-                                        <div>
-                                            <p class="text-sm text-gray-600">User ID:</p>
-                                            <p class="text-sm font-medium text-gray-900">${user.id}</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-gray-600">UUID:</p>
-                                            <p class="text-sm font-mono font-medium text-gray-900 break-all">
-                                                ${user.uuid}</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-gray-600">Trạng thái hiện tại:</p>
-                                            <p class="text-sm font-medium">
-                                                <c:choose>
-                                                    <c:when test="${user.status == 'Active'}">
-                                                        <span
-                                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                            <span class="w-2 h-2 mr-1 bg-green-500 rounded-full"></span>
-                                                            Hoạt động
-                                                        </span>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <span
-                                                            class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                            <span class="w-2 h-2 mr-1 bg-gray-500 rounded-full"></span>
-                                                            Không hoạt động
-                                                        </span>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm text-gray-600">Ngày tạo:</p>
-                                            <p class="text-sm font-medium text-gray-900">
-                                                <fmt:formatDate value="${user.created_at}" pattern="dd/MM/yyyy HH:mm" />
-                                            </p>
-                                        </div>
-                                        <c:if test="${not empty user.updated_at}">
-                                            <div>
-                                                <p class="text-sm text-gray-600">Cập nhật lần cuối:</p>
-                                                <p class="text-sm font-medium text-gray-900">
-                                                    <fmt:formatDate value="${user.updated_at}"
-                                                        pattern="dd/MM/yyyy HH:mm" />
-                                                </p>
-                                            </div>
-                                        </c:if>
-                                    </div>
-                                </div>
-
                                 <!-- Action Buttons -->
-                                <div class="flex items-center justify-end gap-4 pt-6 border-t border-gray-200">
+                                <div class="flex items-center justify-end gap-4 pt-6 mt-6 border-t border-gray-200">
                                     <a href="${pageContext.request.contextPath}/admin/users"
                                         class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
                                         Hủy
@@ -263,9 +208,9 @@
                                         class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center">
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 13l4 4L19 7" />
+                                                d="M12 4v16m8-8H4" />
                                         </svg>
-                                        Cập nhật
+                                        Tạo mới
                                     </button>
                                 </div>
                             </form>
@@ -279,12 +224,12 @@
                     <!-- Toast Notification Logic -->
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
-                <c:if test="${not empty sessionScope.success}">
-                    showToast("${sessionScope.success}", "success");
-                </c:if>
-                <c:if test="${not empty sessionScope.error}">
-                    showToast("${sessionScope.error}", "error");
-                </c:if>
+                            <c:if test="${not empty sessionScope.success}">
+                                showToast("${sessionScope.success}", "success");
+                            </c:if>
+                            <c:if test="${not empty sessionScope.error}">
+                                showToast("${sessionScope.error}", "error");
+                            </c:if>
                         });
                     </script>
                     <c:if test="${not empty sessionScope.success}">
@@ -297,17 +242,18 @@
                     <!-- Form Validation Script -->
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
-                            const form = document.getElementById('updateUserForm');
+                            const form = document.getElementById('createUserForm');
 
                             form.addEventListener('submit', function (e) {
                                 const firstName = document.getElementById('firstName').value.trim();
                                 const lastName = document.getElementById('lastName').value.trim();
                                 const email = document.getElementById('email').value.trim();
+                                const password = document.getElementById('password').value.trim();
                                 const roleChecked = document.querySelector('input[name="roleId"]:checked');
 
-                                if (!firstName || !lastName || !email || !roleChecked) {
+                                if (!firstName || !lastName || !email || !password || !roleChecked) {
                                     e.preventDefault();
-                                    showToast('Vui lòng điền đầy đủ thông tin bắt buộc!', "error");
+                                    showToast('Vui lòng điền đầy đủ thông tin bắt buộc (bao gồm mật khẩu)!', "error");
                                     return false;
                                 }
 
@@ -317,6 +263,21 @@
                                     e.preventDefault();
                                     showToast('Email không hợp lệ!', "error");
                                     return false;
+                                }
+
+                                // Date of Birth validation
+                                const bodInput = document.getElementById('bod');
+                                if (bodInput && bodInput.value) {
+                                    const bod = new Date(bodInput.value);
+                                    const today = new Date();
+                                    // Reset time to midnight for accurate date comparison
+                                    today.setHours(0, 0, 0, 0);
+
+                                    if (bod > today) {
+                                        e.preventDefault();
+                                        showToast('Ngày sinh không được lớn hơn ngày hiện tại!', "error");
+                                        return false;
+                                    }
                                 }
 
                                 return true;
