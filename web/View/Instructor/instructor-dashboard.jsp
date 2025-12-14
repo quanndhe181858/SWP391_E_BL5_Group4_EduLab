@@ -96,9 +96,6 @@
                         <div>
                             <p class="text-white/80 text-sm font-medium mb-1">Bài kiểm tra chờ</p>
                             <h3 class="text-4xl font-bold">${ds.pendingTests}</h3>
-                            <p class="text-white/90 text-xs mt-2">
-                                <span class="font-semibold">${ds.testsThisWeek}</span> trong tuần
-                            </p>
                         </div>
                         <div class="bg-white/20 rounded-full p-4">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +146,7 @@
                                 <a href="${pageContext.request.contextPath}/instructor/courses?cid=${course.id}&type=edit">
                                     <div class="course-card border border-gray-200 rounded-lg p-4 hover:border-purple-300 cursor-pointer">
                                         <div class="flex items-start gap-4">
-                                            <img src="${course.thumbnail}" alt="${course.title}" class="w-20 h-20 object-cover rounded-lg flex-shrink-0">
+                                            <img src="${pageContext.request.contextPath}/${course.thumbnail}" alt="${course.title}" class="w-20 h-20 object-cover rounded-lg flex-shrink-0">
                                             <div class="flex-1 min-w-0">
                                                 <h3 class="font-semibold text-gray-900 mb-1 truncate">${course.title}</h3>
                                                 <p class="text-xs text-gray-500 mb-2">${course.categoryName}</p>

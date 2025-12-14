@@ -77,7 +77,7 @@ public class Email {
 
     public static void main(String[] args) {
         for (int i = 0; i < 1; i++) {
-            boolean result = sendEmail("hoanganh220104@gmail.com",
+            boolean result = sendEmail("haohoangdanh1@gmail.com",
                     "Lêu lêu FA " + System.currentTimeMillis(),
                     "Đây là phần nội dung trêu mấy đứa FA " + System.currentTimeMillis());
             if (result) {

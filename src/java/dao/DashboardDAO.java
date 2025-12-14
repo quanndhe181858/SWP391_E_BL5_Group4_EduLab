@@ -463,13 +463,6 @@ public class DashboardDAO extends dao {
         return courseList;
     }
 
-    /**
-     * Lấy danh sách học viên xuất sắc của instructor
-     *
-     * @param instructorId ID của giảng viên
-     * @param limit Số lượng học viên
-     * @return List<TopStudentDTO>
-     */
     public List<TopStudentDTO> getTopStudents(int instructorId, int limit) {
         List<TopStudentDTO> studentList = new ArrayList<>();
         String sql = """
