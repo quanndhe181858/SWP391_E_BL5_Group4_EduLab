@@ -9,6 +9,7 @@ package dao;
  * @author vomin
  */
 import database.dao;
+import dtos.AccomplishmentDTO;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -183,6 +184,73 @@ public class CertificateDAO extends dao {
             closeResources();
         }
         return null;
+    }
+
+    public List<AccomplishmentDTO> getUserAccomplishments(int userId) {
+
+        List<AccomplishmentDTO> list = new ArrayList<>();
+
+        String sql = """
+        SELECT
+            c.id AS course_id,
+            c.title AS course_title,
+            MAX(cp.completed_at) AS completed_at,
+            e.status AS course_status,
+            MAX(
+                CASE
+                    WHEN ta.status = 'Passed' THEN ta.grade
+                    ELSE NULL
+                END
+            ) AS passed_grade
+
+        FROM enrollment e
+        JOIN course c
+            ON c.id = e.course_id
+
+        LEFT JOIN course_progress cp
+            ON cp.course_id = c.id
+           AND cp.user_id = e.user_id
+           AND cp.status = 'Completed'
+
+        LEFT JOIN test_attempt ta
+            ON ta.user_id = e.user_id
+           AND ta.test_id IN (
+                SELECT t.id
+                FROM test t
+                WHERE t.course_id = c.id
+           )
+
+        WHERE e.user_id = ?
+          AND e.status = 'Completed'
+
+        GROUP BY c.id, c.title, e.status
+        ORDER BY completed_at DESC
+    """;
+
+        try (Connection con = dbc.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                AccomplishmentDTO dto = new AccomplishmentDTO();
+
+                dto.setCourseId(rs.getInt("course_id"));
+                dto.setCourseTitle(rs.getString("course_title"));
+                dto.setCompletedAt(rs.getTimestamp("completed_at"));
+                dto.setCourseStatus(rs.getString("course_status"));
+
+                Float passedGrade = rs.getObject("passed_grade", Float.class);
+                dto.setPassedGrade(passedGrade);
+
+                list.add(dto);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 
 }
