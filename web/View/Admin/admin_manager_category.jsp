@@ -198,7 +198,7 @@
                                                 <button
                                                     onclick="confirmDelete(${c.id}, '${c.name}')"
                                                     class="p-2 text-red-600 hover:bg-red-50 rounded-lg"
-                                                    ${countMap[c.id] > 0 ? "disabled" : ""}>
+                                                    >
                                                     🗑️
                                                 </button>
                                             </div>
