@@ -147,7 +147,7 @@ public class LoginGoogleController extends HttpServlet {
                 case 1 ->
                     response.sendRedirect(request.getContextPath() + "/admin_dashboard");
                 case 2 ->
-                    response.sendRedirect(request.getContextPath() + "/instructor/courses");
+                    response.sendRedirect(request.getContextPath() + "/instructor/dashboard");
                 default ->
                     response.sendRedirect(request.getContextPath() + "/home");
             }
@@ -195,7 +195,7 @@ public class LoginGoogleController extends HttpServlet {
                 case 1 ->
                     response.sendRedirect(request.getContextPath() + "/admin_dashboard");
                 case 2 ->
-                    response.sendRedirect(request.getContextPath() + "/instructor/courses");
+                    response.sendRedirect(request.getContextPath() + "/instructor/dashboard");
                 default ->
                     response.sendRedirect(request.getContextPath() + "/home");
             }
