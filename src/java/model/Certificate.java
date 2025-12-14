@@ -4,46 +4,99 @@
  */
 package model;
 
+import java.sql.Timestamp;
+
 /**
  *
  * @author vomin
  */
 public class Certificate {
 
-    private String userName;
-    private String courseTitle;
-    private String accomplishmentTitle;
-    private String issuedAt;
+    private int id;
+    private String title;
+    private int courseId;
+    private Integer categoryId;
+    private String description;
+    private String codePrefix;
+    private String status;
+    private Timestamp createdAt;
 
-    public String getUserName() {
-        return userName;
+    public Certificate() {
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public Certificate(int id, String title, int courseId, Integer categoryId, String description, String codePrefix, String status, Timestamp createdAt) {
+        this.id = id;
+        this.title = title;
+        this.courseId = courseId;
+        this.categoryId = categoryId;
+        this.description = description;
+        this.codePrefix = codePrefix;
+        this.status = status;
+        this.createdAt = createdAt;
     }
 
-    public String getCourseTitle() {
-        return courseTitle;
+    public int getId() {
+        return id;
     }
 
-    public void setCourseTitle(String courseTitle) {
-        this.courseTitle = courseTitle;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String getAccomplishmentTitle() {
-        return accomplishmentTitle;
+    public String getTitle() {
+        return title;
     }
 
-    public void setAccomplishmentTitle(String accomplishmentTitle) {
-        this.accomplishmentTitle = accomplishmentTitle;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String getIssuedAt() {
-        return issuedAt;
+    public int getCourseId() {
+        return courseId;
     }
 
-    public void setIssuedAt(String issuedAt) {
-        this.issuedAt = issuedAt;
+    public void setCourseId(int courseId) {
+        this.courseId = courseId;
     }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCodePrefix() {
+        return codePrefix;
+    }
+
+    public void setCodePrefix(String codePrefix) {
+        this.codePrefix = codePrefix;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
 }

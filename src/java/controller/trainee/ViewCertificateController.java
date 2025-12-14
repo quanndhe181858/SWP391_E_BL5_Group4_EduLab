@@ -8,50 +8,38 @@ package controller.trainee;
  *
  * @author vomin
  */
-import dao.certificateDAO;
+import dao.CertificateDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.util.List;
 import model.Certificate;
 import model.User;
+import model.UserCertificate;
 
-@WebServlet("/trainee/view-certificate")
+@WebServlet("/trainee/certificates")
 public class ViewCertificateController extends HttpServlet {
+
+    private final CertificateDAO certificateDAO = new CertificateDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("account");
+        HttpSession session = request.getSession(false);
+        User user = (session != null) ? (User) session.getAttribute("user") : null;
 
         if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // FINAL EXAM certificate → truyền testId
-        String testIdRaw = request.getParameter("testId");
-        if (testIdRaw == null) {
-            request.setAttribute("error", "Invalid certificate request.");
-            request.getRequestDispatcher("/View/Error/error.jsp").forward(request, response);
-            return;
-        }
+        List<UserCertificate> certificates
+                = certificateDAO.getUserCertificates(user.getId());
 
-        int testId = Integer.parseInt(testIdRaw);
+        request.setAttribute("certificates", certificates);
 
-        certificateDAO dao = new certificateDAO();
-        Certificate cert = dao.getCertificate(user.getId(), testId);
-
-        if (cert == null) {
-            request.setAttribute("error", "You have not earned this certificate yet.");
-            request.getRequestDispatcher("/View/Error/error.jsp").forward(request, response);
-            return;
-        }
-
-        request.setAttribute("cert", cert);
-        request.getRequestDispatcher("/View/Trainee/certificate.jsp")
-               .forward(request, response);
+        request.getRequestDispatcher("/View/Trainee/Certificate.jsp")
+                .forward(request, response);
     }
 }

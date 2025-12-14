@@ -391,4 +391,35 @@ public class QuizAnswerDAO extends dao {
 
         return answers;
     }
+
+    public List<QuizAnswer> getAnswersByQuizId(int quizId) {
+        String sql = """
+        SELECT id, content
+        FROM quiz_answer
+        WHERE quiz_id = ?
+    """;
+
+        List<QuizAnswer> list = new ArrayList<>();
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, quizId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                QuizAnswer a = new QuizAnswer();
+                a.setId(rs.getInt("id"));
+                a.setContent(rs.getString("content"));
+                list.add(a);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+
+        return list;
+    }
+
 }

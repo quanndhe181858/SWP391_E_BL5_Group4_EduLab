@@ -12,7 +12,7 @@ public class EnrollmentDAO extends dao {
     private void log(Level level, String msg, Throwable e) {
         this.logger.log(level, msg, e);
     }
-    
+
     public static void main(String[] args) {
         EnrollmentDAO dao = new EnrollmentDAO();
         try {
@@ -66,4 +66,29 @@ public class EnrollmentDAO extends dao {
             this.closeResources();
         }
     }
+
+    public boolean markCourseCompleted(int userId, int courseId) {
+        String sql = """
+        UPDATE enrollment
+        SET status = 'Completed'
+        WHERE user_id = ? AND course_id = ?
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error in markCourseCompleted()", e);
+            return false;
+        } finally {
+            closeResources();
+        }
+    }
+
 }
