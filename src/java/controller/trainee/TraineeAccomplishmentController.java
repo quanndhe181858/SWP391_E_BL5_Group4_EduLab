@@ -4,10 +4,12 @@
  */
 package controller.trainee;
 
+import dao.CertificateDAO;
 import dao.CourseDAO;
 import dao.CourseProgressDAO;
 import dao.EnrollmentDAO;
 import dao.testAttemptDao;
+import dtos.AccomplishmentDTO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -55,10 +57,7 @@ public class TraineeAccomplishmentController extends HttpServlet {
         }
     }
 
-    private final EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
-    private final CourseDAO courseDAO = new CourseDAO();
-    private final CourseProgressDAO progressDAO = new CourseProgressDAO();
-    private final testAttemptDao testAttemptDAO = new testAttemptDao();
+    private final CertificateDAO cerDAO = new CertificateDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -72,35 +71,13 @@ public class TraineeAccomplishmentController extends HttpServlet {
         }
 
         int userId = user.getId();
-
-        List<Integer> completedCourseIds
-                = enrollmentDAO.getCompletedCourseIds(userId);
-
-        List<Course> accomplishments = new ArrayList<>();
-
-        for (int courseId : completedCourseIds) {
-
-            Course course = courseDAO.getCourseById(courseId);
-            if (course == null) {
-                continue;
-            }
-
-            Timestamp completedAt
-                    = progressDAO.getCourseCompletedAt(userId, courseId);
-
-            Float passedGrade
-                    = testAttemptDAO.getPassedGradeByCourse(userId, courseId);
-
-            course.setCompletedAt(completedAt);
-            course.setPassedGrade(passedGrade);
-            course.setStatus("Completed");
-
-            accomplishments.add(course);
-        }
+        List<AccomplishmentDTO> accomplishments
+                = cerDAO.getUserAccomplishments(userId);
 
         request.setAttribute("accomplishments", accomplishments);
         request.getRequestDispatcher("/View/Trainee/AccomplishmentList.jsp")
                 .forward(request, response);
+
     }
 
     /**

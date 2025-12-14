@@ -187,4 +187,46 @@ public class TestAttemptDAOv2 extends dao {
         attempt.setStatus(rs.getString("status"));
         return attempt;
     }
+
+    public List<TestAttempt> getAttemptsByUserAndTest(int userId, int testId) {
+
+        List<TestAttempt> list = new ArrayList<>();
+
+        String sql = """
+            SELECT
+                user_id,
+                test_id,
+                current_attempted,
+                grade,
+                status
+            FROM test_attempt
+            WHERE user_id = ?
+              AND test_id = ?
+        """;
+
+        try (
+                Connection con = dbc.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setInt(2, testId);
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                TestAttempt ta = new TestAttempt();
+                ta.setUserId(rs.getInt("user_id"));
+                ta.setTestId(rs.getInt("test_id"));
+                ta.setCurrentAttempted(rs.getInt("current_attempted"));
+                ta.setGrade(rs.getFloat("grade"));
+                ta.setStatus(rs.getString("status"));
+
+                list.add(ta);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
 }
