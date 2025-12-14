@@ -423,4 +423,31 @@ public class UserDAO extends dao {
         }
     }
 
+    public boolean addUser(User user) {
+        String sql = """
+                 INSERT INTO user 
+                 (first_name, last_name, email, hash_password, bod, role_id, status)
+                 VALUES (?, ?, ?, ?, ?, ?, ?);
+                 """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, user.getFirst_name());
+            ps.setString(2, user.getLast_name());
+            ps.setString(3, user.getEmail());
+            ps.setString(4, user.getHash_password());
+            ps.setDate(5, user.getBod());
+            ps.setInt(6, user.getRole_id());
+            ps.setString(7, "Active");
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        }
+    }
+
 }

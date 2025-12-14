@@ -65,6 +65,9 @@ public class AdminUserController extends HttpServlet {
             case "list":
                 showUserList(request, response);
                 break;
+            case "create":
+                showCreateForm(request, response);
+                break;
             case "edit":
                 showEditForm(request, response);
                 break;
@@ -179,6 +182,8 @@ public class AdminUserController extends HttpServlet {
 
         if ("update".equals(action)) {
             updateUser(request, response);
+        } else if ("add".equals(action)) {
+            addUser(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/admin/users");
         }
@@ -243,6 +248,77 @@ public class AdminUserController extends HttpServlet {
         }
 
         response.sendRedirect(request.getContextPath() + "/admin/users");
+    }
+
+    private void showCreateForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<Role> roles = userDAO.getAllRoles();
+        request.setAttribute("roles", roles);
+        request.getRequestDispatcher("/View/Admin/CreateUser.jsp").forward(request, response);
+    }
+
+    private void addUser(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            String firstName = request.getParameter("firstName");
+            String lastName = request.getParameter("lastName");
+            String email = request.getParameter("email");
+            String password = request.getParameter("password");
+            String bodStr = request.getParameter("bod");
+            Integer roleId = getInt(request, "roleId");
+
+            // Validation
+            if (firstName == null || firstName.trim().isEmpty() ||
+                    lastName == null || lastName.trim().isEmpty() ||
+                    email == null || email.trim().isEmpty() ||
+                    password == null || password.trim().isEmpty() ||
+                    roleId == null) {
+                // Using httpStatus.BAD_REQUEST for error message context, though redirecting
+                request.getSession().setAttribute("error", constant.httpStatus.BAD_REQUEST.getMessage());
+                response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+                return;
+            }
+
+            if (userDAO.isEmailExisted(email.trim())) {
+                request.getSession().setAttribute("error", "Email đã tồn tại trong hệ thống!");
+                response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+                return;
+            }
+
+            User user = new User();
+            user.setFirst_name(firstName.trim());
+            user.setLast_name(lastName.trim());
+            user.setEmail(email.trim());
+            user.setHash_password(password); // Should be hashed in real app
+            user.setRole_id(roleId);
+
+            // Parse date if provided
+            if (bodStr != null && !bodStr.trim().isEmpty()) {
+                try {
+                    Date bod = Date.valueOf(bodStr);
+                    user.setBod(bod);
+                } catch (IllegalArgumentException e) {
+                    request.getSession().setAttribute("error", "Định dạng ngày sinh không hợp lệ!");
+                    response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+                    return;
+                }
+            }
+
+            boolean success = userDAO.addUser(user);
+
+            if (success) {
+                request.getSession().setAttribute("success", constant.httpStatus.CREATED.getMessage());
+                response.sendRedirect(request.getContextPath() + "/admin/users");
+            } else {
+                request.getSession().setAttribute("error", constant.httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+                response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+            }
+
+        } catch (Exception e) {
+             // Using httpStatus.INTERNAL_SERVER_ERROR message
+            request.getSession().setAttribute("error", constant.httpStatus.INTERNAL_SERVER_ERROR.getMessage() + " " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+        }
     }
 
     @Override
