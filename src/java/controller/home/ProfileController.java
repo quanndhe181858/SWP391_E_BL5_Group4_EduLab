@@ -153,7 +153,7 @@ public class ProfileController extends HttpServlet {
             request.getRequestDispatcher("View/profile.jsp").forward(request, response);
             return;
         }
-
+        
         LocalDate bod = null;
         int userId = Integer.parseInt(userIdStr);
 

@@ -602,9 +602,7 @@
                     avatarPreview.style.opacity = '0.5';
                 }
 
-                const contextPath = document.querySelector('meta[name="context-path"]')?.content || '';
-
-                fetch(contextPath + '/profile', {
+                fetch('${pageContext.request.contextPath}' + '/profile', {
                     method: 'POST',
                     body: formData
                 })
@@ -623,7 +621,7 @@
                                 showToast('Cập nhật avatar thành công!', 'success');
 
                                 if (data.path && avatarPreview) {
-                                    avatarPreview.src = contextPath + '/' + data.path + '?t=' + new Date().getTime();
+                                    avatarPreview.src = '${pageContext.request.contextPath}' + '/' + data.path + '?t=' + new Date().getTime();
                                 }
 
                                 setTimeout(() => {
