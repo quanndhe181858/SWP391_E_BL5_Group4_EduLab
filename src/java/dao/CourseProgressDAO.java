@@ -188,4 +188,32 @@ public class CourseProgressDAO extends dao {
         }
     }
 
+    public Timestamp getCourseCompletedAt(int userId, int courseId) {
+
+        String sql = """
+        SELECT MAX(cp.completed_at) AS completed_at
+        FROM course_progress cp
+        JOIN course_section cs ON cs.id = cp.section_id
+        WHERE cp.user_id = ?
+          AND cp.course_id = ?
+          AND cp.status = 'Completed'
+    """;
+
+        try (Connection con = dbc.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getTimestamp("completed_at");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 }

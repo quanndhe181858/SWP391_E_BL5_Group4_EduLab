@@ -24,7 +24,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.awt.Color;
-import java.io.OutputStream;
 import model.User;
 import model.UserCertificate;
 

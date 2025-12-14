@@ -30,6 +30,8 @@ public class Course {
     private int totalSections;
     private String categoryName;
     private int enrollmentCount;
+    private Timestamp completedAt;
+    private Float passedGrade;
 
     public Course() {
     }
@@ -160,6 +162,22 @@ public class Course {
 
     public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
+    }
+
+    public Timestamp getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(Timestamp completedAt) {
+        this.completedAt = completedAt;
+    }
+
+    public Float getPassedGrade() {
+        return passedGrade;
+    }
+
+    public void setPassedGrade(Float passedGrade) {
+        this.passedGrade = passedGrade;
     }
 
     public String getUpdatedAgo() {
