@@ -114,8 +114,13 @@ public class CourseProgressDAO extends dao {
     public void markTestDone(int userId, int courseId, int sectionId) {
         String sql = """
         UPDATE course_progress
-        SET test_done = 1
-        WHERE user_id = ? AND course_id = ? AND course_section_id = ?
+        SET test_done = b'1',
+            status = 'Completed',
+            progress_percent = 100,
+            completed_at = NOW()
+        WHERE user_id = ?
+          AND course_id = ?
+          AND section_id = ?
     """;
 
         try (Connection conn = dbc.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -126,7 +131,7 @@ public class CourseProgressDAO extends dao {
             ps.executeUpdate();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("markTestDone failed", e);
         }
     }
 
@@ -154,4 +159,33 @@ public class CourseProgressDAO extends dao {
             closeResources();
         }
     }
+
+    public boolean isAllSectionsCompleted(int userId, int courseId) {
+        String sql = """
+        SELECT COUNT(cs.id) = SUM(cp.status = 'Completed')
+        FROM course_section cs
+        LEFT JOIN course_progress cp
+               ON cs.id = cp.section_id
+              AND cp.user_id = ?
+        WHERE cs.course_id = ?
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+
+            rs = ps.executeQuery();
+            return rs.next() && rs.getBoolean(1);
+
+        } catch (SQLException e) {
+            logger.log(Level.SEVERE, "Error in isAllSectionsCompleted()", e);
+            return false;
+        } finally {
+            closeResources();
+        }
+    }
+
 }

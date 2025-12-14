@@ -110,7 +110,7 @@
                                         ${courseTest.description}
                                     </p>
 
-                                    <a href="${pageContext.request.contextPath}/trainee/taketest?testId=${courseTest.id}"
+                                    <a href="${pageContext.request.contextPath}/trainee/test?id=${courseTest.id}"
                                        class="flex items-center justify-center gap-2 w-full px-4 py-3 bg-purple-600 text-white rounded-lg
                                        font-semibold hover:bg-purple-700 transition-all duration-200 shadow-md hover:shadow-lg">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,7 +180,7 @@
 
                             <c:choose>
                                 <c:when test="${not testDone}">
-                                    <a href="${pageContext.request.contextPath}/trainee/taketest?testId=${test.id}"
+                                    <a href="${pageContext.request.contextPath}/trainee/test?id=${test.id}"
                                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                                         Làm bài test
                                     </a>
