@@ -334,44 +334,37 @@ public class CourseDAO extends dao {
 
     public List<Course> getCoursesByInstructorId(int limit, int offset, String title, String description,
             int categoryId, String status, String sortBy, int instructorId) {
-
         List<Course> cList = new ArrayList<>();
         List<Object> params = new ArrayList<>();
-
         StringBuilder sql = new StringBuilder(
-                "SELECT * FROM edulab.course WHERE created_by = ?"
+                "SELECT c.*, COUNT(cs.id) as total_sections "
+                + "FROM edulab.course c "
+                + "LEFT JOIN edulab.course_section cs ON c.id = cs.course_id "
+                + "WHERE c.created_by = ?"
         );
         params.add(instructorId);
-
         StringBuilder orSearch = new StringBuilder();
-
         if (title != null && !title.isBlank()) {
-            orSearch.append(" title LIKE ? OR");
+            orSearch.append(" c.title LIKE ? OR");
             params.add("%" + title + "%");
         }
-
         if (description != null && !description.isBlank()) {
-            orSearch.append(" description LIKE ? OR");
+            orSearch.append(" c.description LIKE ? OR");
             params.add("%" + description + "%");
         }
-
         if (orSearch.length() > 0) {
             sql.append(" AND (");
             sql.append(orSearch.substring(0, orSearch.length() - 2)); // remove last OR
             sql.append(")");
         }
-
         if (categoryId > 0) {
-
             List<Integer> allCategoryIds = new ArrayList<>();
             allCategoryIds.add(categoryId);
-
             List<Integer> children = categoryDao.getChildCategoryIds(categoryId);
             if (children != null && !children.isEmpty()) {
                 allCategoryIds.addAll(children);
             }
-
-            sql.append(" AND category_id IN (");
+            sql.append(" AND c.category_id IN (");
             for (int i = 0; i < allCategoryIds.size(); i++) {
                 sql.append("?");
                 if (i < allCategoryIds.size() - 1) {
@@ -381,33 +374,29 @@ public class CourseDAO extends dao {
             }
             sql.append(")");
         }
-
         if (status != null && !status.isBlank() && !status.equalsIgnoreCase("all")) {
-            sql.append(" AND status = ?");
+            sql.append(" AND c.status = ?");
             params.add(status);
         }
+
+        sql.append(" GROUP BY c.id");
 
         if (sortBy != null && !sortBy.isBlank()) {
             sql.append(" ORDER BY ").append(sortBy);
         } else {
-            sql.append(" ORDER BY id DESC");
+            sql.append(" ORDER BY updated_at desc");
         }
-
         sql.append(" LIMIT ? OFFSET ?");
         params.add(limit);
         params.add(offset);
-
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql.toString());
-
             int idx = 1;
             for (Object p : params) {
                 ps.setObject(idx++, p);
             }
-
             rs = ps.executeQuery();
-
             while (rs.next()) {
                 Course c = new Course();
                 c.setId(rs.getInt("id"));
@@ -421,15 +410,14 @@ public class CourseDAO extends dao {
                 c.setCreated_by(rs.getInt("created_by"));
                 c.setUpdated_by(rs.getInt("updated_by"));
                 c.setThumbnail(rs.getString("thumbnail"));
+                c.setTotalSections(rs.getInt("total_sections"));
                 cList.add(c);
             }
-
         } catch (SQLException e) {
             this.log(Level.SEVERE, "Error in getCoursesByInstructorId()", e);
         } finally {
             this.closeResources();
         }
-
         return cList;
     }
 
