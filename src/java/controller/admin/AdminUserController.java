@@ -20,8 +20,7 @@ import jakarta.servlet.http.HttpSession;
 import model.Role;
 import model.User;
 
-
-@WebServlet(name = "AdminUserController", urlPatterns = {"/admin/users"})
+@WebServlet(name = "AdminUserController", urlPatterns = { "/admin/users" })
 public class AdminUserController extends HttpServlet {
 
     private final UserDAO userDAO = new UserDAO();
@@ -83,21 +82,38 @@ public class AdminUserController extends HttpServlet {
     private void showUserList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String roleFilter = request.getParameter("role");
+        int page = 1;
+        try {
+            page = Integer.parseInt(request.getParameter("page"));
+        } catch (NumberFormatException e) {
+            page = 1;
+        }
+
+        int limit = constant.paging.USER_LIST_ITEM_PER_PAGE;
+        int offset = (page - 1) * limit;
+        int totalUsers = 0;
         List<User> userList;
 
         if (roleFilter != null && !roleFilter.equals("all")) {
             try {
                 int roleId = Integer.parseInt(roleFilter);
-                userList = userDAO.getUsersByRole(roleId);
+                totalUsers = userDAO.getTotalUsersByRole(roleId);
+                userList = userDAO.getUsersByRole(roleId, limit, offset);
             } catch (NumberFormatException e) {
-                userList = userDAO.getAllUsers();
+                totalUsers = userDAO.getTotalUsers();
+                userList = userDAO.getAllUsers(limit, offset);
             }
         } else {
-            userList = userDAO.getAllUsers();
+            totalUsers = userDAO.getTotalUsers();
+            userList = userDAO.getAllUsers(limit, offset);
         }
+
+        int totalPages = (int) Math.ceil((double) totalUsers / limit);
 
         request.setAttribute("userList", userList);
         request.setAttribute("selectedRole", roleFilter);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/View/Admin/UserList.jsp").forward(request, response);
     }
 
@@ -296,15 +312,15 @@ public class AdminUserController extends HttpServlet {
             if (bodStr != null && !bodStr.trim().isEmpty()) {
                 try {
                     Date bod = Date.valueOf(bodStr);
-                    
+
                     // Validate BOD is not in the future
                     java.util.Date today = new java.util.Date();
                     if (bod.after(today)) {
-                         request.getSession().setAttribute("error", "Ngày sinh không được lớn hơn ngày hiện tại!");
-                         response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
-                         return;
+                        request.getSession().setAttribute("error", "Ngày sinh không được lớn hơn ngày hiện tại!");
+                        response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+                        return;
                     }
-                    
+
                     user.setBod(bod);
                 } catch (IllegalArgumentException e) {
                     request.getSession().setAttribute("error", "Định dạng ngày sinh không hợp lệ!");
@@ -324,8 +340,9 @@ public class AdminUserController extends HttpServlet {
             }
 
         } catch (Exception e) {
-             // Using httpStatus.INTERNAL_SERVER_ERROR message
-            request.getSession().setAttribute("error", constant.httpStatus.INTERNAL_SERVER_ERROR.getMessage() + " " + e.getMessage());
+            // Using httpStatus.INTERNAL_SERVER_ERROR message
+            request.getSession().setAttribute("error",
+                    constant.httpStatus.INTERNAL_SERVER_ERROR.getMessage() + " " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
         }
     }

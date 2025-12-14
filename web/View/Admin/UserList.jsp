@@ -30,35 +30,7 @@
                         </div>
 
                         <!-- Success/Error Messages -->
-                        <c:if test="${not empty sessionScope.success}">
-                            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-lg"
-                                role="alert">
-                                <div class="flex items-center">
-                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                    <span>${sessionScope.success}</span>
-                                </div>
-                            </div>
-                            <c:remove var="success" scope="session" />
-                        </c:if>
-
-                        <c:if test="${not empty sessionScope.error}">
-                            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg"
-                                role="alert">
-                                <div class="flex items-center">
-                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                    <span>${sessionScope.error}</span>
-                                </div>
-                            </div>
-                            <c:remove var="error" scope="session" />
-                        </c:if>
+                        <!-- Messages handled by importBottom.jsp toast logic -->
 
                         <!-- Search & Filter Bar -->
                         <div class="bg-white rounded-xl shadow-md p-4 mb-6">
@@ -375,10 +347,130 @@
 
                         </div>
 
+                        <!-- Pagination -->
+                        <c:if test="${totalPages > 1}">
+                            <div
+                                class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4 rounded-lg shadow-sm">
+                                <div class="flex flex-1 justify-between sm:hidden">
+                                    <c:if test="${currentPage > 1}">
+                                        <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                            class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</a>
+                                    </c:if>
+                                    <c:if test="${currentPage < totalPages}">
+                                        <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                            class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Next</a>
+                                    </c:if>
+                                </div>
+                                <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-sm text-gray-700">
+                                            Hiển thị trang
+                                            <span class="font-medium">${currentPage}</span>
+                                            trong tổng số
+                                            <span class="font-medium">${totalPages}</span>
+                                            trang
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm"
+                                            aria-label="Pagination">
+                                            <!-- Previous Button -->
+                                            <c:choose>
+                                                <c:when test="${currentPage > 1}">
+                                                    <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                                        class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                                        <span class="sr-only">Previous</span>
+                                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
+                                                            aria-hidden="true">
+                                                            <path fill-rule="evenodd"
+                                                                d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                    </a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span
+                                                        class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-300 ring-1 ring-inset ring-gray-300 cursor-not-allowed">
+                                                        <span class="sr-only">Previous</span>
+                                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
+                                                            aria-hidden="true">
+                                                            <path fill-rule="evenodd"
+                                                                d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                    </span>
+                                                </c:otherwise>
+                                            </c:choose>
+
+                                            <!-- Page Numbers -->
+                                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                                <c:choose>
+                                                    <c:when test="${currentPage == i}">
+                                                        <a href="#" aria-current="page"
+                                                            class="relative z-10 inline-flex items-center bg-blue-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">${i}</a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <a href="${pageContext.request.contextPath}/admin/users?page=${i}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                                            class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">${i}</a>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </c:forEach>
+
+                                            <!-- Next Button -->
+                                            <c:choose>
+                                                <c:when test="${currentPage < totalPages}">
+                                                    <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                                        class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                                        <span class="sr-only">Next</span>
+                                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
+                                                            aria-hidden="true">
+                                                            <path fill-rule="evenodd"
+                                                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                    </a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span
+                                                        class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-300 ring-1 ring-inset ring-gray-300 cursor-not-allowed">
+                                                        <span class="sr-only">Next</span>
+                                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
+                                                            aria-hidden="true">
+                                                            <path fill-rule="evenodd"
+                                                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                    </span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </nav>
+                                    </div>
+                                </div>
+                            </div>
+                        </c:if>
+
                     </div>
 
                     <!-- FOOTER -->
                     <jsp:include page="/layout/importBottom.jsp" />
+
+                    <!-- Toast Notification Logic -->
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            <c:if test="${not empty sessionScope.success}">
+                                showToast("${sessionScope.success}", "success");
+                            </c:if>
+                            <c:if test="${not empty sessionScope.error}">
+                                showToast("${sessionScope.error}", "error");
+                            </c:if>
+                        });
+                    </script>
+                    <c:if test="${not empty sessionScope.success}">
+                        <c:remove var="success" scope="session" />
+                    </c:if>
+                    <c:if test="${not empty sessionScope.error}">
+                        <c:remove var="error" scope="session" />
+                    </c:if>
 
                     <!-- Search Script -->
                     <script>
