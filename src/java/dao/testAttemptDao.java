@@ -63,32 +63,6 @@ public class testAttemptDao extends DBContext {
         }
     }
 
-    public Float getPassedGradeByCourse(int userId, int courseId) {
-
-        String sql = """
-        SELECT MAX(ta.grade) AS passed_grade
-        FROM test_attempt ta
-        JOIN test t ON t.id = ta.test_id
-        WHERE ta.user_id = ?
-          AND t.course_id = ?
-          AND ta.status = 'Passed'
-    """;
-
-        try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setInt(1, userId);
-            ps.setInt(2, courseId);
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getFloat("passed_grade");
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
+    
 
 }
