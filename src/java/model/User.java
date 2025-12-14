@@ -38,6 +38,14 @@ public class User {
         this.hash_password = hash_password;
     }
 
+    public User(int id, String first_name, String last_name, String email, String status, Timestamp created_at) {
+        this.id = id;
+        this.first_name = first_name;
+        this.last_name = last_name;
+        this.email = email;
+        this.created_at = created_at;
+    }
+
     public int getId() {
         return id;
     }

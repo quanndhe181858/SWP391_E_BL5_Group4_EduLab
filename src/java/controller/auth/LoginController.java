@@ -65,20 +65,25 @@ public class LoginController extends HttpServlet {
             request.setAttribute("error", "Sai email hoặc mật khẩu.");
             request.getRequestDispatcher("View/Auth/Login.jsp").forward(request, response);
         } else {
-            HttpSession session = request.getSession();
-            Media m = mDao.getMediaByIdAndType("user", user.getId());
-            
-            session.setAttribute("user", user);
-            session.setAttribute("avatar", m);
+            if (user.getStatus().equals("Active")) {
+                HttpSession session = request.getSession();
+                Media m = mDao.getMediaByIdAndType("user", user.getId());
 
-            int roleId = user.getRole_id();
+                session.setAttribute("user", user);
+                session.setAttribute("avatar", m);
 
-            if (roleId == 1) {
-                response.sendRedirect(request.getContextPath() + "/admin_dashboard");
-            } else if (roleId == 2) {
-                response.sendRedirect(request.getContextPath() + "/instructor/courses");
+                int roleId = user.getRole_id();
+
+                if (roleId == 1) {
+                    response.sendRedirect(request.getContextPath() + "/admin_dashboard");
+                } else if (roleId == 2) {
+                    response.sendRedirect(request.getContextPath() + "/instructor/courses");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/home");
+                }
             } else {
-                response.sendRedirect(request.getContextPath() + "/home");
+                request.setAttribute("error", "Tài khoản đã bị dừng hoạt động.");
+                request.getRequestDispatcher("View/Auth/Login.jsp").forward(request, response);
             }
         }
     }

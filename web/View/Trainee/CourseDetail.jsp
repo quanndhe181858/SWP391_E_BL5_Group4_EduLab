@@ -38,7 +38,7 @@
                                 <form action="${pageContext.request.contextPath}/courses" method="POST">
                                     <input type="hidden" name="cid" value="${course.id}" />
                                     <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-12 py-4 rounded-lg transition-colors">
-                                        Học ngay
+                                        Tiếp tục học
                                     </button>
                                 </form>
                             </div>
