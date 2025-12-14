@@ -21,10 +21,7 @@ import java.util.Map;
 import model.Category;
 import model.User;
 
-/**
- *
- * @author quann
- */
+
 @WebServlet(name = "AdminCategoryController", urlPatterns = {"/manager_category"})
 public class AdminCategoryController extends HttpServlet {
 
@@ -51,26 +48,25 @@ public class AdminCategoryController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-//        HttpSession session = request.getSession(false);
-//
-//        if (session == null) {
-//            response.sendRedirect(request.getContextPath() + "/logout");
-//            return;
-//        }
-//
-//        User u = (User) session.getAttribute("user");
-//
-//        if (u == null) {
-//            response.sendRedirect(request.getContextPath() + "/logout");
-//            return;
-//        }
-//
-//        if (u.getRole_id() != 1) {
-//            response.sendRedirect(request.getContextPath() + "/logout");
-//            return;
-//        }
+        HttpSession session = request.getSession(false);
 
-        HttpSession session = request.getSession();
+        if (session == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        User u = (User) session.getAttribute("user");
+
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
+        if (u.getRole_id() != 1) {
+            response.sendRedirect(request.getContextPath() + "/logout");
+            return;
+        }
+
         String success = (String) session.getAttribute("success");
         String error = (String) session.getAttribute("error");
 
