@@ -27,6 +27,9 @@ public class Course {
     private int created_by;
     private int updated_by;
 
+    private Timestamp completedAt;
+    private Float passedGrade;
+
     public Course() {
     }
 
@@ -124,6 +127,22 @@ public class Course {
 
     public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
+    }
+
+    public Timestamp getCompletedAt() {
+        return completedAt;
+    }
+
+    public void setCompletedAt(Timestamp completedAt) {
+        this.completedAt = completedAt;
+    }
+
+    public Float getPassedGrade() {
+        return passedGrade;
+    }
+
+    public void setPassedGrade(Float passedGrade) {
+        this.passedGrade = passedGrade;
     }
 
     public String getUpdatedAgo() {
