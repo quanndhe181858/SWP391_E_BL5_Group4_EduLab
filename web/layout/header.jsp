@@ -79,6 +79,14 @@
                                         </div>
                                     </a>
 
+                                    <c:if test="${sessionScope.user.role_id == 1}">
+                                        <a href="${pageContext.request.contextPath}/admin_dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <div class="flex items-center">
+                                                Bảng điều khiển
+                                            </div>
+                                        </a>
+                                    </c:if> 
+
                                     <c:if test="${sessionScope.user.role_id == 3}">
                                         <a href="${pageContext.request.contextPath}/trainee/certificates" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                             <div class="flex items-center">
@@ -97,6 +105,13 @@
 
 
 
+                                    <c:if test="${sessionScope.user.role_id == 2}">
+                                        <a href="${pageContext.request.contextPath}/instructor/dashboard" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <div class="flex items-center">
+                                                Bảng điều khiển
+                                            </div>
+                                        </a>
+                                    </c:if>
                                     <c:if test="${sessionScope.user.role_id == 2}">
                                         <a href="${pageContext.request.contextPath}/instructor/courses" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                             <div class="flex items-center">
