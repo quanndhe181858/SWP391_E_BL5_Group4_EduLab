@@ -8,6 +8,7 @@
         <title>Quản lý Danh mục Khóa học - EduLAB</title>
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet">
         <script src="https://cdn.tailwindcss.com"></script>
+        <jsp:include page="/layout/import.jsp"/>
     </head>
     <style>
         @keyframes fade-in {
