@@ -16,14 +16,13 @@ import java.sql.ResultSet;
 public class testAttemptDao extends DBContext {
 
     /**
-     * Return the highest current_attempt for this user and test.
-     * If there is no record, return 0.
+     * Return the highest current_attempt for this user and test. If there is no
+     * record, return 0.
      */
     public int getCurrentAttempt(int userId, int testId) {
         String sql = "SELECT MAX(current_attempt) AS mx FROM test_attempt WHERE user_id = ? AND test_id = ?";
 
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, userId);
             ps.setInt(2, testId);
@@ -32,7 +31,9 @@ public class testAttemptDao extends DBContext {
                 if (rs.next()) {
                     // if result is NULL (no rows), getInt returns 0, but better check
                     int val = rs.getInt("mx");
-                    if (rs.wasNull()) return 0;
+                    if (rs.wasNull()) {
+                        return 0;
+                    }
                     return val;
                 }
             }
@@ -48,8 +49,7 @@ public class testAttemptDao extends DBContext {
      */
     public void saveAttempt(int userId, int testId, int attempt, double grade, String status) {
         String sql = "INSERT INTO test_attempt (user_id, test_id, current_attempt, grade, status) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, userId);
             ps.setInt(2, testId);
@@ -62,6 +62,33 @@ public class testAttemptDao extends DBContext {
             e.printStackTrace();
         }
     }
-    
-    
+
+    public Float getPassedGradeByCourse(int userId, int courseId) {
+
+        String sql = """
+        SELECT MAX(ta.grade) AS passed_grade
+        FROM test_attempt ta
+        JOIN test t ON t.id = ta.test_id
+        WHERE ta.user_id = ?
+          AND t.course_id = ?
+          AND ta.status = 'Passed'
+    """;
+
+        try (Connection con = getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setInt(2, courseId);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getFloat("passed_grade");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 }

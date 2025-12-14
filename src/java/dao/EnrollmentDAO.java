@@ -2,6 +2,8 @@ package dao;
 
 import java.sql.*;
 import database.dao;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -89,6 +91,32 @@ public class EnrollmentDAO extends dao {
         } finally {
             closeResources();
         }
+    }
+
+    public List<Integer> getCompletedCourseIds(int userId) {
+        List<Integer> list = new ArrayList<>();
+
+        String sql = """
+        SELECT course_id
+        FROM enrollment
+        WHERE user_id = ?
+          AND status = 'Completed'
+    """;
+
+        try (Connection con = dbc.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                list.add(rs.getInt("course_id"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 
 }
