@@ -8,8 +8,11 @@ import database.dao;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import model.Role;
 import model.User;
 
 /**
@@ -255,4 +258,169 @@ public class UserDAO extends dao {
             return false;
         }
     }
+    
+    public boolean changeUserStatus(int userId, String status) {
+        String sql = """
+                UPDATE user 
+                SET status = ?, updated_at = NOW()
+                WHERE id = ?;
+                """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, status);
+            ps.setInt(2, userId);
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        }
+    }
+    
+    public List<Role> getAllRoles() {
+        List<Role> roles = new ArrayList<>();
+        String sql = "SELECT * FROM role ORDER BY id;";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Role role = new Role();
+                role.setId(rs.getInt("id"));
+                role.setName(rs.getString("name"));
+                role.setDescription(rs.getString("description"));
+                roles.add(role);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        }
+
+        return roles;
+    }
+    
+    public List<User> getUsersByRole(int roleId) {
+        List<User> users = new ArrayList<>();
+        String sql = """
+                SELECT u.*, r.name as role_name, r.description as role_description
+                FROM user u
+                LEFT JOIN role r ON u.role_id = r.id
+                WHERE u.role_id = ?
+                ORDER BY u.created_at DESC;
+                """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, roleId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                User u = new User();
+                u.setId(rs.getInt("id"));
+                u.setUuid(rs.getString("uuid"));
+                u.setFirst_name(rs.getString("first_name"));
+                u.setLast_name(rs.getString("last_name"));
+                u.setEmail(rs.getString("email"));
+                u.setBod(rs.getDate("bod"));
+                u.setStatus(rs.getString("status"));
+                u.setRole_id(rs.getInt("role_id"));
+                u.setCreated_at(rs.getTimestamp("created_at"));
+                u.setUpdated_at(rs.getTimestamp("updated_at"));
+
+                // Set role information
+                Role role = new Role();
+                role.setId(rs.getInt("role_id"));
+                role.setName(rs.getString("role_name"));
+                role.setDescription(rs.getString("role_description"));
+                u.setRole(role);
+
+                users.add(u);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        }
+
+        return users;
+    }
+    
+    public List<User> getAllUsers() {
+        List<User> users = new ArrayList<>();
+        String sql = """
+                SELECT u.*, r.name as role_name, r.description as role_description
+                FROM user u
+                LEFT JOIN role r ON u.role_id = r.id
+                ORDER BY u.created_at DESC;
+                """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                User u = new User();
+                u.setId(rs.getInt("id"));
+                u.setUuid(rs.getString("uuid"));
+                u.setFirst_name(rs.getString("first_name"));
+                u.setLast_name(rs.getString("last_name"));
+                u.setEmail(rs.getString("email"));
+                u.setBod(rs.getDate("bod"));
+                u.setStatus(rs.getString("status"));
+                u.setRole_id(rs.getInt("role_id"));
+                u.setCreated_at(rs.getTimestamp("created_at"));
+                u.setUpdated_at(rs.getTimestamp("updated_at"));
+
+                // Set role information
+                Role role = new Role();
+                role.setId(rs.getInt("role_id"));
+                role.setName(rs.getString("role_name"));
+                role.setDescription(rs.getString("role_description"));
+                u.setRole(role);
+
+                users.add(u);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        }
+
+        return users;
+    }
+    
+    public boolean updateUser(User user) {
+        String sql = """
+                UPDATE user 
+                SET first_name = ?, last_name = ?, email = ?, bod = ?, role_id = ?, updated_at = NOW()
+                WHERE id = ?;
+                """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, user.getFirst_name());
+            ps.setString(2, user.getLast_name());
+            ps.setString(3, user.getEmail());
+            ps.setDate(4, user.getBod());
+            ps.setInt(5, user.getRole_id());
+            ps.setInt(6, user.getId());
+
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        }
+    }
+
 }

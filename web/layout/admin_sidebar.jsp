@@ -92,7 +92,8 @@
                 Quản lý
             </p>
             <div class="space-y-1">
-                <a href="?page=students" 
+
+                <a href="${pageContext.request.contextPath}/admin/users?role=3" 
                    class="flex items-center justify-between px-3 py-2.5 rounded-lg transition-all <%= currentPage.equals("students") ? "bg-white text-blue-600 font-semibold shadow-lg" : "text-white hover:bg-blue-500/30"%>">
                     <div class="flex items-center gap-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,6 +105,17 @@
                 </a>
 
                 <a href="?page=instructors" 
+                   class="flex items-center justify-between px-3 py-2.5 rounded-lg transition-all <%= currentPage.equals("instructors") ? "bg-white text-blue-600 font-semibold shadow-lg" : "text-white hover:bg-blue-500/30"%>">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                        </svg>
+                        <span>Giảng viên</span>
+                    </div>
+                    <span class="px-2 py-0.5 text-xs font-semibold bg-purple-500 rounded-full">15</span>
+                </a>
+
+                <a href="${pageContext.request.contextPath}/admin/users?role=2" 
                    class="flex items-center justify-between px-3 py-2.5 rounded-lg transition-all <%= currentPage.equals("instructors") ? "bg-white text-blue-600 font-semibold shadow-lg" : "text-white hover:bg-blue-500/30"%>">
                     <div class="flex items-center gap-3">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
