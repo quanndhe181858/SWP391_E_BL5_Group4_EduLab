@@ -15,6 +15,7 @@ import java.util.List;
 import model.Question;
 import model.Test;
 import model.QuizAnswer;
+import model.TestAttempt;
 
 public class TestsDAO extends dao {
 
@@ -442,4 +443,101 @@ public class TestsDAO extends dao {
         }
         return false;
     }
+
+    public Test getTestBySection(int courseId, int sectionId) {
+        String sql = """
+        SELECT *
+        FROM test
+        WHERE course_id = ?
+          AND course_section_id = ?
+        LIMIT 1
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, courseId);
+            ps.setInt(2, sectionId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return mapTest(rs);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Test getFinalTestByCourse(int courseId) {
+        String sql = """
+        SELECT *
+        FROM test
+        WHERE course_id = ?
+          AND (course_section_id IS NULL OR course_section_id = 0)
+        LIMIT 1
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, courseId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return mapTest(rs);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private Test mapTest(ResultSet rs) throws SQLException {
+        Test t = new Test();
+        t.setId(rs.getInt("id"));
+        t.setCode(rs.getString("code"));
+        t.setTitle(rs.getString("title"));
+        t.setDescription(rs.getString("description"));
+        t.setTimeInterval(rs.getInt("time_interval"));
+        t.setMinGrade(rs.getInt("min_grade"));
+        t.setCourseId(rs.getInt("course_id"));
+        t.setCourseSectionId((Integer) rs.getObject("course_section_id"));
+        t.setCreatedAt(rs.getTimestamp("created_at"));
+        return t;
+    }
+
+    public TestAttempt getLatestAttempt(int userId, int testId) {
+
+        String sql = """
+        SELECT *
+        FROM test_attempt
+        WHERE user_id = ? AND test_id = ?
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, userId);
+            ps.setInt(2, testId);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                TestAttempt ta = new TestAttempt();
+                ta.setUserId(rs.getInt("user_id"));
+                ta.setTestId(rs.getInt("test_id"));
+                ta.setCurrentAttempted(rs.getInt("current_attempted"));
+                ta.setGrade(rs.getFloat("grade"));
+                ta.setStatus(rs.getString("status"));
+                return ta;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } 
+        return null;
+    }
+
 }

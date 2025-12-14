@@ -1,5 +1,6 @@
 package controller.trainee;
 
+import dao.CertificateDAO;
 import dao.CourseDAO;
 import dao.CourseProgressDAO;
 import dao.CourseSectionDAO;
@@ -31,6 +32,7 @@ public class LearnCourseController extends HttpServlet {
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
     private final MediaDAO mediaDAO = new MediaDAO();
     private final TestsDAO testsDAO = new TestsDAO();
+    private final CertificateDAO certificateDAO = new CertificateDAO();
 
     // Helper parse int an toàn
     private Integer getInt(HttpServletRequest req, String name) {
@@ -66,7 +68,7 @@ public class LearnCourseController extends HttpServlet {
         Course course = courseDAO.getCourseById(courseId);
         if (course == null) {
             request.setAttribute("error", "Khóa học không tồn tại");
-           request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
             return;
         }
 
@@ -78,7 +80,7 @@ public class LearnCourseController extends HttpServlet {
 
         if (!enrollmentDAO.isEnrolled(userId, courseId)) {
             request.setAttribute("error", "Bạn chưa đăng ký khóa học này");
-           request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
+            request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
             return;
         }
 
@@ -121,6 +123,28 @@ public class LearnCourseController extends HttpServlet {
         Test courseTest = allCompleted
                 ? testsDAO.getCourseTestByCourseId(courseId)
                 : null;
+
+        if (allCompleted) {
+
+            Test finalTest = testsDAO.getCourseTestByCourseId(courseId);
+
+            boolean finalPassed = true;
+
+            if (finalTest != null) {
+                var attempt = testsDAO.getLatestAttempt(userId, finalTest.getId());
+                finalPassed = (attempt != null && "Passed".equalsIgnoreCase(attempt.getStatus()));
+            }
+
+            if (finalPassed) {
+                if (!certificateDAO.hasUserCertificate(userId, courseId)) {
+                    certificateDAO.issueCertificate(
+                            userId,
+                            courseId,
+                            null
+                    );
+                }
+            }
+        }
 
         request.setAttribute("course", course);
         request.setAttribute("sections", sections);

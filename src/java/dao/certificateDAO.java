@@ -8,65 +8,181 @@ package dao;
  *
  * @author vomin
  */
-import database.DBContext;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import database.dao;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import model.Certificate;
+import model.UserCertificate;
 
-public class certificateDAO extends DBContext {
+public class CertificateDAO extends dao {
 
-    public Certificate getCertificate(int userId, int courseId) {
-
+    public Certificate getCertificateByCourseId(int courseId) {
         String sql = """
-        SELECT 
-            u.full_name,
-            c.title AS course_title,
-            a.title AS accomplishment_title,
-            ua.issued_at
-        FROM user_accomplishment ua
-        JOIN accomplishment a ON ua.accomplishment_id = a.id
-        JOIN course c ON a.course_id = c.id
-        JOIN user u ON ua.user_id = u.id
-        WHERE ua.user_id = ?
-          AND c.id = ?
-    """;
+            SELECT * FROM certificate
+            WHERE course_id = ? AND status = 'Active'
+        """;
 
         try {
-            PreparedStatement ps = getConnection().prepareStatement(sql);
-            ps.setInt(1, userId);
-            ps.setInt(2, courseId);
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, courseId);
+            rs = ps.executeQuery();
 
-            ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                Certificate cert = new Certificate();
-                cert.setUserName(rs.getString("full_name"));
-                cert.setCourseTitle(rs.getString("course_title"));
-                cert.setAccomplishmentTitle(rs.getString("accomplishment_title"));
-                cert.setIssuedAt(rs.getString("issued_at"));
-                return cert;
+                Certificate c = new Certificate();
+                c.setId(rs.getInt("id"));
+                c.setTitle(rs.getString("title"));
+                c.setCourseId(rs.getInt("course_id"));
+                c.setCategoryId(rs.getObject("category_id", Integer.class));
+                c.setDescription(rs.getString("description"));
+                c.setCodePrefix(rs.getString("code_prefix"));
+                c.setStatus(rs.getString("status"));
+                c.setCreatedAt(rs.getTimestamp("created_at"));
+                return c;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+        } catch (SQLException e) {
+        } finally {
+            closeResources();
         }
         return null;
     }
 
-    public void createCertificate(int userId, int courseId) {
+    public boolean hasUserCertificate(int userId, int courseId) {
         String sql = """
-        INSERT INTO user_accomplishment (user_id, accomplishment_id, issued_at)
-        SELECT ?, a.id, NOW()
-        FROM accomplishment a
-        WHERE a.course_id = ?
-    """;
+            SELECT 1
+            FROM user_certificate uc
+            JOIN certificate c ON uc.certificate_id = c.id
+            WHERE uc.user_id = ? AND c.course_id = ?
+        """;
 
         try {
-            PreparedStatement ps = getConnection().prepareStatement(sql);
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
             ps.setInt(1, userId);
             ps.setInt(2, courseId);
-            ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
+            rs = ps.executeQuery();
+            return rs.next();
+
+        } catch (SQLException e) {
+            return false;
+        } finally {
+            closeResources();
         }
+    }
+
+    public boolean issueCertificate(int userId, int courseId, String filePath) {
+
+        Certificate cert = getCertificateByCourseId(courseId);
+        if (cert == null) {
+            return false;
+        }
+
+        if (hasUserCertificate(userId, courseId)) {
+            return true;
+        }
+
+        String certificateCode = cert.getCodePrefix() + "-"
+                + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+
+        String sql = """
+            INSERT INTO user_certificate
+                (user_id, certificate_id, certificate_code, issued_at, file_path)
+            VALUES (?, ?, ?, NOW(), ?)
+        """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, userId);
+            ps.setInt(2, cert.getId());
+            ps.setString(3, certificateCode);
+            ps.setString(4, filePath);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            return false;
+        } finally {
+            closeResources();
+        }
+    }
+
+    public List<UserCertificate> getUserCertificates(int userId) {
+        List<UserCertificate> list = new ArrayList<>();
+
+        String sql = """
+            SELECT uc.*
+            FROM user_certificate uc
+            WHERE uc.user_id = ?
+            ORDER BY uc.issued_at DESC
+        """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, userId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                UserCertificate uc = new UserCertificate();
+                uc.setId(rs.getInt("id"));
+                uc.setUserId(rs.getInt("user_id"));
+                uc.setCertificateId(rs.getInt("certificate_id"));
+                uc.setCertificateCode(rs.getString("certificate_code"));
+                uc.setIssuedAt(rs.getTimestamp("issued_at"));
+                uc.setFilePath(rs.getString("file_path"));
+                list.add(uc);
+            }
+
+        } catch (SQLException e) {
+        } finally {
+            closeResources();
+        }
+
+        return list;
+    }
+
+    public UserCertificate getUserCertificateById(int certId, int userId) {
+        String sql = "SELECT uc.id, uc.user_id, uc.certificate_id, uc.certificate_code, "
+                + "uc.issued_at, uc.file_path, "
+                + "DATE_FORMAT(uc.issued_at, '%d/%m/%Y') as issued_at_formatted "
+                + "FROM user_certificate uc "
+                + "WHERE uc.id = ? AND uc.user_id = ?";
+
+        System.out.println("Getting certificate - ID: " + certId + ", UserID: " + userId);
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, certId);
+            ps.setInt(2, userId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                UserCertificate uc = new UserCertificate();
+                uc.setId(rs.getInt("id"));
+                uc.setUserId(rs.getInt("user_id"));
+                uc.setCertificateId(rs.getInt("certificate_id"));
+                uc.setCertificateCode(rs.getString("certificate_code"));
+                uc.setIssuedAt(rs.getTimestamp("issued_at"));
+                uc.setFilePath(rs.getString("file_path"));
+
+                System.out.println("Certificate found: " + uc.getCertificateCode());
+                return uc;
+            } else {
+                System.out.println("No certificate found in database");
+            }
+        } catch (SQLException e) {
+            System.out.println("SQL Error: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return null;
     }
 
 }
