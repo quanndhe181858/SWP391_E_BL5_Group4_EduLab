@@ -74,8 +74,6 @@
                                                                       ? 'selected' : '' }>Trắc nghiệm</option>
                                     <option value="True/False" ${param.type=='True/False' ? 'selected'
                                                                  : '' }>Đúng/Sai</option>
-                                    <option value="Short Answer" ${param.type=='Short Answer'
-                                                                   ? 'selected' : '' }>Câu trả lời ngắn</option>
                                 </select>
                             </div>
 
