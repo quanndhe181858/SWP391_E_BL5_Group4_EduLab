@@ -85,10 +85,10 @@
                                                                 <option value="">-- Chọn loại câu hỏi --</option>
                                                                 <option value="Multiple Choice" <c:if
                                                                     test="${quiz != null && fn:trim(quiz.type) == 'Multiple Choice'}">
-                                                                    selected</c:if>>Trắc nghiệm</option>
-                                                                <option value="True/False" <c:if
-                                                                    test="${quiz != null && fn:trim(quiz.type) == 'True/False'}">
-                                                                    selected</c:if>>Đúng/Sai</option>
+                                                                    selected</c:if>>Multiple Choice</option>
+                                                                <option value="Single Choice" <c:if
+                                                                    test="${quiz != null && fn:trim(quiz.type) == 'Single Choice'}">
+                                                                    selected</c:if>>Single Choice</option>
                                                             </select>
                                                         </div>
 
@@ -208,8 +208,7 @@
                                                                         </div>
                                                                         <div class="flex gap-2">
                                                                             <button type="button"
-                                                                                onclick='editAnswer(${answer.id}, ${quiz.id}, "${answer.content.replace("'", "
-                                                                                \\'").replace("\"", "&quot;" )}",
+                                                                                onclick='editAnswer(${answer.id}, ${quiz.id}, "${answer.content.replace("'", "\\'").replace("\"", "&quot;" )}",
                                                                                 ${answer.is_true})'
                                                                                 class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                                                                 title="Chỉnh sửa">
