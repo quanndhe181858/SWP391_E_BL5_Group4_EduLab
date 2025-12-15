@@ -174,17 +174,18 @@
 
             <div>
                 <label for="editSectionPosition" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Vị trí <span class="text-red-500">*</span>
+                    Đổi chỗ với bài học <span class="text-red-500">*</span>
                 </label>
-                <input 
-                    type="number" 
+                <select 
                     id="editSectionPosition" 
                     name="position"
-                    min="1"
-                    value="1"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                     required>
-                <p class="text-xs text-gray-500 mt-1">Thứ tự hiển thị của bài học trong khóa học</p>
+                    <!-- Options will be populated dynamically -->
+                </select>
+                <p class="text-xs text-gray-500 mt-1">
+                    <span id="currentPositionInfo" class="font-medium text-blue-600"></span>
+                </p>
             </div>
 
             <div>
@@ -230,6 +231,7 @@
 
 <script>
     let editSectionData = null;
+    const totalSections = ${not empty sections ? sections.size() : 0};
 
     function editSection(sectionId) {
         $.ajax({
@@ -252,8 +254,28 @@
         document.getElementById('editSectionTitle').value = section.title;
         document.getElementById('editSectionDescription').value = section.description;
         document.getElementById('editSectionType').value = section.type;
-        document.getElementById('editSectionPosition').value = section.position;
         document.getElementById('editSectionContent').value = section.content || '';
+
+        // Populate position dropdown
+        const positionSelect = document.getElementById('editSectionPosition');
+        positionSelect.innerHTML = '';
+        
+        for (let i = 1; i <= totalSections; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            
+            if (i === section.position) {
+                option.textContent = `Vị trí ` + i + ` (Vị trí hiện tại)`;
+                option.selected = true;
+            } else {
+                option.textContent = `Vị trí ` + i;
+            }
+            
+            positionSelect.appendChild(option);
+        }
+
+        document.getElementById('currentPositionInfo').textContent = 
+            `Vị trí hiện tại: ` + section.position + ` / ` + totalSections;
 
         const statusRadios = document.querySelectorAll('input[name="editStatus"]');
         statusRadios.forEach(radio => {
@@ -400,7 +422,8 @@
         const title = document.getElementById('editSectionTitle').value.trim();
         const description = document.getElementById('editSectionDescription').value.trim();
         const content = document.getElementById('editSectionContent').value.trim();
-        const position = document.getElementById('editSectionPosition').value;
+        const futurePosition = document.getElementById('editSectionPosition').value;
+        const currentPosition = editSectionData.position;
         const status = document.querySelector('input[name="editStatus"]:checked').value;
 
         if (!title) {
@@ -439,8 +462,8 @@
             return;
         }
 
-        if (!position) {
-            showToast('Vui lòng nhập vị trí', 'error', 2500);
+        if (!futurePosition) {
+            showToast('Vui lòng chọn vị trí', 'error', 2500);
             document.getElementById('editSectionPosition').focus();
             return;
         }
@@ -452,7 +475,8 @@
         formData.append('description', description);
         formData.append('content', content);
         formData.append('type', type);
-        formData.append('position', position);
+        formData.append('currentPosition', currentPosition);
+        formData.append('futurePosition', futurePosition);
         formData.append('status', status);
 
         if (type === 'image') {

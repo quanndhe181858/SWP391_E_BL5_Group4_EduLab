@@ -5,6 +5,7 @@
 package controller.instructor;
 
 import constant.httpStatus;
+import dao.CourseSectionDAO;
 import jakarta.servlet.ServletConfig;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -44,6 +45,7 @@ public class CourseSectionsController extends HttpServlet {
     private CourseSectionServices _courseSectionService;
     private CourseServices _courseService;
     private MediaServices _mediaService;
+    private CourseSectionDAO csDao = new CourseSectionDAO();
 
     @Override
     public void init(ServletConfig config)
@@ -87,7 +89,6 @@ public class CourseSectionsController extends HttpServlet {
             String description = req.getParameter("description");
             String content = req.getParameter("content");
             String type = req.getParameter("type");
-            String positionStr = req.getParameter("position");
             String status = req.getParameter("status");
 
             if (courseIdStr == null || courseIdStr.isBlank()
@@ -95,7 +96,6 @@ public class CourseSectionsController extends HttpServlet {
                     || description == null || description.isBlank()
                     || content == null || content.isBlank()
                     || type == null || type.isBlank()
-                    || positionStr == null || positionStr.isBlank()
                     || status == null || status.isBlank()) {
                 resp.setStatus(400);
                 res.put("success", false);
@@ -108,7 +108,6 @@ public class CourseSectionsController extends HttpServlet {
             int position = 0;
             try {
                 courseId = Integer.parseInt(courseIdStr);
-                position = Integer.parseInt(positionStr);
             } catch (NumberFormatException e) {
                 resp.setStatus(400);
                 res.put("success", false);
@@ -172,6 +171,8 @@ public class CourseSectionsController extends HttpServlet {
                     return;
                 }
             }
+
+            position = csDao.getSectionsPositionForCourse(courseId);
 
             CourseSection section = new CourseSection();
             section.setCourse_id(courseId);
@@ -297,7 +298,8 @@ public class CourseSectionsController extends HttpServlet {
             String description = req.getParameter("description");
             String content = req.getParameter("content");
             String type = req.getParameter("type");
-            String positionStr = req.getParameter("position");
+            String currentPositionStr = req.getParameter("currentPosition");
+            String futurePositionStr = req.getParameter("futurePosition");
             String status = req.getParameter("status");
 
             // Validate required fields
@@ -307,7 +309,8 @@ public class CourseSectionsController extends HttpServlet {
                     || description == null || description.isBlank()
                     || content == null || content.isBlank()
                     || type == null || type.isBlank()
-                    || positionStr == null || positionStr.isBlank()
+                    || currentPositionStr == null || currentPositionStr.isBlank()
+                    || futurePositionStr == null || futurePositionStr.isBlank()
                     || status == null || status.isBlank()) {
                 resp.setStatus(400);
                 res.put("success", false);
@@ -318,11 +321,13 @@ public class CourseSectionsController extends HttpServlet {
 
             int sectionId = 0;
             int courseId = 0;
-            int position = 0;
+            int currentPosition = 0;
+            int futurePosition = 0;
             try {
                 sectionId = Integer.parseInt(sectionIdStr);
                 courseId = Integer.parseInt(courseIdStr);
-                position = Integer.parseInt(positionStr);
+                currentPosition = Integer.parseInt(currentPositionStr);
+                futurePosition = Integer.parseInt(futurePositionStr);
             } catch (NumberFormatException e) {
                 resp.setStatus(400);
                 res.put("success", false);
@@ -413,6 +418,11 @@ public class CourseSectionsController extends HttpServlet {
                 }
             }
 
+            if (currentPosition != futurePosition) {
+                CourseSection updatePositionSection = csDao.getSectionsByPositionAndCourseId(futurePosition, courseId);
+                csDao.updateCourseSectionPosition(updatePositionSection.getId(), currentPosition);
+            }
+
             CourseSection section = new CourseSection();
             section.setId(sectionId);
             section.setCourse_id(courseId);
@@ -420,7 +430,7 @@ public class CourseSectionsController extends HttpServlet {
             section.setDescription(description);
             section.setContent(content);
             section.setType(type);
-            section.setPosition(position);
+            section.setPosition(futurePosition);
             section.setStatus(status);
             section.setUpdated_by(instructorId);
 

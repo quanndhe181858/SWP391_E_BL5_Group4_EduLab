@@ -561,29 +561,6 @@ public class DashboardDAO extends dao {
                  ORDER BY cp.last_accessed_at DESC
                  LIMIT ?)
                  
-                 UNION ALL
-                 
-                 (SELECT 
-                     'passed_test' as type,
-                     CONCAT(u.first_name, ' ', u.last_name, ' đã hoàn thành bài kiểm tra "', t.title, '" với điểm ', ta.grade, '%') as description,
-                     c.title as courseName,
-                     NOW() as activityTime,
-                     CASE 
-                         WHEN TIMESTAMPDIFF(MINUTE, NOW(), NOW()) < 60 
-                             THEN CONCAT(TIMESTAMPDIFF(MINUTE, NOW(), NOW()), ' phút trước')
-                         WHEN TIMESTAMPDIFF(HOUR, NOW(), NOW()) < 24 
-                             THEN CONCAT(TIMESTAMPDIFF(HOUR, NOW(), NOW()), ' giờ trước')
-                         ELSE CONCAT(TIMESTAMPDIFF(DAY, NOW(), NOW()), ' ngày trước')
-                     END as timeAgo
-                 FROM test_attempt ta
-                 JOIN user u ON ta.user_id = u.id
-                 JOIN test t ON ta.test_id = t.id
-                 JOIN course c ON t.course_id = c.id
-                 WHERE c.created_by = ?
-                   AND ta.status = 'Passed'
-                 ORDER BY ta.test_id DESC
-                 LIMIT ?)
-                 
                  ORDER BY activityTime DESC
                  LIMIT ?;
                  """;
@@ -596,9 +573,7 @@ public class DashboardDAO extends dao {
             ps.setInt(2, limit);
             ps.setInt(3, instructorId);
             ps.setInt(4, limit);
-            ps.setInt(5, instructorId);
-            ps.setInt(6, limit);
-            ps.setInt(7, limit);
+            ps.setInt(5, limit);
 
             rs = ps.executeQuery();
 

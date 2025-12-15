@@ -173,21 +173,6 @@
             </div>
 
             <div>
-                <label for="sectionPosition" class="block text-sm font-semibold text-gray-700 mb-2">
-                    Vị trí <span class="text-red-500">*</span>
-                </label>
-                <input 
-                    type="number" 
-                    id="sectionPosition" 
-                    name="position"
-                    min="1"
-                    value="1"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required>
-                <p class="text-xs text-gray-500 mt-1">Thứ tự hiển thị của bài học trong khóa học</p>
-            </div>
-
-            <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     Trạng thái <span class="text-red-500">*</span>
                 </label>
@@ -195,7 +180,7 @@
                     <label class="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
                         <input 
                             type="radio" 
-                            name="status" 
+                            name="statusSection" 
                             value="Active"
                             checked
                             class="w-4 h-4 text-blue-600 focus:ring-blue-500">
@@ -204,7 +189,7 @@
                     <label class="flex items-center p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition">
                         <input 
                             type="radio" 
-                            name="status" 
+                            name="statusSection" 
                             value="Inactive"
                             class="w-4 h-4 text-blue-600 focus:ring-blue-500">
                         <span class="ml-3 font-medium text-gray-900">Không hoạt động</span>
@@ -349,10 +334,7 @@
         const title = document.getElementById('sectionTitle').value.trim();
         const description = document.getElementById('sectionDescription').value.trim();
         const content = document.getElementById('sectionContent').value.trim();
-        const position = document.getElementById('sectionPosition').value;
-        const status = document.querySelector('input[name="status"]:checked').value;
-
-        console.log(title + description + type + content + position);
+        const status = document.querySelector('input[name="statusSection"]:checked').value;
 
         if (!title) {
             showToast('Tên bài học không được để trống', 'error', 2500);
@@ -390,12 +372,6 @@
             return;
         }
 
-        if (!position) {
-            showToast('Vui lòng nhập vị trí', 'error', 2500);
-            document.getElementById('sectionPosition').focus();
-            return;
-        }
-
         if (type === 'image') {
             const imageFile = document.getElementById('sectionImage').files[0];
             if (!imageFile) {
@@ -416,7 +392,6 @@
         formData.append('description', description);
         formData.append('content', content);
         formData.append('type', type);
-        formData.append('position', position);
         formData.append('status', status);
 
         if (type === 'image') {
