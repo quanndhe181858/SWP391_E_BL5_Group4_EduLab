@@ -15,6 +15,13 @@ public class UserCertificate {
     private Timestamp issuedAt;
     private String filePath;
 
+    private int courseId;
+    private String courseTitle;
+    private String courseDescription;
+    private String firstName;
+    private String lastName;
+    private String email;
+
     public UserCertificate() {
     }
 
@@ -73,6 +80,54 @@ public class UserCertificate {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public int getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(int courseId) {
+        this.courseId = courseId;
+    }
+
+    public String getCourseTitle() {
+        return courseTitle;
+    }
+
+    public void setCourseTitle(String courseTitle) {
+        this.courseTitle = courseTitle;
+    }
+
+    public String getCourseDescription() {
+        return courseDescription;
+    }
+
+    public void setCourseDescription(String courseDescription) {
+        this.courseDescription = courseDescription;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 }
