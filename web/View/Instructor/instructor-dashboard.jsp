@@ -137,11 +137,11 @@
                     <div class="p-6 border-b border-gray-100">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-gray-900">Khóa học của tôi</h2>
-                            <a href="${pageContext.request.contextPath}/instructor_courses" class="text-sm text-purple-600 hover:text-purple-700 font-medium">Quản lý khóa học →</a>
+                            <a href="${pageContext.request.contextPath}/instructor/courses" class="text-sm text-purple-600 hover:text-purple-700 font-medium">Quản lý khóa học →</a>
                         </div>
                     </div>
                     <div class="p-6">
-                        <div class="space-y-4 max-h-[400px] overflow-auto">
+                        <div class="space-y-4 space-x-1 max-h-[400px] overflow-auto">
                             <c:forEach items="${myCourses}" var="course">
                                 <a href="${pageContext.request.contextPath}/instructor/courses?cid=${course.id}&type=edit">
                                     <div class="course-card border border-gray-200 rounded-lg p-4 hover:border-purple-300 cursor-pointer">
@@ -180,7 +180,6 @@
                     <div class="p-6 border-b border-gray-100">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-gray-900">Học viên xuất sắc</h2>
-                            <a href="${pageContext.request.contextPath}/instructor_students" class="text-sm text-purple-600 hover:text-purple-700 font-medium">Xem tất cả →</a>
                         </div>
                     </div>
                     <div class="p-6">
@@ -273,8 +272,8 @@
                             </svg>
                             <span class="text-sm font-medium">Tạo bài kiểm tra</span>
                         </a>
+                    </div>
                 </div>
-            </div>
         </main>
 
         <jsp:include page="/layout/footer.jsp" />
