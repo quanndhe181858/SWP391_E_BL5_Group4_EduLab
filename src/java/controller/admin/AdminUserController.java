@@ -6,6 +6,8 @@
 package controller.admin;
 
 import dao.UserDAO;
+import util.Hash;
+import util.ValidateUtils;
 
 import java.io.IOException;
 import java.sql.Date;
@@ -295,6 +297,12 @@ public class AdminUserController extends HttpServlet {
                 return;
             }
 
+            if (!ValidateUtils.validatePassword(password)) {
+                request.getSession().setAttribute("error", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt.");
+                response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
+                return;
+            }
+
             if (userDAO.isEmailExisted(email.trim())) {
                 request.getSession().setAttribute("error", "Email đã tồn tại trong hệ thống!");
                 response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
@@ -305,7 +313,7 @@ public class AdminUserController extends HttpServlet {
             user.setFirst_name(firstName.trim());
             user.setLast_name(lastName.trim());
             user.setEmail(email.trim());
-            user.setHash_password(password); // Should be hashed in real app
+            user.setHash_password(Hash.sha512(password)); 
             user.setRole_id(roleId);
 
             // Parse date if provided

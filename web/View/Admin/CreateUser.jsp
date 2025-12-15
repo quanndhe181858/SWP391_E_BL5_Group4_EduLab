@@ -265,6 +265,15 @@
                                     return false;
                                 }
 
+                                // Password validation
+                                // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
+                                const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+                                if (!passwordPattern.test(password)) {
+                                    e.preventDefault();
+                                    showToast('Mật khẩu phải có ít nhất 8 ký tự, bao gồm 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt.', "error");
+                                    return false;
+                                }
+
                                 // Date of Birth validation
                                 const bodInput = document.getElementById('bod');
                                 if (bodInput && bodInput.value) {
