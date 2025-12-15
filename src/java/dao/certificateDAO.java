@@ -77,8 +77,13 @@ public class CertificateDAO extends dao {
     public boolean issueCertificate(int userId, int courseId, String filePath) {
 
         Certificate cert = getCertificateByCourseId(courseId);
+
+        // ⬇️ CHỖ QUAN TRỌNG
         if (cert == null) {
-            return false;
+            cert = createDefaultCertificateForCourse(courseId);
+            if (cert == null) {
+                return false;
+            }
         }
 
         if (hasUserCertificate(userId, courseId)) {
@@ -89,10 +94,10 @@ public class CertificateDAO extends dao {
                 + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         String sql = """
-            INSERT INTO user_certificate
-                (user_id, certificate_id, certificate_code, issued_at, file_path)
-            VALUES (?, ?, ?, NOW(), ?)
-        """;
+        INSERT INTO user_certificate
+            (user_id, certificate_id, certificate_code, issued_at, file_path)
+        VALUES (?, ?, ?, NOW(), ?)
+    """;
 
         try {
             con = dbc.getConnection();
@@ -106,10 +111,11 @@ public class CertificateDAO extends dao {
             return ps.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            return false;
+            e.printStackTrace();
         } finally {
             closeResources();
         }
+        return false;
     }
 
     public List<UserCertificate> getUserCertificates(int userId) {
@@ -253,7 +259,6 @@ public class CertificateDAO extends dao {
         return list;
     }
 
-    
     public UserCertificate getUserCertificateByCourseId(int courseId, int userId) {
         String sql = """
         SELECT 
@@ -316,4 +321,48 @@ public class CertificateDAO extends dao {
         }
         return null;
     }
+
+    public Certificate createDefaultCertificateForCourse(int courseId) {
+        String sql = """
+        INSERT INTO certificate
+            (title, course_id, description, code_prefix, status, created_at)
+        VALUES
+            (?, ?, ?, ?, 'Active', NOW())
+    """;
+
+        String title = "Certificate of Completion";
+        String description = "Auto-generated certificate";
+        String codePrefix = "COURSE-" + courseId;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            ps.setString(1, title);
+            ps.setInt(2, courseId);
+            ps.setString(3, description);
+            ps.setString(4, codePrefix);
+
+            ps.executeUpdate();
+
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                Certificate c = new Certificate();
+                c.setId(rs.getInt(1));
+                c.setTitle(title);
+                c.setCourseId(courseId);
+                c.setDescription(description);
+                c.setCodePrefix(codePrefix);
+                c.setStatus("Active");
+                return c;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return null;
+    }
+
 }
