@@ -1,14 +1,17 @@
 package controller.trainee;
 
 import dao.CertificateDAO;
+import dao.TestAttemptDAOv2;
+import dao.TestsDAO;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import model.Test;
+import model.TestAttempt;
 import model.User;
 import model.UserCertificate;
 
@@ -16,22 +19,8 @@ import model.UserCertificate;
 public class ViewCertificateDetailController extends HttpServlet {
 
     private final CertificateDAO certificateDAO = new CertificateDAO();
-
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet ViewCertificateDetailController</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet ViewCertificateDetailController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
+    private final TestsDAO testsDAO = new TestsDAO();
+    private final TestAttemptDAOv2 testAttemptDAO = new TestAttemptDAOv2();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -54,12 +43,10 @@ public class ViewCertificateDetailController extends HttpServlet {
             if (certificateId != null && !certificateId.isEmpty()) {
                 int certId = Integer.parseInt(certificateId);
                 certificate = certificateDAO.getUserCertificateById(certId, user.getId());
-            } 
-            else if (courseIdParam != null && !courseIdParam.isEmpty()) {
+            } else if (courseIdParam != null && !courseIdParam.isEmpty()) {
                 int courseId = Integer.parseInt(courseIdParam);
                 certificate = certificateDAO.getUserCertificateByCourseId(courseId, user.getId());
-            } 
-            else {
+            } else {
                 response.sendRedirect(request.getContextPath() + "/trainee/certificates");
                 return;
             }
@@ -70,10 +57,28 @@ public class ViewCertificateDetailController extends HttpServlet {
                 return;
             }
 
+            int courseId = certificate.getCourseId();
+            Test finalTest = testsDAO.getCourseTestByCourseId(courseId);
+
+            if (finalTest != null) {
+                TestAttempt attempt = testAttemptDAO.getAttemptByUserAndTest(user.getId(), finalTest.getId());
+
+                if (attempt != null && attempt.getGrade() != null) {
+                    // Set điểm vào certificate để hiển thị
+                    certificate.setPassedGrade(attempt.getGrade());
+                    System.out.println("Final test grade found: " + attempt.getGrade());
+                } else {
+                    System.out.println("No final test attempt found or grade is null");
+                }
+            } else {
+                System.out.println("No final test found for course " + courseId);
+            }
+
             request.setAttribute("certificate", certificate);
             request.getRequestDispatcher("/View/Trainee/ViewCertificateDetail.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {
+            System.err.println("Invalid certificate/course ID format: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/trainee/certificates");
         }
     }
@@ -81,11 +86,11 @@ public class ViewCertificateDetailController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        doGet(request, response);
     }
 
     @Override
     public String getServletInfo() {
-        return "View Certificate Detail Controller - Displays certificate details";
+        return "View Certificate Detail Controller - Displays certificate with course details and grade";
     }
 }

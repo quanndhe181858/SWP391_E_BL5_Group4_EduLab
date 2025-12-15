@@ -78,7 +78,6 @@ public class CertificateDAO extends dao {
 
         Certificate cert = getCertificateByCourseId(courseId);
 
-        // ⬇️ CHỖ QUAN TRỌNG
         if (cert == null) {
             cert = createDefaultCertificateForCourse(courseId);
             if (cert == null) {
@@ -90,7 +89,12 @@ public class CertificateDAO extends dao {
             return true;
         }
 
-        String certificateCode = cert.getCodePrefix() + "-"
+        String prefix = cert.getCodePrefix();
+        if (prefix == null || prefix.isBlank()) {
+            prefix = "COURSE-" + courseId;
+        }
+
+        String certificateCode = prefix + "-"
                 + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         String sql = """
@@ -122,11 +126,52 @@ public class CertificateDAO extends dao {
         List<UserCertificate> list = new ArrayList<>();
 
         String sql = """
-            SELECT uc.*
-            FROM user_certificate uc
-            WHERE uc.user_id = ?
-            ORDER BY uc.issued_at DESC
-        """;
+        SELECT 
+            uc.id,
+            uc.user_id,
+            uc.certificate_id,
+            uc.certificate_code,
+            uc.issued_at,
+            uc.file_path,
+
+            c.course_id,
+            c.title AS certificate_title,
+
+            co.title AS course_title,
+            co.description AS course_description,
+
+            u.first_name,
+            u.last_name,
+            u.email,
+
+            MAX(
+                CASE 
+                    WHEN ta.status = 'Passed' THEN ta.grade
+                    ELSE NULL
+                END
+            ) AS passed_grade
+
+        FROM user_certificate uc
+        INNER JOIN certificate c ON uc.certificate_id = c.id
+        INNER JOIN course co ON c.course_id = co.id
+        INNER JOIN user u ON uc.user_id = u.id
+
+        LEFT JOIN test t ON t.course_id = co.id
+        LEFT JOIN test_attempt ta 
+            ON ta.test_id = t.id 
+           AND ta.user_id = uc.user_id
+
+        WHERE uc.user_id = ?
+
+        GROUP BY 
+            uc.id, uc.user_id, uc.certificate_id, uc.certificate_code,
+            uc.issued_at, uc.file_path,
+            c.course_id, c.title,
+            co.title, co.description,
+            u.first_name, u.last_name, u.email
+
+        ORDER BY uc.issued_at DESC
+    """;
 
         try {
             con = dbc.getConnection();
@@ -136,16 +181,29 @@ public class CertificateDAO extends dao {
 
             while (rs.next()) {
                 UserCertificate uc = new UserCertificate();
+
                 uc.setId(rs.getInt("id"));
                 uc.setUserId(rs.getInt("user_id"));
                 uc.setCertificateId(rs.getInt("certificate_id"));
                 uc.setCertificateCode(rs.getString("certificate_code"));
                 uc.setIssuedAt(rs.getTimestamp("issued_at"));
                 uc.setFilePath(rs.getString("file_path"));
+
+                uc.setCourseId(rs.getInt("course_id"));
+                uc.setCourseTitle(rs.getString("course_title"));
+                uc.setCourseDescription(rs.getString("course_description"));
+
+                uc.setFirstName(rs.getString("first_name"));
+                uc.setLastName(rs.getString("last_name"));
+                uc.setEmail(rs.getString("email"));
+
+                uc.setPassedGrade(rs.getObject("passed_grade", Float.class));
+
                 list.add(uc);
             }
 
         } catch (SQLException e) {
+            e.printStackTrace();
         } finally {
             closeResources();
         }
@@ -154,11 +212,33 @@ public class CertificateDAO extends dao {
     }
 
     public UserCertificate getUserCertificateById(int certId, int userId) {
-        String sql = "SELECT uc.id, uc.user_id, uc.certificate_id, uc.certificate_code, "
-                + "uc.issued_at, uc.file_path, "
-                + "DATE_FORMAT(uc.issued_at, '%d/%m/%Y') as issued_at_formatted "
-                + "FROM user_certificate uc "
-                + "WHERE uc.id = ? AND uc.user_id = ?";
+
+        String sql = """
+        SELECT 
+            uc.id,
+            uc.user_id,
+            uc.certificate_id,
+            uc.certificate_code,
+            uc.issued_at,
+            uc.file_path,
+
+            c.course_id,
+            c.title AS certificate_title,
+
+            co.title AS course_title,
+            co.description AS course_description,
+
+            u.first_name,
+            u.last_name,
+            u.email,
+
+            DATE_FORMAT(uc.issued_at, '%d/%m/%Y') AS issued_at_formatted
+        FROM user_certificate uc
+        INNER JOIN certificate c ON uc.certificate_id = c.id
+        INNER JOIN course co ON c.course_id = co.id
+        INNER JOIN user u ON uc.user_id = u.id
+        WHERE uc.id = ? AND uc.user_id = ?
+    """;
 
         System.out.println("Getting certificate - ID: " + certId + ", UserID: " + userId);
 
@@ -170,25 +250,36 @@ public class CertificateDAO extends dao {
             rs = ps.executeQuery();
 
             if (rs.next()) {
-                UserCertificate uc = new UserCertificate();
-                uc.setId(rs.getInt("id"));
-                uc.setUserId(rs.getInt("user_id"));
-                uc.setCertificateId(rs.getInt("certificate_id"));
-                uc.setCertificateCode(rs.getString("certificate_code"));
-                uc.setIssuedAt(rs.getTimestamp("issued_at"));
-                uc.setFilePath(rs.getString("file_path"));
+                UserCertificate cert = new UserCertificate();
 
-                System.out.println("Certificate found: " + uc.getCertificateCode());
-                return uc;
-            } else {
-                System.out.println("No certificate found in database");
+                cert.setId(rs.getInt("id"));
+                cert.setUserId(rs.getInt("user_id"));
+                cert.setCertificateId(rs.getInt("certificate_id"));
+                cert.setCertificateCode(rs.getString("certificate_code"));
+                cert.setIssuedAt(rs.getTimestamp("issued_at"));
+                cert.setFilePath(rs.getString("file_path"));
+
+                cert.setCourseId(rs.getInt("course_id"));
+                cert.setCourseTitle(rs.getString("course_title"));
+                cert.setCourseDescription(rs.getString("course_description"));
+
+                cert.setFirstName(rs.getString("first_name"));
+                cert.setLastName(rs.getString("last_name"));
+                cert.setEmail(rs.getString("email"));
+
+                System.out.println("Certificate found: " + cert.getCertificateCode());
+                return cert;
             }
+
+            System.out.println("No certificate found in database");
+
         } catch (SQLException e) {
             System.out.println("SQL Error: " + e.getMessage());
             e.printStackTrace();
         } finally {
             closeResources();
         }
+
         return null;
     }
 
