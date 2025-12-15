@@ -72,13 +72,24 @@ public class TraineeTakeTestController extends HttpServlet {
             return;
         }
 
+        // Kiểm tra số lần làm bài TRƯỚC khi load questions
+        TestAttempt previousAttempt = testAttemptDAO.getAttemptByUserAndTest(currentUser.getId(), testId);
+
+        // CHỈ giới hạn course test (courseSectionId == 0)
+        if (test.getCourseSectionId() == 0) {  // Course test
+            if (previousAttempt != null && previousAttempt.getCurrentAttempted() >= 2) {
+                // Redirect về trang learn thay vì hiển thị modal
+                response.sendRedirect(request.getContextPath() + "/learn?courseId=" + test.getCourseId());
+                return;
+            }
+        }
+
+        // Nếu chưa hết lượt hoặc là section test, tiếp tục load questions
         List<Question> questions = testDAO.getQuestionsByTest(testId);
 
         if (questions.isEmpty()) {
             request.setAttribute("error", "Bài test này chưa có câu hỏi");
         }
-
-        TestAttempt previousAttempt = testAttemptDAO.getAttemptByUserAndTest(currentUser.getId(), testId);
 
         request.setAttribute("test", test);
         request.setAttribute("questions", questions);
@@ -111,6 +122,20 @@ public class TraineeTakeTestController extends HttpServlet {
             return;
         }
 
+        // Kiểm tra số lần làm bài TRƯỚC khi xử lý
+        TestAttempt previousAttempt = testAttemptDAO.getAttemptByUserAndTest(
+                currentUser.getId(), testId);
+
+        // CHỈ giới hạn course test
+        if (test.getCourseSectionId() == 0) {  // Course test
+            if (previousAttempt != null && previousAttempt.getCurrentAttempted() >= 2) {
+                // Redirect về trang learn
+                response.sendRedirect(request.getContextPath() + "/learn?courseId=" + test.getCourseId());
+                return;
+            }
+        }
+
+        // Tiếp tục xử lý bài test
         List<Question> questions = testDAO.getQuestionsByTest(testId);
 
         int correctCount = 0;
@@ -133,9 +158,6 @@ public class TraineeTakeTestController extends HttpServlet {
                 ? Math.round((correctCount * 100.0f / totalQuestions) * 10) / 10.0f : 0;
 
         boolean passed = (grade >= test.getMinGrade());
-
-        TestAttempt previousAttempt = testAttemptDAO.getAttemptByUserAndTest(
-                currentUser.getId(), testId);
 
         TestAttempt attempt = new TestAttempt();
         attempt.setUserId(currentUser.getId());
