@@ -15,6 +15,8 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import dao.CertificateDAO;
+import dao.TestAttemptDAOv2;
+import dao.TestsDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
@@ -24,13 +26,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.awt.Color;
+import model.Test;
+import model.TestAttempt;
 import model.User;
 import model.UserCertificate;
 
 @WebServlet(name = "DownloadCertificateController", urlPatterns = {"/trainee/certificate/download"})
 public class DownloadCertificateController extends HttpServlet {
 
-  
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
@@ -49,6 +52,8 @@ public class DownloadCertificateController extends HttpServlet {
     }
 
     private final CertificateDAO certificateDAO = new CertificateDAO();
+    private final TestsDAO testsDAO = new TestsDAO();
+    private final TestAttemptDAOv2 testAttemptDAO = new TestAttemptDAOv2();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -62,23 +67,46 @@ public class DownloadCertificateController extends HttpServlet {
         }
 
         String certificateId = request.getParameter("id");
-        if (certificateId == null || certificateId.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/trainee/certificates");
-            return;
-        }
+        String courseIdParam = request.getParameter("courseId");
+
+        UserCertificate certificate = null;
 
         try {
-            int certId = Integer.parseInt(certificateId);
-            UserCertificate certificate = certificateDAO.getUserCertificateById(certId, user.getId());
+            // === LẤY CERTIFICATE GIỐNG ViewCertificateDetailController ===
+            if (certificateId != null && !certificateId.isBlank()) {
+                int certId = Integer.parseInt(certificateId);
+                certificate = certificateDAO.getUserCertificateById(certId, user.getId());
+            } else if (courseIdParam != null && !courseIdParam.isBlank()) {
+                int courseId = Integer.parseInt(courseIdParam);
+                certificate = certificateDAO.getUserCertificateByCourseId(courseId, user.getId());
+            } else {
+                response.sendRedirect(request.getContextPath() + "/trainee/certificates");
+                return;
+            }
 
             if (certificate == null) {
                 response.sendRedirect(request.getContextPath() + "/trainee/certificates");
                 return;
             }
 
+            // === LẤY ĐIỂM FINAL TEST (Y CHANG VIEW) ===
+            int courseId = certificate.getCourseId();
+            Test finalTest = testsDAO.getCourseTestByCourseId(courseId);
+
+            if (finalTest != null) {
+                TestAttempt attempt
+                        = testAttemptDAO.getAttemptByUserAndTest(user.getId(), finalTest.getId());
+
+                if (attempt != null && attempt.getGrade() != null) {
+                    certificate.setPassedGrade(attempt.getGrade());
+                }
+            }
+
+            // === GEN PDF ===
             generateCertificatePDF(response, certificate, user);
 
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/trainee/certificates");
         }
     }
@@ -97,24 +125,21 @@ public class DownloadCertificateController extends HttpServlet {
         PdfWriter.getInstance(document, response.getOutputStream());
         document.open();
 
-        // Fonts
-        Font titleFont = new Font(Font.TIMES_ROMAN, 24, Font.BOLD);
+        Font titleFont = new Font(Font.TIMES_ROMAN, 26, Font.BOLD);
         Font subTitleFont = new Font(Font.TIMES_ROMAN, 16, Font.ITALIC);
-        Font nameFont = new Font(Font.TIMES_ROMAN, 20, Font.BOLD);
+        Font nameFont = new Font(Font.TIMES_ROMAN, 22, Font.BOLD);
         Font normalFont = new Font(Font.TIMES_ROMAN, 14);
-        Font smallFont = new Font(Font.TIMES_ROMAN, 12);
+        Font boldFont = new Font(Font.TIMES_ROMAN, 14, Font.BOLD);
 
-        // Outer border
         PdfPTable outer = new PdfPTable(1);
         outer.setWidthPercentage(100);
 
         PdfPCell cell = new PdfPCell();
         cell.setBorderWidth(6);
-        cell.setBorderColor(new Color(37, 99, 235)); // blue-600
+        cell.setBorderColor(new Color(251, 191, 36)); // amber
         cell.setPadding(30);
-        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
 
-        // Title
+        // TITLE
         Paragraph p = new Paragraph("CHỨNG CHỈ HOÀN THÀNH\n", titleFont);
         p.setAlignment(Element.ALIGN_CENTER);
         cell.addElement(p);
@@ -123,66 +148,79 @@ public class DownloadCertificateController extends HttpServlet {
         p.setAlignment(Element.ALIGN_CENTER);
         cell.addElement(p);
 
-        // Body
+        // USER
         p = new Paragraph("Chứng nhận rằng\n\n", normalFont);
         p.setAlignment(Element.ALIGN_CENTER);
         cell.addElement(p);
 
         p = new Paragraph(
-                user.getFirst_name() + " " + user.getLast_name() + "\n\n",
+                cert.getFirstName() + " " + cert.getLastName() + "\n\n",
                 nameFont
         );
         p.setAlignment(Element.ALIGN_CENTER);
         cell.addElement(p);
 
-        p = new Paragraph(
-                "Đã hoàn thành xuất sắc chương trình đào tạo\n"
-                + "và được cấp chứng chỉ này để ghi nhận\n"
-                + "sự nỗ lực và thành tích đạt được.\n\n",
-                normalFont
-        );
+        // COURSE
+        p = new Paragraph("Đã hoàn thành xuất sắc khóa học\n\n", normalFont);
         p.setAlignment(Element.ALIGN_CENTER);
         cell.addElement(p);
 
-        // Details box
+        p = new Paragraph(cert.getCourseTitle() + "\n\n", boldFont);
+        p.setAlignment(Element.ALIGN_CENTER);
+        cell.addElement(p);
+
+        if (cert.getCourseDescription() != null) {
+            p = new Paragraph(cert.getCourseDescription() + "\n\n", normalFont);
+            p.setAlignment(Element.ALIGN_CENTER);
+            cell.addElement(p);
+        }
+
+        // INFO TABLE
         PdfPTable info = new PdfPTable(2);
-        info.setWidthPercentage(70);
+        info.setWidthPercentage(80);
         info.setSpacingBefore(20);
 
-        info.addCell(createLabelCell("Mã chứng chỉ:"));
-        info.addCell(createValueCell(cert.getCertificateCode()));
+        info.addCell(label("Mã chứng chỉ"));
+        info.addCell(value(cert.getCertificateCode()));
 
-        info.addCell(createLabelCell("Ngày cấp:"));
-        info.addCell(createValueCell(cert.getIssuedAt().toString()));
+        info.addCell(label("Ngày cấp"));
+        info.addCell(value(cert.getIssuedAt().toString()));
+
+        info.addCell(label("Email"));
+        info.addCell(value(cert.getEmail()));
+
+        if (cert.getPassedGrade() != null) {
+            info.addCell(label("Điểm đạt"));
+            info.addCell(value(cert.getPassedGrade() + " / 100"));
+        }
 
         cell.addElement(info);
 
-        // Signature
-        p = new Paragraph("\n\nGiám đốc\n\n", smallFont);
+        // SIGN
+        p = new Paragraph("\n\nGiám đốc điều hành\nLearning Management System",
+                normalFont);
         p.setAlignment(Element.ALIGN_RIGHT);
         cell.addElement(p);
 
         outer.addCell(cell);
         document.add(outer);
-
         document.close();
     }
 
-    private PdfPCell createLabelCell(String text) {
+    private PdfPCell label(String text) {
         PdfPCell c = new PdfPCell(new Phrase(text));
         c.setBorder(Rectangle.NO_BORDER);
         c.setHorizontalAlignment(Element.ALIGN_LEFT);
         return c;
     }
 
-    private PdfPCell createValueCell(String text) {
+    private PdfPCell value(String text) {
         PdfPCell c = new PdfPCell(new Phrase(text, new Font(Font.TIMES_ROMAN, 12, Font.BOLD)));
         c.setBorder(Rectangle.NO_BORDER);
         c.setHorizontalAlignment(Element.ALIGN_RIGHT);
         return c;
     }
 
-  
     @Override
     public String getServletInfo() {
         return "Short description";
