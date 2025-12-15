@@ -1,5 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 <!DOCTYPE html>
 <html lang="vi">
     <head>
@@ -148,11 +150,14 @@
             id: '${c.id}',
                     certificateCode: '${c.certificateCode}',
                     issuedAt: '${c.issuedAt}',
-                    issuedAtRaw: new Date('${c.issuedAt}').getTime()
+                    issuedAtRaw: new Date('${c.issuedAt}').getTime(),
+                    courseTitle: '${fn:escapeXml(c.courseTitle)}',
+                    courseDescription: '${fn:escapeXml(c.courseDescription)}',
+                    fullName: '${c.firstName} ${c.lastName}',
+                    email: '${c.email}'
             }<c:if test="${!status.last}">,</c:if>
             </c:forEach>
             ];
-
             // Quản lý trạng thái
             let state = {
                 allCertificates: allCertificates,
@@ -162,7 +167,6 @@
                 searchTerm: '',
                 sortBy: 'date-desc'
             };
-
             // Khởi tạo
             function init() {
                 if (allCertificates.length === 0) {
@@ -182,20 +186,17 @@
                     state.currentPage = 1;
                     filterAndSort();
                 }, 300));
-
                 // Sắp xếp
                 document.getElementById('sortSelect').addEventListener('change', (e) => {
                     state.sortBy = e.target.value;
                     filterAndSort();
                 });
-
                 // Số lượng mỗi trang
                 document.getElementById('itemsPerPage').addEventListener('change', (e) => {
                     state.itemsPerPage = e.target.value === 'all' ? state.filteredCertificates.length : parseInt(e.target.value);
                     state.currentPage = 1;
                     updateDisplay();
                 });
-
                 // Đặt lại
                 document.getElementById('resetBtn').addEventListener('click', () => {
                     document.getElementById('searchInput').value = '';
@@ -207,7 +208,6 @@
                     state.currentPage = 1;
                     filterAndSort();
                 });
-
                 // Phân trang
                 document.getElementById('prevBtn').addEventListener('click', () => {
                     if (state.currentPage > 1) {
@@ -215,7 +215,6 @@
                         updateDisplay();
                     }
                 });
-
                 document.getElementById('nextBtn').addEventListener('click', () => {
                     const totalPages = Math.ceil(state.filteredCertificates.length / state.itemsPerPage);
                     if (state.currentPage < totalPages) {
@@ -231,7 +230,6 @@
                 state.filteredCertificates = state.allCertificates.filter(cert => {
                     return cert.certificateCode.toLowerCase().includes(state.searchTerm);
                 });
-
                 // Sắp xếp
                 state.filteredCertificates.sort((a, b) => {
                     switch (state.sortBy) {
@@ -247,7 +245,6 @@
                             return 0;
                     }
                 });
-
                 updateDisplay();
             }
 
@@ -277,26 +274,43 @@
                     // Render chứng chỉ (1 chứng chỉ/dòng)
                     grid.innerHTML = paginatedCertificates.map(cert => `
                             <div class="bg-white rounded-xl shadow hover:shadow-lg transition p-6">
-                                        <div class="flex items-center justify-between gap-6">
-                                        <!-- Icon chứng chỉ -->
-                                        <div class="flex-shrink-0">
-                                        <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
-                                    </svg>
-                                </div>
+                            <div class="flex items-center justify-between gap-6">
+                            <!-- Icon chứng chỉ -->
+                            <div class="flex-shrink-0">
+                            <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                            </svg>
+                            </div>
                             </div>
                             
                             <!-- Thông tin chứng chỉ -->
                             <div class="flex-grow">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                                        Chứng chỉ
-                                    </span>
-                                </div>
-                                <h3 class="text-lg font-bold text-slate-800 mb-1">
+                            <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                            Chứng chỉ
+                            </span>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-800 mb-1">
                                     \${cert.certificateCode}
                                 </h3>
+        <h3 class="text-lg font-bold text-slate-800 mb-1">
+            \${cert.courseTitle}
+</h3>
+
+<p class="text-sm text-slate-600 mb-1">
+    Người nhận: <span class="font-medium">\${cert.fullName}</span>
+</p>
+
+<p class="text-sm text-slate-600 mb-2 line-clamp-2">
+            \${cert.courseDescription || ''}
+</p>
+
+<div class="flex items-center text-sm text-slate-600">
+    Mã: <span class="font-mono font-semibold ml-1">\${cert.certificateCode}</span>
+</div>
+
+        
                                 <div class="flex items-center text-sm text-slate-600">
                                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
