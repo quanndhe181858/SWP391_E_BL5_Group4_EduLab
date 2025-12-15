@@ -253,4 +253,67 @@ public class CertificateDAO extends dao {
         return list;
     }
 
+    
+    public UserCertificate getUserCertificateByCourseId(int courseId, int userId) {
+        String sql = """
+        SELECT 
+            uc.id,
+            uc.user_id,
+            uc.certificate_id,
+            uc.certificate_code,
+            uc.issued_at,
+            uc.file_path,
+            c.title as certificate_title,
+            c.course_id,
+            co.title as course_title,
+            co.description as course_description,
+            DATE_FORMAT(uc.issued_at, '%d/%m/%Y') as issued_at_formatted,
+            u.first_name,
+            u.last_name,
+            u.email
+        FROM user_certificate uc
+        INNER JOIN certificate c ON uc.certificate_id = c.id
+        INNER JOIN course co ON c.course_id = co.id
+        INNER JOIN user u ON uc.user_id = u.id
+        WHERE c.course_id = ? AND uc.user_id = ?
+        ORDER BY uc.issued_at DESC
+        LIMIT 1
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, courseId);
+            ps.setInt(2, userId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                UserCertificate cert = new UserCertificate();
+                cert.setId(rs.getInt("id"));
+                cert.setUserId(rs.getInt("user_id"));
+                cert.setCertificateId(rs.getInt("certificate_id"));
+                cert.setCertificateCode(rs.getString("certificate_code"));
+                cert.setIssuedAt(rs.getTimestamp("issued_at"));
+                cert.setFilePath(rs.getString("file_path"));
+
+                cert.setCourseId(rs.getInt("course_id"));
+                cert.setCourseTitle(rs.getString("course_title"));
+                cert.setCourseDescription(rs.getString("course_description"));
+                cert.setFirstName(rs.getString("first_name"));
+                cert.setLastName(rs.getString("last_name"));
+                cert.setEmail(rs.getString("email"));
+
+                System.out.println("Certificate found for course " + courseId + ": " + cert.getCertificateCode());
+                return cert;
+            } else {
+                System.out.println("No certificate found for userId=" + userId + ", courseId=" + courseId);
+            }
+        } catch (SQLException e) {
+            System.out.println("SQL Error in getUserCertificateByCourseId: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return null;
+    }
 }

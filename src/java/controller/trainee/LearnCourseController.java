@@ -6,6 +6,7 @@ import dao.CourseProgressDAO;
 import dao.CourseSectionDAO;
 import dao.EnrollmentDAO;
 import dao.MediaDAO;
+import dao.TestAttemptDAOv2;
 import dao.TestsDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,6 +22,7 @@ import model.CourseProgress;
 import model.CourseSection;
 import model.Media;
 import model.Test;
+import model.TestAttempt;
 import model.User;
 
 @WebServlet(name = "LearnCourseController", urlPatterns = {"/learn"})
@@ -33,6 +35,7 @@ public class LearnCourseController extends HttpServlet {
     private final MediaDAO mediaDAO = new MediaDAO();
     private final TestsDAO testsDAO = new TestsDAO();
     private final CertificateDAO certificateDAO = new CertificateDAO();
+    private final TestAttemptDAOv2 testAttemptDAO = new TestAttemptDAOv2();
 
     // Helper parse int an toàn
     private Integer getInt(HttpServletRequest req, String name) {
@@ -117,13 +120,25 @@ public class LearnCourseController extends HttpServlet {
         boolean allCompleted = completedCount == sections.size();
 
         Test sectionTest = testsDAO.getTestBySectionId(sectionId);
+        TestAttempt sectionTestAttempt = null;
+        if (sectionTest != null) {
+            sectionTestAttempt = testAttemptDAO.getAttemptByUserAndTest(userId, sectionTest.getId());
+        }
+
         CourseProgress curProgress = progressMap.get(sectionId);
         boolean testDone = curProgress != null && curProgress.isTestDone();
 
         Test courseTest = allCompleted
                 ? testsDAO.getCourseTestByCourseId(courseId)
                 : null;
-
+        TestAttempt courseTestAttempt = null;
+        boolean courseTestLimitReached = false;
+        if (courseTest != null) {
+            courseTestAttempt = testAttemptDAO.getAttemptByUserAndTest(userId, courseTest.getId());
+            if (courseTestAttempt != null && courseTestAttempt.getCurrentAttempted() >= 2) {
+                courseTestLimitReached = true;
+            }
+        }
         if (allCompleted) {
 
             Test finalTest = testsDAO.getCourseTestByCourseId(courseId);
@@ -145,7 +160,9 @@ public class LearnCourseController extends HttpServlet {
                 }
             }
         }
-
+        request.setAttribute("sectionTestAttempt", sectionTestAttempt);
+        request.setAttribute("courseTestAttempt", courseTestAttempt);
+        request.setAttribute("courseTestLimitReached", courseTestLimitReached);
         request.setAttribute("course", course);
         request.setAttribute("sections", sections);
         request.setAttribute("current", current);
