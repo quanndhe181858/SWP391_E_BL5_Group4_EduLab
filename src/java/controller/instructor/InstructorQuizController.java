@@ -332,6 +332,9 @@ public class InstructorQuizController extends HttpServlet {
         // Get form parameters
         String question = request.getParameter("question");
         String type = request.getParameter("type");
+        if (type != null)
+            type = type.trim();
+
         String categoryIdParam = request.getParameter("categoryId");
 
         // Validate input
@@ -398,6 +401,7 @@ public class InstructorQuizController extends HttpServlet {
         Quiz quiz = new Quiz();
         quiz.setQuestion(question.trim());
         quiz.setType(type);
+
         quiz.setCategory_id(categoryId);
 
         // Save to database
@@ -500,6 +504,9 @@ public class InstructorQuizController extends HttpServlet {
         String idParam = request.getParameter("id");
         String question = request.getParameter("question");
         String type = request.getParameter("type");
+        if (type != null)
+            type = type.trim();
+
         String categoryIdParam = request.getParameter("categoryId");
 
         // Validate quiz ID

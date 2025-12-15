@@ -66,8 +66,8 @@
                                     <select id="type" name="type" required
                                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white">
                                         <option value="">-- Chọn loại câu hỏi --</option>
-                                        <option value="Multiple Choice" ${type == 'Multiple Choice' ? 'selected' : ''}>Trắc nghiệm</option>
-                                        <option value="True/False" ${type == 'True/False' ? 'selected' : ''}>Đúng/Sai</option>
+                                        <option value="Multiple Choice" ${type == 'Multiple Choice' ? 'selected' : ''}>Multiple Choice</option>
+                                        <option value="Single Choice" ${type == 'Single Choice' ? 'selected' : ''}>Single Choice</option>
                                     </select>
                                 </div>
 
