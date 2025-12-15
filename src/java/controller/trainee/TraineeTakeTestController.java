@@ -1,12 +1,16 @@
 package controller.trainee;
 
+import dao.CertificateDAO;
 import dao.CourseProgressDAO;
+import dao.CourseSectionDAO;
 import dao.EnrollmentDAO;
 import dao.QuizDAO;
 import dao.QuizAnswerDAO;
 import dao.QuizTestDAO;
 import dao.TestsDAO;
 import dao.TestAttemptDAOv2;
+import model.CourseProgress;
+import model.CourseSection;
 import model.TestAttempt;
 import java.io.IOException;
 import jakarta.servlet.ServletException;
@@ -30,6 +34,8 @@ public class TraineeTakeTestController extends HttpServlet {
     private final TestAttemptDAOv2 testAttemptDAO = new TestAttemptDAOv2();
     private final CourseProgressDAO courseProgressDAO = new CourseProgressDAO();
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
+    private final CourseSectionDAO sectionDAO = new CourseSectionDAO();  // THÊM
+    private final CertificateDAO certificateDAO = new CertificateDAO();  // THÊM
 
     private Integer getInt(HttpServletRequest req, String name) {
         try {
@@ -182,11 +188,12 @@ public class TraineeTakeTestController extends HttpServlet {
         }
 
         boolean saved = testAttemptDAO.saveTestAttempt(attempt);
-        if (saved && passed) {
 
+        if (saved && passed) {
             int courseId = test.getCourseId();
             int sectionId = test.getCourseSectionId();
 
+            // Xử lý section test
             if (sectionId > 0) {
                 courseProgressDAO.markTestDone(
                         currentUser.getId(),
@@ -203,15 +210,64 @@ public class TraineeTakeTestController extends HttpServlet {
                             courseId
                     );
                 }
-            } else {
-                if (courseProgressDAO.isAllSectionsCompleted(
-                        currentUser.getId(),
-                        courseId)) {
+            } // Xử lý FINAL TEST (course test) - sectionId == 0
+            else {
+                System.out.println("=== FINAL TEST PASSED ===");
+                System.out.println("User: " + currentUser.getId() + ", Course: " + courseId);
+                System.out.println("Grade: " + grade + " (min required: " + test.getMinGrade() + ")");
 
+                // Kiểm tra xem đã hoàn thành tất cả sections chưa
+                boolean allSectionsCompleted = courseProgressDAO.isAllSectionsCompleted(
+                        currentUser.getId(),
+                        courseId
+                );
+
+                System.out.println("All sections completed: " + allSectionsCompleted);
+
+                if (allSectionsCompleted) {
+                    // Mark enrollment as completed
                     enrollmentDAO.markCourseCompleted(
                             currentUser.getId(),
                             courseId
                     );
+
+                    // ===== CẤP CHỨNG CHỈ =====
+                    System.out.println("Attempting to issue certificate...");
+                    boolean certificateIssued = certificateDAO.issueCertificate(
+                            currentUser.getId(),
+                            courseId,
+                            null
+                    );
+
+                    if (certificateIssued) {
+                        System.out.println("✓ Certificate issued successfully for userId="
+                                + currentUser.getId() + ", courseId=" + courseId);
+                    } else {
+                        System.out.println("✗ Failed to issue certificate for userId="
+                                + currentUser.getId() + ", courseId=" + courseId);
+                    }
+                } else {
+                    // Debug: Xem section nào chưa completed
+                    List<CourseSection> allSections = sectionDAO.getAllCourseSectionsByCourseId(courseId);
+                    int completedCount = 0;
+
+                    for (CourseSection s : allSections) {
+                        CourseProgress p = courseProgressDAO.getProgress(
+                                currentUser.getId(),
+                                courseId,
+                                s.getId()
+                        );
+                        if (p != null && "Completed".equalsIgnoreCase(p.getStatus())) {
+                            completedCount++;
+                        } else {
+                            System.out.println("Section " + s.getId() + " (" + s.getTitle()
+                                    + ") not completed yet");
+                        }
+                    }
+
+                    System.out.println("Progress: " + completedCount + "/" + allSections.size()
+                            + " sections completed");
+                    System.out.println("Cannot issue certificate: Not all sections completed");
                 }
             }
         }

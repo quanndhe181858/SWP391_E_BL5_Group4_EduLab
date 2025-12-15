@@ -24,6 +24,7 @@ import model.Media;
 import model.Test;
 import model.TestAttempt;
 import model.User;
+import model.UserCertificate;
 
 @WebServlet(name = "LearnCourseController", urlPatterns = {"/learn"})
 public class LearnCourseController extends HttpServlet {
@@ -139,27 +140,15 @@ public class LearnCourseController extends HttpServlet {
                 courseTestLimitReached = true;
             }
         }
+
+        UserCertificate courseCertificate = null;
         if (allCompleted) {
-
-            Test finalTest = testsDAO.getCourseTestByCourseId(courseId);
-
-            boolean finalPassed = true;
-
-            if (finalTest != null) {
-                var attempt = testsDAO.getLatestAttempt(userId, finalTest.getId());
-                finalPassed = (attempt != null && "Passed".equalsIgnoreCase(attempt.getStatus()));
-            }
-
-            if (finalPassed) {
-                if (!certificateDAO.hasUserCertificate(userId, courseId)) {
-                    certificateDAO.issueCertificate(
-                            userId,
-                            courseId,
-                            null
-                    );
-                }
-            }
+            courseCertificate
+                    = certificateDAO.getUserCertificateByCourseId(courseId, userId);
         }
+
+        request.setAttribute("courseCertificate", courseCertificate);
+
         request.setAttribute("sectionTestAttempt", sectionTestAttempt);
         request.setAttribute("courseTestAttempt", courseTestAttempt);
         request.setAttribute("courseTestLimitReached", courseTestLimitReached);
@@ -201,19 +190,67 @@ public class LearnCourseController extends HttpServlet {
         CourseProgress progress = progressDAO.getProgress(userId, courseId, sectionId);
         Test sectionTest = testsDAO.getTestBySectionId(sectionId);
 
+        // Kiểm tra nếu có section test thì phải hoàn thành trước
         if (sectionTest != null && (progress == null || !progress.isTestDone())) {
             request.setAttribute("error", "Bạn phải hoàn thành bài test trước khi đánh dấu hoàn thành");
             doGet(request, response);
             return;
         }
 
+        // Nếu đã completed rồi thì redirect
         if (progress != null && "Completed".equalsIgnoreCase(progress.getStatus())) {
             response.sendRedirect(request.getContextPath()
                     + "/learn?courseId=" + courseId + "&sectionId=" + sectionId);
             return;
         }
 
+        // Đánh dấu section hiện tại là completed
         progressDAO.markCompleted(userId, courseId, sectionId);
+
+        // Kiểm tra xem đã hoàn thành tất cả sections chưa
+        List<CourseSection> sections = sectionDAO.getAllCourseSectionsByCourseId(courseId);
+
+        int completedCount = 0;
+        for (CourseSection s : sections) {
+            CourseProgress p = progressDAO.getProgress(userId, courseId, s.getId());
+            if (p != null && "Completed".equalsIgnoreCase(p.getStatus())) {
+                completedCount++;
+            }
+        }
+
+        boolean allCompleted = completedCount == sections.size();
+
+        // Nếu hoàn thành tất cả sections -> xét cấp chứng chỉ
+        if (allCompleted) {
+            // Kiểm tra xem có final test không
+            Test finalTest = testsDAO.getCourseTestByCourseId(courseId);
+            boolean canIssueCertificate = false;
+
+            if (finalTest != null) {
+                // Có final test -> phải pass mới được chứng chỉ
+                TestAttempt attempt = testAttemptDAO.getAttemptByUserAndTest(userId, finalTest.getId());
+                canIssueCertificate = (attempt != null && "Passed".equalsIgnoreCase(attempt.getStatus()));
+
+                if (!canIssueCertificate) {
+                    System.out.println("User " + userId + " chưa pass final test của course " + courseId);
+                }
+            } else {
+                // Không có final test -> hoàn thành tất cả sections là đủ điều kiện
+                canIssueCertificate = true;
+                System.out.println("Course " + courseId + " không có final test, tự động cấp chứng chỉ");
+            }
+
+            if (canIssueCertificate) {
+
+                boolean issued = certificateDAO.issueCertificate(userId, courseId, null);
+
+                if (issued) {
+                    System.out.println("✓ Certificate issued successfully for userId=" + userId + ", courseId=" + courseId);
+                } else {
+                    System.out.println("✗ Failed to issue certificate for userId=" + userId + ", courseId=" + courseId);
+                }
+            }
+        }
 
         response.sendRedirect(request.getContextPath()
                 + "/learn?courseId=" + courseId + "&sectionId=" + sectionId);

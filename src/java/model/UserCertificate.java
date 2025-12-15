@@ -21,6 +21,7 @@ public class UserCertificate {
     private String firstName;
     private String lastName;
     private String email;
+    private Float passedGrade;
 
     public UserCertificate() {
     }
@@ -128,6 +129,14 @@ public class UserCertificate {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Float getPassedGrade() {
+        return passedGrade;
+    }
+
+    public void setPassedGrade(Float passedGrade) {
+        this.passedGrade = passedGrade;
     }
 
 }
