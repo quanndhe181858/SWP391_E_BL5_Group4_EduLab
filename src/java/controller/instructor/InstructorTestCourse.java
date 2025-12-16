@@ -13,11 +13,12 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import model.Course;
 import model.Quiz;
 import model.Test;
 import model.User;
 
-@WebServlet(name = "InstructorTestCourse", urlPatterns = {"/instructor/test-course"})//khoa hoc
+@WebServlet(name = "InstructorTestCourse", urlPatterns = {"/instructor/test-course"})
 public class InstructorTestCourse extends HttpServlet {
 
     private final TestsDAO testDAO = new TestsDAO();
@@ -58,28 +59,29 @@ public class InstructorTestCourse extends HttpServlet {
 
         int instructorId = u.getId();
 
-        // Lấy danh sách khóa học
         var courses = courseDAO.getCoursesByInstructorId(999, 0, "", "", 0, "", "", instructorId);
         request.setAttribute("courses", courses);
 
-        // Lấy courseId nếu có trên URL
         Integer selectedCourse = getInt(request, "courseId");
 
-        // Nếu không có, lấy khóa đầu tiên
         if (selectedCourse == null && !courses.isEmpty()) {
             selectedCourse = courses.get(0).getId();
         }
 
-        // Đẩy về JSP
         request.setAttribute("selectedCourse", selectedCourse);
 
-        // LẤY DANH SÁCH TEST THEO COURSE
         request.setAttribute("testList", testDAO.getTestsByInstructor(instructorId));
 
-        // Load quiz list để tạo / sửa test
-        request.setAttribute("quizList", quizDAO.getAllQuizzes());
+        // ⭐ LẤY QUIZ THEO CATEGORY CỦA COURSE
+        List<Quiz> quizList = quizDAO.getAllQuizzes();
+        if (selectedCourse != null) {
+            Course course = courseDAO.getCourseById(selectedCourse);
+            if (course != null && course.getCategory_id() > 0) {
+                quizList = quizDAO.getQuizzesByCategory(course.getCategory_id());
+            }
+        }
+        request.setAttribute("quizList", quizList);
 
-        // EDIT MODE
         Integer editId = getInt(request, "id");
         String action = request.getParameter("action");
 
@@ -87,6 +89,13 @@ public class InstructorTestCourse extends HttpServlet {
             Test t = testDAO.getById(editId);
             request.setAttribute("editTest", t);
             request.setAttribute("selectedQuizIds", quizTestDAO.getQuizIdsByTest(editId));
+
+            // ⭐ UPDATE QUIZ LIST CHO EDIT MODE
+            Course course = courseDAO.getCourseById(t.getCourseId());
+            if (course != null && course.getCategory_id() > 0) {
+                quizList = quizDAO.getQuizzesByCategory(course.getCategory_id());
+                request.setAttribute("quizList", quizList);
+            }
         }
 
         request.getRequestDispatcher("/View/Instructor/testcreateCourse.jsp")
@@ -147,8 +156,9 @@ public class InstructorTestCourse extends HttpServlet {
             t.setTimeInterval(duration);
             t.setMinGrade(minGrade);
             t.setCourseId(courseId);
-            t.setCourseSectionId(0); // test của khóa học
+            t.setCourseSectionId(0);
             t.setCreatedBy(instructorId);
+
             if (testDAO.isCodeOrTitleExisted(code, title, null)) {
                 request.setAttribute("error", "Code hoặc tiêu đề đã tồn tại.");
                 doGet(request, response);
@@ -176,7 +186,8 @@ public class InstructorTestCourse extends HttpServlet {
 
             if (id > 0) {
                 quizTestDAO.deleteQuizByTest(id);
-                processQuiz(mode, id, request);
+                // ⭐ TRUYỀN courseId VÀO processQuiz
+                processQuiz(mode, id, courseId, request);
             }
 
             response.sendRedirect(request.getContextPath() + "/instructor/test-course?courseId=" + courseId);
@@ -195,6 +206,7 @@ public class InstructorTestCourse extends HttpServlet {
             t.setMinGrade(minGrade);
             t.setCourseId(courseId);
             t.setCourseSectionId(0);
+
             if (testDAO.isCodeOrTitleExisted(code, title, id)) {
                 request.setAttribute("error", "Code hoặc tiêu đề đã tồn tại.");
                 doGet(request, response);
@@ -221,19 +233,36 @@ public class InstructorTestCourse extends HttpServlet {
             testDAO.updateTest(t);
 
             quizTestDAO.deleteQuizByTest(id);
-            processQuiz(mode, id, request);
+            // ⭐ TRUYỀN courseId VÀO processQuiz
+            processQuiz(mode, id, courseId, request);
 
             response.sendRedirect(request.getContextPath() + "/managerTest");
         }
     }
 
-    private void processQuiz(String mode, int testId, HttpServletRequest request) {
+    // ⭐ UPDATE processQuiz ĐỂ FILTER THEO CATEGORY
+    private void processQuiz(String mode, int testId, int courseId, HttpServletRequest request) {
+
+        // Lấy categoryId từ course
+        Course course = courseDAO.getCourseById(courseId);
+        if (course == null || course.getCategory_id() <= 0) {
+            request.setAttribute("error", "Không tìm thấy category của khóa học.");
+            return;
+        }
+
+        int categoryId = course.getCategory_id();
 
         if ("custom".equals(mode)) {
             String[] ids = request.getParameterValues("quizId");
             if (ids != null) {
                 for (String q : ids) {
-                    quizTestDAO.addQuizToTest(testId, Integer.parseInt(q));
+                    int quizId = Integer.parseInt(q);
+
+                    // ⭐ KIỂM TRA QUIZ CÓ ĐÚNG CATEGORY KHÔNG
+                    Quiz quiz = quizDAO.getQuizById(quizId);
+                    if (quiz != null && quiz.getCategory_id() == categoryId) {
+                        quizTestDAO.addQuizToTest(testId, quizId);
+                    }
                 }
             }
         } else if ("random".equals(mode)) {
@@ -242,15 +271,17 @@ public class InstructorTestCourse extends HttpServlet {
                 return;
             }
 
-            List<Quiz> all = quizDAO.getAllQuizzes();
-            if (count > all.size()) {
-                request.setAttribute("error", "Không đủ số lượng quiz trong ngân hàng.");
+            // ⭐ CHỈ LẤY QUIZ THEO CATEGORY CỦA COURSE
+            List<Quiz> availableQuizzes = quizDAO.getQuizzesByCategory(categoryId);
+
+            if (count > availableQuizzes.size()) {
+                request.setAttribute("error", "Không đủ số lượng quiz trong danh mục này.");
                 return;
             }
 
-            Collections.shuffle(all);
+            Collections.shuffle(availableQuizzes);
             for (int i = 0; i < count; i++) {
-                quizTestDAO.addQuizToTest(testId, all.get(i).getId());
+                quizTestDAO.addQuizToTest(testId, availableQuizzes.get(i).getId());
             }
         }
     }

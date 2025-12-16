@@ -8,6 +8,7 @@ import database.dao;
 import model.Quiz;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,13 +57,6 @@ public class QuizDAO extends dao {
         System.out.println("Deleted? " + deleted);
     }
 
-    /**
-     * Creates a new quiz in the database
-     *
-     * @param quiz Quiz object to create
-     * @param uid User ID of the creator
-     * @return Quiz object with generated ID, or null if creation fails
-     */
     public Quiz createQuiz(Quiz quiz, int uid) {
         String sql = """
                  INSERT INTO `edulab`.`quiz`
@@ -103,13 +97,6 @@ public class QuizDAO extends dao {
         }
     }
 
-    /**
-     * Updates an existing quiz in the database
-     *
-     * @param quiz Quiz object with updated information
-     * @param uid User ID of the updater
-     * @return Quiz object if update was successful, null otherwise
-     */
     public Quiz updateQuiz(Quiz quiz, int uid) {
         String sql = """
                  UPDATE `edulab`.`quiz`
@@ -148,12 +135,6 @@ public class QuizDAO extends dao {
         }
     }
 
-    /**
-     * Deletes a quiz from the database
-     *
-     * @param id ID of the quiz to delete
-     * @return true if deletion was successful, false otherwise
-     */
     public boolean deleteQuiz(int id) {
         String sql = "DELETE FROM `edulab`.`quiz` WHERE `id` = ?";
 
@@ -179,12 +160,6 @@ public class QuizDAO extends dao {
         }
     }
 
-    /**
-     * Retrieves a quiz by its ID
-     *
-     * @param id ID of the quiz to retrieve
-     * @return Quiz object if found, null otherwise
-     */
     public Quiz getQuizById(int id) {
         String sql = """
                  SELECT 
@@ -232,11 +207,6 @@ public class QuizDAO extends dao {
         }
     }
 
-    /**
-     * Retrieves all quizzes from the database
-     *
-     * @return List of all Quiz objects
-     */
     public List<Quiz> getAllQuizzes() {
         String sql = """
                  SELECT 
@@ -280,12 +250,6 @@ public class QuizDAO extends dao {
         return quizzes;
     }
 
-    /**
-     * Retrieves quizzes by category ID
-     *
-     * @param categoryId Category ID to filter by
-     * @return List of Quiz objects in the specified category
-     */
     public List<Quiz> getQuizzesByCategory(int categoryId) {
         String sql = """
                  SELECT 
@@ -332,12 +296,6 @@ public class QuizDAO extends dao {
         return quizzes;
     }
 
-    /**
-     * Retrieves quizzes by type
-     *
-     * @param type Quiz type to filter by
-     * @return List of Quiz objects of the specified type
-     */
     public List<Quiz> getQuizzesByType(String type) {
         String sql = """
                  SELECT 
@@ -418,7 +376,6 @@ public class QuizDAO extends dao {
         return list;
     }
 
-    // ====== FOR TRAINEE - TAKE TEST ======
     public Question getQuestionById(int quizId) {
         String sql = "SELECT id, question FROM quiz WHERE id = ?";
 
@@ -441,6 +398,52 @@ public class QuizDAO extends dao {
         }
         return null;
     }
-   
 
+    public List<Quiz> getQuizzesByMultipleCategories(List<Integer> categoryIds) {
+        if (categoryIds == null || categoryIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Quiz> quizzes = new ArrayList<>();
+
+        String placeholders = String.join(",", Collections.nCopies(categoryIds.size(), "?"));
+
+        String sql = """
+        SELECT 
+            id, question, type, category_id,
+            created_at, updated_at, created_by, updated_by
+        FROM edulab.quiz
+        WHERE category_id IN (""" + placeholders + ")";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            for (int i = 0; i < categoryIds.size(); i++) {
+                ps.setInt(i + 1, categoryIds.get(i));
+            }
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Quiz quiz = new Quiz();
+                quiz.setId(rs.getInt("id"));
+                quiz.setQuestion(rs.getString("question"));
+                quiz.setType(rs.getString("type"));
+                quiz.setCategory_id(rs.getInt("category_id"));
+                quiz.setCreated_at(rs.getTimestamp("created_at"));
+                quiz.setUpdated_at(rs.getTimestamp("updated_at"));
+                quiz.setCreated_by(rs.getInt("created_by"));
+                quiz.setUpdated_by(rs.getInt("updated_by"));
+                quizzes.add(quiz);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error in getQuizzesByMultipleCategories", e);
+        } finally {
+            this.closeResources();
+        }
+
+        return quizzes;
+    }
 }
