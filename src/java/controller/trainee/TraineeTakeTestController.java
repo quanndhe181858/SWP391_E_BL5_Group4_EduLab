@@ -19,8 +19,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import model.Question;
+import model.QuizAnswer;
 import model.Test;
 import model.User;
 
@@ -78,19 +82,15 @@ public class TraineeTakeTestController extends HttpServlet {
             return;
         }
 
-        // Kiểm tra số lần làm bài TRƯỚC khi load questions
         TestAttempt previousAttempt = testAttemptDAO.getAttemptByUserAndTest(currentUser.getId(), testId);
 
-        // CHỈ giới hạn course test (courseSectionId == 0)
         if (test.getCourseSectionId() == 0) {  // Course test
             if (previousAttempt != null && previousAttempt.getCurrentAttempted() >= 2) {
-                // Redirect về trang learn thay vì hiển thị modal
                 response.sendRedirect(request.getContextPath() + "/learn?courseId=" + test.getCourseId());
                 return;
             }
         }
 
-        // Nếu chưa hết lượt hoặc là section test, tiếp tục load questions
         List<Question> questions = testDAO.getQuestionsByTest(testId);
 
         if (questions.isEmpty()) {
@@ -121,27 +121,22 @@ public class TraineeTakeTestController extends HttpServlet {
             return;
         }
 
-        // Lấy thông tin test
         Test test = testDAO.getById(testId);
         if (test == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Test not found");
             return;
         }
 
-        // Kiểm tra số lần làm bài TRƯỚC khi xử lý
         TestAttempt previousAttempt = testAttemptDAO.getAttemptByUserAndTest(
                 currentUser.getId(), testId);
 
-        // CHỈ giới hạn course test
         if (test.getCourseSectionId() == 0) {  // Course test
             if (previousAttempt != null && previousAttempt.getCurrentAttempted() >= 2) {
-                // Redirect về trang learn
                 response.sendRedirect(request.getContextPath() + "/learn?courseId=" + test.getCourseId());
                 return;
             }
         }
 
-        // Tiếp tục xử lý bài test
         List<Question> questions = testDAO.getQuestionsByTest(testId);
 
         int correctCount = 0;
@@ -149,17 +144,57 @@ public class TraineeTakeTestController extends HttpServlet {
 
         for (Question question : questions) {
             String paramName = "answer_" + question.getId();
-            Integer selectedAnswerId = getInt(request, paramName);
+            String questionType = question.getType();
+            if ("Multiple Choice".equalsIgnoreCase(questionType)) {
+                String[] selectedAnswerIds = request.getParameterValues(paramName);
 
-            if (selectedAnswerId != null) {
-                boolean isCorrect = quizAnswerDAO.isCorrect(selectedAnswerId);
-                if (isCorrect) {
-                    correctCount++;
+                if (selectedAnswerIds != null && selectedAnswerIds.length > 0) {
+                    List<Integer> correctAnswerIds = new ArrayList<>();
+                    for (QuizAnswer answer : question.getAnswers()) {
+                        if (answer.isIs_true()) {
+                            correctAnswerIds.add(answer.getId());
+                        }
+                    }
+
+                    boolean isCorrect = true;
+
+                    Set<Integer> selectedSet = new HashSet<>();
+                    for (String id : selectedAnswerIds) {
+                        try {
+                            selectedSet.add(Integer.parseInt(id));
+                        } catch (NumberFormatException e) {
+                            // ignore
+                        }
+                    }
+
+                    if (selectedSet.size() != correctAnswerIds.size()) {
+                        isCorrect = false;
+                    } else {
+                        for (Integer correctId : correctAnswerIds) {
+                            if (!selectedSet.contains(correctId)) {
+                                isCorrect = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (isCorrect) {
+                        correctCount++;
+                    }
+                }
+
+            } else {
+                Integer selectedAnswerId = getInt(request, paramName);
+
+                if (selectedAnswerId != null) {
+                    boolean isCorrect = quizAnswerDAO.isCorrect(selectedAnswerId);
+                    if (isCorrect) {
+                        correctCount++;
+                    }
                 }
             }
         }
 
-        // Tính điểm
         float grade = (totalQuestions > 0)
                 ? Math.round((correctCount * 100.0f / totalQuestions) * 10) / 10.0f : 0;
 
@@ -176,7 +211,6 @@ public class TraineeTakeTestController extends HttpServlet {
             attempt.setCurrentAttempted(1);
         }
 
-        // Set status
         if (passed) {
             attempt.setStatus("Passed");
         } else {
@@ -193,7 +227,6 @@ public class TraineeTakeTestController extends HttpServlet {
             int courseId = test.getCourseId();
             int sectionId = test.getCourseSectionId();
 
-            // Xử lý section test
             if (sectionId > 0) {
                 courseProgressDAO.markTestDone(
                         currentUser.getId(),
@@ -210,13 +243,11 @@ public class TraineeTakeTestController extends HttpServlet {
                             courseId
                     );
                 }
-            } // Xử lý FINAL TEST (course test) - sectionId == 0
-            else {
+            } else {
                 System.out.println("=== FINAL TEST PASSED ===");
                 System.out.println("User: " + currentUser.getId() + ", Course: " + courseId);
                 System.out.println("Grade: " + grade + " (min required: " + test.getMinGrade() + ")");
 
-                // Kiểm tra xem đã hoàn thành tất cả sections chưa
                 boolean allSectionsCompleted = courseProgressDAO.isAllSectionsCompleted(
                         currentUser.getId(),
                         courseId
@@ -225,13 +256,11 @@ public class TraineeTakeTestController extends HttpServlet {
                 System.out.println("All sections completed: " + allSectionsCompleted);
 
                 if (allSectionsCompleted) {
-                    // Mark enrollment as completed
                     enrollmentDAO.markCourseCompleted(
                             currentUser.getId(),
                             courseId
                     );
 
-                    // ===== CẤP CHỨNG CHỈ =====
                     System.out.println("Attempting to issue certificate...");
                     boolean certificateIssued = certificateDAO.issueCertificate(
                             currentUser.getId(),
@@ -247,7 +276,6 @@ public class TraineeTakeTestController extends HttpServlet {
                                 + currentUser.getId() + ", courseId=" + courseId);
                     }
                 } else {
-                    // Debug: Xem section nào chưa completed
                     List<CourseSection> allSections = sectionDAO.getAllCourseSectionsByCourseId(courseId);
                     int completedCount = 0;
 
@@ -279,7 +307,6 @@ public class TraineeTakeTestController extends HttpServlet {
                     + currentUser.getId() + " - Test " + testId + " - Grade: " + grade);
         }
 
-        // Set attributes để hiển thị kết quả
         request.setAttribute("test", test);
         request.setAttribute("totalQuestions", totalQuestions);
         request.setAttribute("correctCount", correctCount);
@@ -288,7 +315,6 @@ public class TraineeTakeTestController extends HttpServlet {
         request.setAttribute("attempt", attempt);
         request.setAttribute("previousAttempt", previousAttempt);
 
-        // Forward to result page
         request.getRequestDispatcher("/View/Trainee/TestResult.jsp").forward(request, response);
     }
 

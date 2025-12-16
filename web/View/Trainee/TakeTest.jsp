@@ -81,7 +81,6 @@
                         <% } %>
                     </div>
 
-
                     <button onclick="openModal()"
                             class="w-full bg-blue-600 text-white py-2 rounded">
                         Nộp bài
@@ -95,7 +94,7 @@
                       action="<%= request.getContextPath() %>/trainee/test"
                       method="post">
 
-                    <!-- HIDDEN INPUTS QUAN TRỌNG -->
+                    <!-- HIDDEN INPUTS -->
                     <input type="hidden" name="testId" value="${test.id}">
                     <input type="hidden" name="courseId" value="${test.courseId}">
                     <input type="hidden" name="sectionId" value="${test.courseSectionId}">
@@ -104,12 +103,17 @@
                         int index = 1;
                         if (questions != null) {
                             for (Question question : questions) {
+                                String questionType = question.getType(); // "Single Choice" hoặc "Multiple Choice"
+                                boolean isMultiple = "Multiple Choice".equalsIgnoreCase(questionType);
                     %>
 
                     <div id="q<%= index %>" class="question-block hidden" data-question="<%= index %>">
 
                         <h3 class="text-xl font-bold mb-4">
                             Câu <%= index %> / <%= total %>
+                            <span class="text-sm text-gray-500 ml-2">
+                                <%= isMultiple ? "(Chọn nhiều đáp án)" : "(Chọn 1 đáp án)" %>
+                            </span>
                         </h3>
 
                         <p class="mb-4"><%= question.getContent() %></p>
@@ -122,10 +126,17 @@
                         %>
 
                         <label class="answer-option block border p-3 rounded mb-2 cursor-pointer hover:bg-gray-50">
+                            <% if (isMultiple) { %>
+                            <input type="checkbox"
+                                   name="answer_<%= question.getId() %>"
+                                   value="<%= answer.getId() %>"
+                                   onchange="markAnswered(<%= index %>)" />
+                            <% } else { %>
                             <input type="radio"
                                    name="answer_<%= question.getId() %>"
                                    value="<%= answer.getId() %>"
                                    onchange="markAnswered(<%= index %>)" />
+                            <% } %>
                             <strong><%= c %>.</strong> <%= answer.getContent() %>
                         </label>
 
@@ -242,8 +253,8 @@
                 for (let i = 1; i <= totalQuestions; i++) {
                     const questionBlock = document.getElementById('q' + i);
                     if (questionBlock) {
-                        const radios = questionBlock.querySelectorAll('input[type="radio"]:checked');
-                        if (radios.length > 0) {
+                        const inputs = questionBlock.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked');
+                        if (inputs.length > 0) {
                             markAnswered(i);
                         }
                     }
