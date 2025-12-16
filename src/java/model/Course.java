@@ -32,6 +32,8 @@ public class Course {
     private int enrollmentCount;
     private Timestamp completedAt;
     private Float passedGrade;
+    
+    private boolean hide_by_admin;
 
     public Course() {
     }
@@ -42,6 +44,14 @@ public class Course {
         this.thumbnail = thumbnail;
         this.categoryName = categoryName;
         this.enrollmentCount = enrollmentCount;
+    }
+
+    public boolean isHide_by_admin() {
+        return hide_by_admin;
+    }
+
+    public void setHide_by_admin(boolean hide_by_admin) {
+        this.hide_by_admin = hide_by_admin;
     }
 
     public String getCategoryName() {

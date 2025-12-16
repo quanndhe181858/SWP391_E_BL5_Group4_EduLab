@@ -166,8 +166,13 @@
                                                 </div>
                                             </div>
                                             <span class="px-3 py-1 rounded-full text-xs font-medium ${course.status == 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">
-                                                ${course.status}
+                                                ${course.status == 'Active' ? 'Hoạt động' : 'Không hoạt động'}
                                             </span>
+                                            <c:if test="${course.hide_by_admin}">
+                                                <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                                    Bị khoá bởi quản trị viên
+                                                </span>
+                                            </c:if>
                                         </div>
                                     </div>
                                 </a>

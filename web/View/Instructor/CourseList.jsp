@@ -233,6 +233,9 @@
                                                                     <div class="flex items-center gap-2 mb-2">
                                                                         <span class="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 rounded">${course.category.name}</span>
                                                                         <span class="px-2 py-1 text-xs font-semibold ${course.status == 'Active' ? 'text-green-600 bg-green-100' : 'text-yellow-600 bg-yellow-100'} rounded">${course.status == "Active" ? "Hoạt động" : "Không hoạt động"}</span>
+                                                                        <c:if test="${course.hide_by_admin}">
+                                                                            <span class="px-2 py-1 text-xs font-semibold text-red-600 bg-red-100 rounded">Bị khoá bởi quản trị viên</span>
+                                                                        </c:if>
                                                                     </div>
                                                                     <h3 class="text-xl font-bold text-gray-900 mb-2 line-clamp-2">${course.title}</h3>
                                                                     <p class="text-sm text-gray-600 mb-3 line-clamp-2">${course.description}</p>
@@ -240,12 +243,6 @@
                                                             </div>
 
                                                             <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
-                                                                <!--                                                                <div class="flex items-center">
-                                                                                                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                                                                                                                    </svg>
-                                                                                                                                    <span>256 students</span>
-                                                                                                                                </div>-->
                                                                 <div class="flex items-center">
                                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path>
@@ -260,7 +257,6 @@
                                                                 </div>
                                                             </div>
 
-                                                            <!-- Action Buttons -->
                                                             <div class="flex flex-wrap gap-2">
                                                                 <a href="courses?cid=${course.id}&type=edit" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
                                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -268,18 +264,6 @@
                                                                     </svg>
                                                                     Chỉnh sửa
                                                                 </a>
-<!--                                                                <a href="course?action=content&id=${course.id}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">
-                                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                                                    </svg>
-                                                                    Content
-                                                                </a>-->
-<!--                                                                <a href="course?action=students&id=${course.id}" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition">
-                                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                                                    </svg>
-                                                                    Students
-                                                                </a>-->
                                                                 <button type="button" onclick="deleteCourse(${course.id}, '${course.title}')" class="inline-flex items-center px-4 py-2 bg-white border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50 transition">
                                                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -372,7 +356,7 @@
                             setTimeout(() => location.reload(), 1500);
                         },
                         error: function (xhr) {
-                            showToast("Hiện tại đã có học viên tham già vào khoá học và làm bài, không thể xoá khoá học này!", "error", 2500);
+                            showToast(xhr.responseJSON.message ? xhr.responseJSON.message : "Hiện tại đã có học viên tham già vào khoá học và làm bài, không thể xoá khoá học này!", "error", 2500);
                         }
                     });
                 });

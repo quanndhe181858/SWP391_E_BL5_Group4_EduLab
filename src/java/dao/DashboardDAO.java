@@ -420,6 +420,7 @@ public class DashboardDAO extends dao {
                      c.title,
                      c.thumbnail,
                      c.status,
+                     c.hide_by_admin,
                      cat.name as categoryName,
                      COUNT(DISTINCT e.user_id) as studentCount,
                      COALESCE(ROUND((COUNT(CASE WHEN e.status = 'Completed' THEN 1 END) * 100.0 / NULLIF(COUNT(e.user_id), 0)), 1), 0) as completionRate
@@ -451,6 +452,7 @@ public class DashboardDAO extends dao {
                         rs.getInt("studentCount"),
                         rs.getFloat("completionRate")
                 );
+                course.setHide_by_admin(rs.getBoolean("hide_by_admin"));
                 courseList.add(course);
             }
 

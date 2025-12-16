@@ -170,6 +170,7 @@ public class CourseDAO extends dao {
                 course.setCreated_by(rs.getInt("created_by"));
                 course.setUpdated_by(rs.getInt("updated_by"));
                 course.setThumbnail(rs.getString("thumbnail"));
+                course.setHide_by_admin(rs.getBoolean("hide_by_admin"));
 
                 return course;
             }
@@ -320,6 +321,7 @@ public class CourseDAO extends dao {
                 c.setCreated_by(rs.getInt("created_by"));
                 c.setUpdated_by(rs.getInt("updated_by"));
                 c.setThumbnail(rs.getString("thumbnail"));
+                c.setHide_by_admin(rs.getBoolean("hide_by_admin"));
                 cList.add(c);
             }
 
@@ -411,6 +413,7 @@ public class CourseDAO extends dao {
                 c.setUpdated_by(rs.getInt("updated_by"));
                 c.setThumbnail(rs.getString("thumbnail"));
                 c.setTotalSections(rs.getInt("total_sections"));
+                c.setHide_by_admin(rs.getBoolean("hide_by_admin"));
                 cList.add(c);
             }
         } catch (SQLException e) {
@@ -620,7 +623,7 @@ public class CourseDAO extends dao {
         StringBuilder sql = new StringBuilder(
                 "SELECT DISTINCT c.* FROM edulab.course c "
                 + "INNER JOIN edulab.course_section cs ON c.id = cs.course_id "
-                + "WHERE c.status = 'Active'"
+                + "WHERE c.status = 'Active' AND c.hide_by_admin = 0"
         );
         StringBuilder orSearch = new StringBuilder();
         if (title != null && !title.isBlank()) {
@@ -699,7 +702,7 @@ public class CourseDAO extends dao {
         StringBuilder sql = new StringBuilder(
                 "SELECT DISTINCT c.* FROM edulab.course c "
                 + "INNER JOIN edulab.course_section cs ON c.id = cs.course_id "
-                + "WHERE c.status = 'Active'"
+                + "WHERE c.status = 'Active' AND c.hide_by_admin = 0"
         );
 
         List<Object> params = new ArrayList<>();
