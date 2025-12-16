@@ -277,9 +277,26 @@ public class CategoryDAO extends dao {
 
         while (parent != null && parent != 0) {
             if (parent == currentId) {
-                return true; 
+                return true;
             }
             parent = getParentId(parent);
+        }
+        return false;
+    }
+
+    public boolean hasChildren(int categoryId) {
+        String sql = "SELECT COUNT(*) FROM category WHERE parent_id = ?";
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, categoryId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }
