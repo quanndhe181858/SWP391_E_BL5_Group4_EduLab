@@ -245,13 +245,13 @@ public class InstructorQuizController extends HttpServlet {
             long multipleChoiceCount = allQuizzes.stream()
                     .filter(q -> "Multiple Choice".equals(q.getType()))
                     .count();
-            long trueFalseCount = allQuizzes.stream()
-                    .filter(q -> "True/False".equals(q.getType()))
+            long singleChoiceCount = allQuizzes.stream()
+                    .filter(q -> "Single Choice".equals(q.getType()))
                     .count();
             long otherTypesCount = allQuizzes.stream()
                     .filter(q -> q.getType() != null &&
                             !"Multiple Choice".equals(q.getType()) &&
-                            !"True/False".equals(q.getType()))
+                            !"Single Choice".equals(q.getType()))
                     .count();
 
             // Pagination with validation
@@ -293,7 +293,7 @@ public class InstructorQuizController extends HttpServlet {
             request.setAttribute("quizList", paginatedQuizzes);
             request.setAttribute("totalQuizzes", totalQuizzes);
             request.setAttribute("multipleChoiceCount", multipleChoiceCount);
-            request.setAttribute("trueFalseCount", trueFalseCount);
+            request.setAttribute("singleChoiceCount", singleChoiceCount);
             request.setAttribute("otherTypesCount", otherTypesCount);
             request.setAttribute("page", currentPage);
             request.setAttribute("totalPages", totalPages);
@@ -382,6 +382,35 @@ public class InstructorQuizController extends HttpServlet {
 
         if (answerIsCorrectIndices == null || answerIsCorrectIndices.length < 1) {
             request.setAttribute("notification", "Vui lòng chọn ít nhất 1 câu trả lời đúng.");
+            request.setAttribute("notificationType", "error");
+            // Preserve input
+            request.setAttribute("question", question);
+            request.setAttribute("type", type);
+            request.setAttribute("categoryId", categoryIdParam);
+            request.setAttribute("answerContents", answerContents);
+            // Forward back to create form
+            showCreateForm(request, response);
+            return;
+        }
+
+        // Validate correct answer count based on type
+        if ("Multiple Choice".equals(type) && answerIsCorrectIndices.length < 2) {
+            request.setAttribute("notification", "Câu hỏi Multiple Choice phải có ít nhất 2 đáp án đúng.");
+            request.setAttribute("notificationType", "error");
+            showCreateFormWithError(request, response, question, type, categoryIdParam, answerContents);
+            return;
+        }
+
+        if ("Single Choice".equals(type) && answerIsCorrectIndices.length != 1) {
+            request.setAttribute("notification", "Câu hỏi Single Choice chỉ được có đúng 1 đáp án đúng.");
+            request.setAttribute("notificationType", "error");
+            showCreateFormWithError(request, response, question, type, categoryIdParam, answerContents);
+            return;
+        }
+
+        // Validate max 6 answers
+        if (answerContents.length > 6) {
+            request.setAttribute("notification", "Tối đa 6 câu trả lời cho phép.");
             request.setAttribute("notificationType", "error");
             // Preserve input
             request.setAttribute("question", question);
@@ -559,6 +588,30 @@ public class InstructorQuizController extends HttpServlet {
             return;
         }
 
+        // Validate type change against existing answers
+        dao.QuizAnswerDAO quizAnswerDAO = new dao.QuizAnswerDAO();
+        List<model.QuizAnswer> existingAnswers = quizAnswerDAO.getQuizAnswersByQuizId(quizId);
+        long correctCount = 0;
+        if (existingAnswers != null) {
+            correctCount = existingAnswers.stream().filter(model.QuizAnswer::isIs_true).count();
+        }
+
+        if ("Multiple Choice".equals(type) && correctCount < 2) {
+            session.setAttribute("notification",
+                    "Không thể đổi sang Multiple Choice. Cần ít nhất 2 đáp án đúng hiện có.");
+            session.setAttribute("notificationType", "error");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
+            return;
+        }
+
+        if ("Single Choice".equals(type) && correctCount != 1) {
+            session.setAttribute("notification",
+                    "Không thể đổi sang Single Choice. Cần chính xác 1 đáp án đúng hiện có.");
+            session.setAttribute("notificationType", "error");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
+            return;
+        }
+
         // Create quiz object with updated data
         Quiz quiz = new Quiz();
         quiz.setId(quizId);
@@ -627,6 +680,16 @@ public class InstructorQuizController extends HttpServlet {
         }
 
         response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+    }
+
+    private void showCreateFormWithError(HttpServletRequest request, HttpServletResponse response,
+            String question, String type, String categoryId, String[] answerContents)
+            throws ServletException, IOException {
+        request.setAttribute("question", question);
+        request.setAttribute("type", type);
+        request.setAttribute("categoryId", categoryId);
+        request.setAttribute("answerContents", answerContents);
+        showCreateForm(request, response);
     }
 
     @Override
