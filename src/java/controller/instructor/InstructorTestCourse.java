@@ -233,7 +233,6 @@ public class InstructorTestCourse extends HttpServlet {
             testDAO.updateTest(t);
 
             quizTestDAO.deleteQuizByTest(id);
-            // ⭐ TRUYỀN courseId VÀO processQuiz
             processQuiz(mode, id, courseId, request);
 
             response.sendRedirect(request.getContextPath() + "/managerTest");
