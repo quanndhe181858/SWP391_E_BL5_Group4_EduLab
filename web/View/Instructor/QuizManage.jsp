@@ -208,7 +208,8 @@
                                                                         </div>
                                                                         <div class="flex gap-2">
                                                                             <button type="button"
-                                                                                onclick='editAnswer(${answer.id}, ${quiz.id}, "${answer.content.replace("'", "\\'").replace("\"", "&quot;" )}",
+                                                                                onclick='editAnswer(${answer.id}, ${quiz.id}, "${answer.content.replace("'", "
+                                                                                \\'").replace("\"", "&quot;" )}",
                                                                                 ${answer.is_true})'
                                                                                 class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                                                                 title="Chỉnh sửa">
@@ -412,7 +413,30 @@
                                     document.getElementById('formAction').value = 'createAnswer';
                                     document.getElementById('answerId').value = '';
                                     document.getElementById('answerContent').value = '';
-                                    document.getElementById('isCorrect').checked = false;
+
+                                    const isCorrectInput = document.getElementById('isCorrect');
+                                    isCorrectInput.checked = false;
+                                    isCorrectInput.disabled = false;
+                                    isCorrectInput.title = "";
+
+                                    // Check if Single Choice and already has correct answer
+                                    // Using JSP EL to get type might be tricky if not in a JS var, but we can check the select box which is present
+                                    const typeSelect = document.getElementById('type');
+                                    // Or use the hidden type if available, or just check DOM for green ticks
+
+                                    // safer to check DOM for green checkmarks
+                                    const correctAnswers = document.querySelectorAll('#answers-section .text-green-600.w-6'); // identifying ticks
+
+                                    // Need to know quiz type. 
+                                    // In Edit mode, the type select is populated.
+                                    if (typeSelect && typeSelect.value === 'Single Choice') {
+                                        if (correctAnswers.length > 0) {
+                                            isCorrectInput.disabled = true;
+                                            isCorrectInput.title = "Câu hỏi Single Choice chỉ được có 1 đáp án đúng.";
+                                            // Add a small helper text if needed, or just rely on disability
+                                        }
+                                    }
+
                                     document.getElementById('answerModal').classList.remove('hidden');
                                     document.body.style.overflow = 'hidden';
                                 }
@@ -423,7 +447,26 @@
                                     document.getElementById('answerId').value = answerId;
                                     document.getElementById('quizIdInput').value = quizId;
                                     document.getElementById('answerContent').value = content;
-                                    document.getElementById('isCorrect').checked = isCorrect;
+
+                                    const isCorrectInput = document.getElementById('isCorrect');
+                                    isCorrectInput.checked = isCorrect;
+                                    isCorrectInput.disabled = false;
+                                    isCorrectInput.title = "";
+
+                                    const typeSelect = document.getElementById('type');
+                                    if (typeSelect && typeSelect.value === 'Single Choice') {
+                                        // If this answer is NOT correct, and there IS a correct answer elsewhere, disable it
+                                        // If this answer IS correct, keep it enabled (so they can uncheck it if they want, though usually required 1)
+
+                                        if (!isCorrect) {
+                                            const correctAnswers = document.querySelectorAll('#answers-section .text-green-600.w-6');
+                                            if (correctAnswers.length > 0) {
+                                                isCorrectInput.disabled = true;
+                                                isCorrectInput.title = "Câu hỏi Single Choice chỉ được có 1 đáp án đúng.";
+                                            }
+                                        }
+                                    }
+
                                     document.getElementById('answerModal').classList.remove('hidden');
                                     document.body.style.overflow = 'hidden';
                                 }

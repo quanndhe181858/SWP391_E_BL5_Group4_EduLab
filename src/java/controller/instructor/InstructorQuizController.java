@@ -245,13 +245,13 @@ public class InstructorQuizController extends HttpServlet {
             long multipleChoiceCount = allQuizzes.stream()
                     .filter(q -> "Multiple Choice".equals(q.getType()))
                     .count();
-            long trueFalseCount = allQuizzes.stream()
-                    .filter(q -> "True/False".equals(q.getType()))
+            long singleChoiceCount = allQuizzes.stream()
+                    .filter(q -> "Single Choice".equals(q.getType()))
                     .count();
             long otherTypesCount = allQuizzes.stream()
                     .filter(q -> q.getType() != null &&
                             !"Multiple Choice".equals(q.getType()) &&
-                            !"True/False".equals(q.getType()))
+                            !"Single Choice".equals(q.getType()))
                     .count();
 
             // Pagination with validation
@@ -293,7 +293,7 @@ public class InstructorQuizController extends HttpServlet {
             request.setAttribute("quizList", paginatedQuizzes);
             request.setAttribute("totalQuizzes", totalQuizzes);
             request.setAttribute("multipleChoiceCount", multipleChoiceCount);
-            request.setAttribute("trueFalseCount", trueFalseCount);
+            request.setAttribute("singleChoiceCount", singleChoiceCount);
             request.setAttribute("otherTypesCount", otherTypesCount);
             request.setAttribute("page", currentPage);
             request.setAttribute("totalPages", totalPages);
@@ -585,6 +585,30 @@ public class InstructorQuizController extends HttpServlet {
         Quiz existingQuiz = quizServices.getQuizById(quizId);
         if (existingQuiz == null) {
             response.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
+            return;
+        }
+
+        // Validate type change against existing answers
+        dao.QuizAnswerDAO quizAnswerDAO = new dao.QuizAnswerDAO();
+        List<model.QuizAnswer> existingAnswers = quizAnswerDAO.getQuizAnswersByQuizId(quizId);
+        long correctCount = 0;
+        if (existingAnswers != null) {
+            correctCount = existingAnswers.stream().filter(model.QuizAnswer::isIs_true).count();
+        }
+
+        if ("Multiple Choice".equals(type) && correctCount < 2) {
+            session.setAttribute("notification",
+                    "Không thể đổi sang Multiple Choice. Cần ít nhất 2 đáp án đúng hiện có.");
+            session.setAttribute("notificationType", "error");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
+            return;
+        }
+
+        if ("Single Choice".equals(type) && correctCount != 1) {
+            session.setAttribute("notification",
+                    "Không thể đổi sang Single Choice. Cần chính xác 1 đáp án đúng hiện có.");
+            session.setAttribute("notificationType", "error");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
             return;
         }
 

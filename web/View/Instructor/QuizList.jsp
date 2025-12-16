@@ -107,20 +107,20 @@
                                                                                            != null ? totalQuizzes : 0}</p>
                                     </div>
                                     <div class="bg-green-50 p-4 rounded-lg">
-                                        <p class="text-sm text-green-600 font-semibold">Trắc nghiệm</p>
+                                        <p class="text-sm text-green-600 font-semibold">Multiple Choice</p>
                                         <p class="text-2xl font-bold text-gray-900 mt-1">
                                             ${multipleChoiceCount != null ? multipleChoiceCount : 0}</p>
                                     </div>
                                     <div class="bg-yellow-50 p-4 rounded-lg">
-                                        <p class="text-sm text-yellow-600 font-semibold">Đúng/Sai</p>
+                                        <p class="text-sm text-yellow-600 font-semibold">Single Choice</p>
                                         <p class="text-2xl font-bold text-gray-900 mt-1">
-                                            ${trueFalseCount != null ? trueFalseCount : 0}</p>
+                                            ${singleChoiceCount != null ? singleChoiceCount : 0}</p>
                                     </div>
-                                    <div class="bg-purple-50 p-4 rounded-lg">
+<!--                                    <div class="bg-purple-50 p-4 rounded-lg">
                                         <p class="text-sm text-purple-600 font-semibold">Các loại khác</p>
                                         <p class="text-2xl font-bold text-gray-900 mt-1">
                                             ${otherTypesCount != null ? otherTypesCount : 0}</p>
-                                    </div>
+                                    </div>-->
                                 </div>
 
                                 <div
