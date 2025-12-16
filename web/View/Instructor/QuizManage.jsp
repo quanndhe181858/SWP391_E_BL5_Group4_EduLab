@@ -208,9 +208,7 @@
                                                                         </div>
                                                                         <div class="flex gap-2">
                                                                             <button type="button"
-                                                                                onclick='editAnswer(${answer.id}, ${quiz.id}, "${answer.content.replace("'", "
-                                                                                \\'").replace("\"", "&quot;" )}",
-                                                                                ${answer.is_true})'
+                                                                                onclick='editAnswer(${answer.id}, ${quiz.id}, "${answer.content.replace("'", "\\'").replace("\"", "&quot;" )}",${answer.is_true})'
                                                                                 class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                                                                 title="Chỉnh sửa">
                                                                                 <svg class="w-5 h-5" fill="none"
@@ -405,7 +403,7 @@
                                     // The class .border-2 is used on answer divs
 
                                     if (answerCount >= 6) {
-                                        showToast('Tối đa 6 câu trả lời!', 'warning', 2000, 'right');
+                                        showToast('Tối đa 6 câu trả lời!', 'error', 2000, 'right');
                                         return;
                                     }
 

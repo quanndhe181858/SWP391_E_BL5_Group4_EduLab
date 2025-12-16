@@ -241,7 +241,7 @@
                             // Check for max 6 answers
                             const rows = document.querySelectorAll('.answer-row');
                             if (rows.length >= 6) {
-                                showToast('Tối đa 6 câu trả lời!', 'warning', 2000, 'right');
+                                showToast('Tối đa 6 câu trả lời!', 'error', 2000, 'right');
                                 return;
                             }
 
