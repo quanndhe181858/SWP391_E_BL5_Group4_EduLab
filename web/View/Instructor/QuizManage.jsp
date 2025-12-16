@@ -208,7 +208,8 @@
                                                                         </div>
                                                                         <div class="flex gap-2">
                                                                             <button type="button"
-                                                                                onclick='editAnswer(${answer.id}, ${quiz.id}, "${answer.content.replace("'", "\\'").replace("\"", "&quot;" )}",
+                                                                                onclick='editAnswer(${answer.id}, ${quiz.id}, "${answer.content.replace("'", "
+                                                                                \\'").replace("\"", "&quot;" )}",
                                                                                 ${answer.is_true})'
                                                                                 class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                                                                 title="Chỉnh sửa">
@@ -398,6 +399,16 @@
                                 });
 
                                 function showAddAnswerModal() {
+                                    // Check for max 6 answers
+                                    const answerCount = document.querySelectorAll('#answers-section .border-2').length;
+                                    // Also count if there is a 'No answers' placeholder, but here we count actual answer elements
+                                    // The class .border-2 is used on answer divs
+
+                                    if (answerCount >= 6) {
+                                        showToast('Tối đa 6 câu trả lời!', 'warning', 2000, 'right');
+                                        return;
+                                    }
+
                                     document.getElementById('modalTitle').textContent = 'Thêm câu trả lời';
                                     document.getElementById('formAction').value = 'createAnswer';
                                     document.getElementById('answerId').value = '';

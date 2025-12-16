@@ -167,6 +167,25 @@ public class InstructorQuizAnswerController extends HttpServlet {
             return;
         }
 
+        // Validate max 6 answers
+        java.util.List<QuizAnswer> existingAnswers = quizAnswerDAO.getQuizAnswersByQuizId(quizId);
+        if (existingAnswers != null && existingAnswers.size() >= 6) {
+            String ajaxHeader = request.getHeader("X-Requested-With");
+            boolean isAjax = "XMLHttpRequest".equals(ajaxHeader);
+
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\": false, \"message\": \"Tối đa 6 câu trả lời cho phép.\"}");
+            } else {
+                session.setAttribute("notification", "Tối đa 6 câu trả lời cho phép.");
+                session.setAttribute("notificationType", "error");
+                response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
+            }
+            return;
+        }
+
         // Create quiz answer object
         QuizAnswer answer = new QuizAnswer();
         answer.setQuiz_id(quizId);

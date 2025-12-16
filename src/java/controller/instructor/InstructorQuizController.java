@@ -393,6 +393,20 @@ public class InstructorQuizController extends HttpServlet {
             return;
         }
 
+        // Validate max 6 answers
+        if (answerContents.length > 6) {
+            request.setAttribute("notification", "Tối đa 6 câu trả lời cho phép.");
+            request.setAttribute("notificationType", "error");
+            // Preserve input
+            request.setAttribute("question", question);
+            request.setAttribute("type", type);
+            request.setAttribute("categoryId", categoryIdParam);
+            request.setAttribute("answerContents", answerContents);
+            // Forward back to create form
+            showCreateForm(request, response);
+            return;
+        }
+
         // Get user from session - we know it exists due to authorization check
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
