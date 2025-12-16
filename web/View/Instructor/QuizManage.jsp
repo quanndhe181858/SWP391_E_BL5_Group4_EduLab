@@ -208,8 +208,7 @@
                                                                         </div>
                                                                         <div class="flex gap-2">
                                                                             <button type="button"
-                                                                                onclick='editAnswer(${answer.id}, ${quiz.id}, "${answer.content.replace("'", "
-                                                                                \\'").replace("\"", "&quot;" )}",
+                                                                                onclick='editAnswer(${answer.id}, ${quiz.id}, "${answer.content.replace("'", "\\'").replace("\"", "&quot;" )}",
                                                                                 ${answer.is_true})'
                                                                                 class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                                                                                 title="Chỉnh sửa">

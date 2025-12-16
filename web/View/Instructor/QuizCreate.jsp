@@ -307,9 +307,23 @@
                             }
 
                             const checked = document.querySelectorAll('input[name="answerIsCorrect"]:checked');
+                            const type = document.getElementById('type').value;
+
                             if (checked.length < 1) {
                                 showToast('Vui lòng chọn ít nhất 1 câu trả lời đúng!', 'error', 3000, 'right');
                                 return false;
+                            }
+
+                            if (type === 'Multiple Choice') {
+                                if (checked.length < 2) {
+                                    showToast('Câu hỏi Multiple Choice phải có ít nhất 2 đáp án đúng!', 'error', 3000, 'right');
+                                    return false;
+                                }
+                            } else if (type === 'Single Choice') {
+                                if (checked.length !== 1) {
+                                    showToast('Câu hỏi Single Choice chỉ được có đúng 1 đáp án đúng!', 'error', 3000, 'right');
+                                    return false;
+                                }
                             }
 
                             return true;

@@ -135,14 +135,10 @@
                                             <select name="sortBy"
                                                     class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
                                                     onchange="submitFilter()">
-                                                <option value="updated_desc" ${param.sortBy=='updated_desc'
-                                                                               || param.sortBy==null ? 'selected' : '' }>Mới cập nhật</option>
-                                                <option value="question_asc" ${param.sortBy=='question_asc'
-                                                                               ? 'selected' : '' }>Câu hỏi (A-Z)</option>
-                                                <option value="created_desc" ${param.sortBy=='created_desc'
-                                                                               ? 'selected' : '' }>Mới nhất</option>
-                                                <option value="created_asc" ${param.sortBy=='created_asc'
-                                                                              ? 'selected' : '' }>Cũ nhất</option>
+                                                <option value="updated_desc" ${param.sortBy=='updated_desc' ? 'selected' : '' }>Mới cập nhật</option>
+                                                <option value="question_asc" ${param.sortBy=='question_asc' ? 'selected' : '' }>Câu hỏi (A-Z)</option>
+                                                <option value="created_desc" ${param.sortBy=='created_desc' || param.sortBy==null ? 'selected' : '' }>Mới nhất</option>
+                                                <option value="created_asc" ${param.sortBy=='created_asc' ? 'selected' : '' }>Cũ nhất</option>
                                             </select>
                                         </div>
                                     </div>

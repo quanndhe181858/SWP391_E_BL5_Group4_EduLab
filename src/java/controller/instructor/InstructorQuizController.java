@@ -393,6 +393,21 @@ public class InstructorQuizController extends HttpServlet {
             return;
         }
 
+        // Validate correct answer count based on type
+        if ("Multiple Choice".equals(type) && answerIsCorrectIndices.length < 2) {
+            request.setAttribute("notification", "Câu hỏi Multiple Choice phải có ít nhất 2 đáp án đúng.");
+            request.setAttribute("notificationType", "error");
+            showCreateFormWithError(request, response, question, type, categoryIdParam, answerContents);
+            return;
+        }
+
+        if ("Single Choice".equals(type) && answerIsCorrectIndices.length != 1) {
+            request.setAttribute("notification", "Câu hỏi Single Choice chỉ được có đúng 1 đáp án đúng.");
+            request.setAttribute("notificationType", "error");
+            showCreateFormWithError(request, response, question, type, categoryIdParam, answerContents);
+            return;
+        }
+
         // Validate max 6 answers
         if (answerContents.length > 6) {
             request.setAttribute("notification", "Tối đa 6 câu trả lời cho phép.");
@@ -641,6 +656,16 @@ public class InstructorQuizController extends HttpServlet {
         }
 
         response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+    }
+
+    private void showCreateFormWithError(HttpServletRequest request, HttpServletResponse response,
+            String question, String type, String categoryId, String[] answerContents)
+            throws ServletException, IOException {
+        request.setAttribute("question", question);
+        request.setAttribute("type", type);
+        request.setAttribute("categoryId", categoryId);
+        request.setAttribute("answerContents", answerContents);
+        showCreateForm(request, response);
     }
 
     @Override
