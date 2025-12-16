@@ -84,7 +84,7 @@
                         </div>
 
                         <div class="flex items-center justify-between mb-6">
-                            <a href="#" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                            <a href="<%= request.getContextPath()%>/forgot-password" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
                                 Quên mật khẩu?
                             </a>
                         </div>
