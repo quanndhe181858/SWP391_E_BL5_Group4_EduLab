@@ -167,11 +167,57 @@ public class InstructorQuizAnswerController extends HttpServlet {
             return;
         }
 
+        // Validate max 6 answers
+        java.util.List<QuizAnswer> existingAnswers = quizAnswerDAO.getQuizAnswersByQuizId(quizId);
+        if (existingAnswers != null && existingAnswers.size() >= 6) {
+            String ajaxHeader = request.getHeader("X-Requested-With");
+            boolean isAjax = "XMLHttpRequest".equals(ajaxHeader);
+
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                response.getWriter().write("{\"success\": false, \"message\": \"Tối đa 6 câu trả lời cho phép.\"}");
+            } else {
+                session.setAttribute("notification", "Tối đa 6 câu trả lời cho phép.");
+                session.setAttribute("notificationType", "error");
+                response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
+            }
+            return;
+        }
+
+        // Validate Single Choice constraint
+        if ("Single Choice".equals(existingQuiz.getType()) && "on".equalsIgnoreCase(isTrueParam))
+
+        {
+            // Check if there is already a correct answer
+            if (existingAnswers != null) {
+                boolean hasCorrect = existingAnswers.stream().anyMatch(QuizAnswer::isIs_true);
+                if (hasCorrect) {
+                    String ajaxHeader = request.getHeader("X-Requested-With");
+                    boolean isAjax = "XMLHttpRequest".equals(ajaxHeader);
+
+                    if (isAjax) {
+                        response.setContentType("application/json");
+                        response.setCharacterEncoding("UTF-8");
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        response.getWriter().write(
+                                "{\"success\": false, \"message\": \"Câu hỏi Single Choice chỉ được có 1 đáp án đúng.\"}");
+                    } else {
+                        session.setAttribute("notification", "Câu hỏi Single Choice chỉ được có 1 đáp án đúng.");
+                        session.setAttribute("notificationType", "error");
+                        response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
+                    }
+                    return;
+                }
+            }
+        }
+
         // Create quiz answer object
         QuizAnswer answer = new QuizAnswer();
         answer.setQuiz_id(quizId);
         answer.setIs_true("on".equalsIgnoreCase(isTrueParam));
-        answer.setType(existingQuiz.getType() != null ? existingQuiz.getType() : "text"); // Use Quiz's type
+        answer.setType(existingQuiz.getType() != null ? existingQuiz.getType() : "text");
         answer.setContent(content.trim());
 
         // Save to database using the authorized user's ID

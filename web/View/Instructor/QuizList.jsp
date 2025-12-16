@@ -107,20 +107,20 @@
                                                                                            != null ? totalQuizzes : 0}</p>
                                     </div>
                                     <div class="bg-green-50 p-4 rounded-lg">
-                                        <p class="text-sm text-green-600 font-semibold">Trắc nghiệm</p>
+                                        <p class="text-sm text-green-600 font-semibold">Multiple Choice</p>
                                         <p class="text-2xl font-bold text-gray-900 mt-1">
                                             ${multipleChoiceCount != null ? multipleChoiceCount : 0}</p>
                                     </div>
                                     <div class="bg-yellow-50 p-4 rounded-lg">
-                                        <p class="text-sm text-yellow-600 font-semibold">Đúng/Sai</p>
+                                        <p class="text-sm text-yellow-600 font-semibold">Single Choice</p>
                                         <p class="text-2xl font-bold text-gray-900 mt-1">
-                                            ${trueFalseCount != null ? trueFalseCount : 0}</p>
+                                            ${singleChoiceCount != null ? singleChoiceCount : 0}</p>
                                     </div>
-                                    <div class="bg-purple-50 p-4 rounded-lg">
+<!--                                    <div class="bg-purple-50 p-4 rounded-lg">
                                         <p class="text-sm text-purple-600 font-semibold">Các loại khác</p>
                                         <p class="text-2xl font-bold text-gray-900 mt-1">
                                             ${otherTypesCount != null ? otherTypesCount : 0}</p>
-                                    </div>
+                                    </div>-->
                                 </div>
 
                                 <div
@@ -135,14 +135,10 @@
                                             <select name="sortBy"
                                                     class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
                                                     onchange="submitFilter()">
-                                                <option value="updated_desc" ${param.sortBy=='updated_desc'
-                                                                               || param.sortBy==null ? 'selected' : '' }>Mới cập nhật</option>
-                                                <option value="question_asc" ${param.sortBy=='question_asc'
-                                                                               ? 'selected' : '' }>Câu hỏi (A-Z)</option>
-                                                <option value="created_desc" ${param.sortBy=='created_desc'
-                                                                               ? 'selected' : '' }>Mới nhất</option>
-                                                <option value="created_asc" ${param.sortBy=='created_asc'
-                                                                              ? 'selected' : '' }>Cũ nhất</option>
+                                                <option value="updated_desc" ${param.sortBy=='updated_desc' ? 'selected' : '' }>Mới cập nhật</option>
+                                                <option value="question_asc" ${param.sortBy=='question_asc' ? 'selected' : '' }>Câu hỏi (A-Z)</option>
+                                                <option value="created_desc" ${param.sortBy=='created_desc' || param.sortBy==null ? 'selected' : '' }>Mới nhất</option>
+                                                <option value="created_asc" ${param.sortBy=='created_asc' ? 'selected' : '' }>Cũ nhất</option>
                                             </select>
                                         </div>
                                     </div>
