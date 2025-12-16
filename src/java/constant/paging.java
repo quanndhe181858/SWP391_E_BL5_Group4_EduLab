@@ -16,5 +16,5 @@ public class paging {
 
     public static final int COURSE_CATALOG_ITEM_PER_PAGE = 12;
 
-    public static final int USER_LIST_ITEM_PER_PAGE = 10;
+    public static final int USER_LIST_ITEM_PER_PAGE = 99;
 }

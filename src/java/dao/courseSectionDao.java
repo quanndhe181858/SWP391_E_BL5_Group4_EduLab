@@ -30,36 +30,37 @@ public class CourseSectionDAO extends dao {
 
         CourseSectionDAO dao = new CourseSectionDAO();
 
-        CourseSection newCS = new CourseSection();
-        newCS.setCourse_id(3);
-        newCS.setTitle("Introduction");
-        newCS.setDescription("This is the intro section");
-        newCS.setContent("HTML content here");
-        newCS.setType("video");
-        newCS.setPosition(1);
-        newCS.setStatus("active");
-        newCS.setCreated_at(new Timestamp(System.currentTimeMillis()));
-        newCS.setCreated_by(1);
-
-        CourseSection created = dao.createCourseSection(newCS);
-
-        int testId = created.getId();
-
-        CourseSection cs = dao.getCourseSectionById(testId);
-        System.out.println(cs != null ? cs : "Not found");
-
-        cs.setTitle("Updated Title");
-        cs.setUpdated_at(new Timestamp(System.currentTimeMillis()));
-        cs.setUpdated_by(2);
-
-        boolean updated = dao.updateCourseSection(cs);
-
-        List<CourseSection> listByCourse = dao.getAllCourseSectionsByCourseId(1);
-        listByCourse.forEach(System.out::println);
-
-        boolean deleted = dao.deleteCourseSection(testId);
-
-        CourseSection afterDelete = dao.getCourseSectionById(testId);
+//        CourseSection newCS = new CourseSection();
+//        newCS.setCourse_id(3);
+//        newCS.setTitle("Introduction");
+//        newCS.setDescription("This is the intro section");
+//        newCS.setContent("HTML content here");
+//        newCS.setType("video");
+//        newCS.setPosition(1);
+//        newCS.setStatus("active");
+//        newCS.setCreated_at(new Timestamp(System.currentTimeMillis()));
+//        newCS.setCreated_by(1);
+//
+//        CourseSection created = dao.createCourseSection(newCS);
+//
+//        int testId = created.getId();
+//
+//        CourseSection cs = dao.getCourseSectionById(testId);
+//        System.out.println(cs != null ? cs : "Not found");
+//
+//        cs.setTitle("Updated Title");
+//        cs.setUpdated_at(new Timestamp(System.currentTimeMillis()));
+//        cs.setUpdated_by(2);
+//
+//        boolean updated = dao.updateCourseSection(cs);
+//
+//        List<CourseSection> listByCourse = dao.getAllCourseSectionsByCourseId(1);
+//        listByCourse.forEach(System.out::println);
+//
+//        boolean deleted = dao.deleteCourseSection(testId);
+//
+//        CourseSection afterDelete = dao.getCourseSectionById(testId);
+        System.out.println(dao.getSectionsByPositionAndCourseId(1, 6));
     }
 
     public List<CourseSection> getSectionsByCourseId(int courseId) {
@@ -304,4 +305,90 @@ public class CourseSectionDAO extends dao {
         return list;
     }
 
+    public int getSectionsPositionForCourse(int courseId) {
+        String sql = """
+                     SELECT COUNT(*) + 1 as SectionPosition FROM course_section WHERE course_id = 1;
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("SectionPosition");
+            }
+
+            return 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        } finally {
+            this.closeResources();
+        }
+    }
+
+    public CourseSection getSectionsByPositionAndCourseId(int position, int courseId) {
+        String sql = "SELECT * FROM `edulab`.`course_section` WHERE course_id = ? AND position = ?";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, courseId);
+            ps.setInt(2, position);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                CourseSection cs = new CourseSection();
+
+                cs.setId(rs.getInt("id"));
+                cs.setCourse_id(rs.getInt("course_id"));
+                cs.setTitle(rs.getString("title"));
+                cs.setDescription(rs.getString("description"));
+                cs.setContent(rs.getString("content"));
+                cs.setType(rs.getString("type"));
+                cs.setPosition(rs.getInt("position"));
+                cs.setStatus(rs.getString("status"));
+                cs.setCreated_at(rs.getTimestamp("created_at"));
+                cs.setUpdated_at(rs.getTimestamp("updated_at"));
+                cs.setCreated_by(rs.getInt("created_by"));
+                cs.setUpdated_by(rs.getInt("updated_by"));
+
+                return cs;
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+
+        return null;
+    }
+
+    public boolean updateCourseSectionPosition(int csId, int pos) {
+        String sql = """
+                 UPDATE `edulab`.`course_section`
+                 SET
+                   `position` = ?
+                 WHERE `id` = ?;
+                 """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, pos);
+            ps.setInt(2, csId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        } finally {
+            this.closeResources();
+        }
+    }
 }

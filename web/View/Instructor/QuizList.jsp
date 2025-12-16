@@ -70,10 +70,8 @@
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                                         onchange="submitFilter()">
                                     <option value="">Tất cả các loại</option>
-                                    <option value="Multiple Choice" ${param.type=='Multiple Choice'
-                                                                      ? 'selected' : '' }>Trắc nghiệm</option>
-                                    <option value="True/False" ${param.type=='True/False' ? 'selected'
-                                                                 : '' }>Đúng/Sai</option>
+                                    <option value="Multiple Choice" ${param.type=='Multiple Choice'? 'selected' : '' }>Multiple Choice</option>
+                                    <option value="Single Choice" ${param.type=='Single Choice' ? 'selected' : '' }>Single Choice</option>
                                 </select>
                             </div>
 
