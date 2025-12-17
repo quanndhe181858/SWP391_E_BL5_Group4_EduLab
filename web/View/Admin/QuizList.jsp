@@ -265,34 +265,100 @@
                         <!-- Pagination -->
                         <c:if test="${totalPages > 1}">
                             <div
-                                class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                                <div class="flex-1 flex justify-between sm:hidden">
+                                class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4 rounded-lg shadow-sm">
+                                <div class="flex flex-1 justify-between sm:hidden">
                                     <c:if test="${currentPage > 1}">
-                                        <a href="?page=${currentPage - 1}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}&sort=${param.sort}"
-                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Trước</a>
+                                        <a href="${pageContext.request.contextPath}/admin/quizzes?page=${currentPage - 1}&keyword=${keyword}&type=${selectedType}&category=${selectedCategory}&status=${selectedStatus}&sort=${selectedSort}"
+                                            class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</a>
                                     </c:if>
                                     <c:if test="${currentPage < totalPages}">
-                                        <a href="?page=${currentPage + 1}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}&sort=${param.sort}"
-                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Sau</a>
+                                        <a href="${pageContext.request.contextPath}/admin/quizzes?page=${currentPage + 1}&keyword=${keyword}&type=${selectedType}&category=${selectedCategory}&status=${selectedStatus}&sort=${selectedSort}"
+                                            class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Next</a>
                                     </c:if>
                                 </div>
-                                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                                     <div>
                                         <p class="text-sm text-gray-700">
-                                            Trang <span class="font-medium">${currentPage}</span> trên <span
-                                                class="font-medium">${totalPages}</span>
+                                            Hiển thị trang
+                                            <span class="font-medium">${currentPage}</span>
+                                            trong tổng số
+                                            <span class="font-medium">${totalPages}</span>
+                                            trang
                                         </p>
                                     </div>
                                     <div>
-                                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
+                                        <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm"
                                             aria-label="Pagination">
+                                            <!-- Previous Button -->
+                                            <c:choose>
+                                                <c:when test="${currentPage > 1}">
+                                                    <a href="${pageContext.request.contextPath}/admin/quizzes?page=${currentPage - 1}&keyword=${keyword}&type=${selectedType}&category=${selectedCategory}&status=${selectedStatus}&sort=${selectedSort}"
+                                                        class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                                        <span class="sr-only">Previous</span>
+                                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
+                                                            aria-hidden="true">
+                                                            <path fill-rule="evenodd"
+                                                                d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                    </a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span
+                                                        class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-300 ring-1 ring-inset ring-gray-300 cursor-not-allowed">
+                                                        <span class="sr-only">Previous</span>
+                                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
+                                                            aria-hidden="true">
+                                                            <path fill-rule="evenodd"
+                                                                d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                    </span>
+                                                </c:otherwise>
+                                            </c:choose>
+
+                                            <!-- Page Numbers -->
                                             <c:forEach begin="1" end="${totalPages}" var="i">
-                                                <a href="?page=${i}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}&sort=${param.sort}"
-                                                    aria-current="page"
-                                                    class="${currentPage == i ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'} relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                                                    ${i}
-                                                </a>
+                                                <c:choose>
+                                                    <c:when test="${currentPage == i}">
+                                                        <a href="#" aria-current="page"
+                                                            class="relative z-10 inline-flex items-center bg-blue-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">${i}</a>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <a href="${pageContext.request.contextPath}/admin/quizzes?page=${i}&keyword=${keyword}&type=${selectedType}&category=${selectedCategory}&status=${selectedStatus}&sort=${selectedSort}"
+                                                            class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">${i}</a>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </c:forEach>
+
+                                            <!-- Next Button -->
+                                            <c:choose>
+                                                <c:when test="${currentPage < totalPages}">
+                                                    <a href="${pageContext.request.contextPath}/admin/quizzes?page=${currentPage + 1}&keyword=${keyword}&type=${selectedType}&category=${selectedCategory}&status=${selectedStatus}&sort=${selectedSort}"
+                                                        class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                                        <span class="sr-only">Next</span>
+                                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
+                                                            aria-hidden="true">
+                                                            <path fill-rule="evenodd"
+                                                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                    </a>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span
+                                                        class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-300 ring-1 ring-inset ring-gray-300 cursor-not-allowed">
+                                                        <span class="sr-only">Next</span>
+                                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
+                                                            aria-hidden="true">
+                                                            <path fill-rule="evenodd"
+                                                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                                                clip-rule="evenodd" />
+                                                        </svg>
+                                                    </span>
+                                                </c:otherwise>
+                                            </c:choose>
+
                                         </nav>
                                     </div>
                                 </div>
