@@ -9,7 +9,7 @@
                 <head>
                     <meta charset="UTF-8" />
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Quản lý Người dùng - Admin</title>
+                    <title>Quản lý người dùng - Quản trị viên</title>
                     <jsp:include page="/layout/import.jsp" />
                 </head>
 
@@ -24,7 +24,7 @@
 
                         <!-- Page Title -->
                         <div class="mb-8">
-                            <h1 class="text-3xl font-bold text-gray-800 mb-2">👥 Quản lý Người dùng</h1>
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">👥 Quản lý người dùng</h1>
                             <p class="text-gray-600">Quản lý thông tin và trạng thái của tất cả người dùng trong hệ
                                 thống</p>
                         </div>
