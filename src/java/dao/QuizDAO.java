@@ -502,8 +502,9 @@ public class QuizDAO extends dao {
         }
     }
 
-    public List<Quiz> searchQuizzes(String keyword) {
-        String sql = """
+    public List<Quiz> searchQuizzes(String keyword, String type, Integer categoryId, String status) {
+        List<Quiz> quizzes = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
                 SELECT
                     id,
                     question,
@@ -515,14 +516,41 @@ public class QuizDAO extends dao {
                     updated_by,
                     status
                 FROM edulab.quiz
-                WHERE question LIKE ?;
-                """;
-        List<Quiz> quizzes = new ArrayList<>();
+                WHERE 1=1
+                """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND question LIKE ?");
+            params.add("%" + keyword.trim() + "%");
+        }
+
+        if (type != null && !type.trim().isEmpty()) {
+            sql.append(" AND type = ?");
+            params.add(type);
+        }
+
+        if (categoryId != null) {
+            sql.append(" AND category_id = ?");
+            params.add(categoryId);
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND status = ?");
+            params.add(status);
+        }
+
+        sql.append(" ORDER BY id DESC");
 
         try {
             con = dbc.getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setString(1, "%" + keyword + "%");
+            ps = con.prepareStatement(sql.toString());
+            
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
             rs = ps.executeQuery();
 
             while (rs.next()) {
@@ -541,11 +569,15 @@ public class QuizDAO extends dao {
             }
 
         } catch (SQLException e) {
-            this.log(Level.SEVERE, "Something wrong while searchQuizzes() execute!", e);
+            this.log(Level.SEVERE, "Something wrong while searchQuizzes() with filters execute!", e);
         } finally {
             this.closeResources();
         }
 
         return quizzes;
+    }
+
+    public List<Quiz> searchQuizzes(String keyword) {
+        return searchQuizzes(keyword, null, null, null);
     }
 }

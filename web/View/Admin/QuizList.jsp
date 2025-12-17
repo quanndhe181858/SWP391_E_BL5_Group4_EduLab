@@ -30,8 +30,42 @@
                         <form action="${pageContext.request.contextPath}/admin/quizzes" method="get"
                             class="flex flex-wrap gap-4 items-center">
 
+                            <!-- FILTER: TYPE -->
+                            <div class="min-w-[150px]">
+                                <select name="type"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Tất cả loại</option>
+                                    <option value="Single Choice" ${param.type=='Single Choice' ? 'selected' : '' }>
+                                        Single Choice</option>
+                                    <option value="Multiple Choice" ${param.type=='Multiple Choice' ? 'selected' : '' }>
+                                        Multiple Choice</option>
+                                </select>
+                            </div>
+
+                            <!-- FILTER: CATEGORY -->
+                            <div class="min-w-[150px]">
+                                <select name="category"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Tất cả danh mục</option>
+                                    <c:forEach items="${categories}" var="cat">
+                                        <option value="${cat.id}" ${param.category==cat.id ? 'selected' : '' }>
+                                            ${cat.name}</option>
+                                    </c:forEach>
+                                </select>
+                            </div>
+
+                            <!-- FILTER: STATUS -->
+                            <div class="min-w-[150px]">
+                                <select name="status"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="Active" ${param.status=='Active' ? 'selected' : '' }>Active</option>
+                                    <option value="Hidden" ${param.status=='Hidden' ? 'selected' : '' }>Hidden</option>
+                                </select>
+                            </div>
+
                             <!-- SEARCH INPUT -->
-                            <div class="flex-1 min-w-[300px]">
+                            <div class="flex-1 min-w-[200px]">
                                 <div class="relative">
                                     <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,11 +185,11 @@
                                 class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                                 <div class="flex-1 flex justify-between sm:hidden">
                                     <c:if test="${currentPage > 1}">
-                                        <a href="?page=${currentPage - 1}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
+                                        <a href="?page=${currentPage - 1}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}"
                                             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Trước</a>
                                     </c:if>
                                     <c:if test="${currentPage < totalPages}">
-                                        <a href="?page=${currentPage + 1}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
+                                        <a href="?page=${currentPage + 1}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}"
                                             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Sau</a>
                                     </c:if>
                                 </div>
@@ -170,7 +204,7 @@
                                         <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
                                             aria-label="Pagination">
                                             <c:forEach begin="1" end="${totalPages}" var="i">
-                                                <a href="?page=${i}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
+                                                <a href="?page=${i}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}"
                                                     aria-current="page"
                                                     class="${currentPage == i ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'} relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                                                     ${i}

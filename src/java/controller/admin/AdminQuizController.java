@@ -114,6 +114,10 @@ public class AdminQuizController extends HttpServlet {
             throws ServletException, IOException {
         String pageParam = request.getParameter("page");
         String keyword = request.getParameter("keyword");
+        String type = request.getParameter("type");
+        String categoryIdParam = request.getParameter("category");
+        String status = request.getParameter("status");
+
         int page = 1;
         if (pageParam != null && !pageParam.isEmpty()) {
             try {
@@ -123,12 +127,17 @@ public class AdminQuizController extends HttpServlet {
             }
         }
 
-        List<Quiz> allQuizzes;
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            allQuizzes = quizDAO.searchQuizzes(keyword.trim());
-        } else {
-            allQuizzes = quizDAO.getAllQuizzes();
+        Integer categoryId = null;
+        if (categoryIdParam != null && !categoryIdParam.trim().isEmpty()) {
+            try {
+                categoryId = Integer.parseInt(categoryIdParam);
+            } catch (NumberFormatException e) {
+                // ignore invalid category id
+            }
         }
+
+        // Use the new search method that handles all filters
+        List<Quiz> allQuizzes = quizDAO.searchQuizzes(keyword, type, categoryId, status);
 
         // Manual Pagination
         int pageSize = 10;
@@ -152,6 +161,7 @@ public class AdminQuizController extends HttpServlet {
 
         // Fetch categories and create a map for easy lookup in JSP
         List<Category> categories = categoryDAO.getCategories();
+        request.setAttribute("categories", categories); // Passed list for dropdown
         java.util.Map<Integer, String> categoryMap = new java.util.HashMap<>();
         if (categories != null) {
             for (Category c : categories) {
