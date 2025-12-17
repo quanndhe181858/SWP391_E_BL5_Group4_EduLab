@@ -20,6 +20,7 @@ import java.util.Map;
 import model.Category;
 import model.Course;
 import model.User;
+import service.CourseServices;
 import util.ResponseUtils;
 
 /**
@@ -30,6 +31,7 @@ import util.ResponseUtils;
 public class AdminCoursesController extends HttpServlet {
 
     private final CourseDAO cDao = new CourseDAO();
+    private final CourseServices cService = new CourseServices();
     private final CategoryDAO cateDao = new CategoryDAO();
 
     @Override
@@ -78,6 +80,10 @@ public class AdminCoursesController extends HttpServlet {
         int offset = (page - 1) * paging.ADMIN_COURSE_MANAGEMENT_PER_PAGE;
 
         List<Course> cList = cDao.getAllCoursesForAdmin(paging.ADMIN_COURSE_MANAGEMENT_PER_PAGE, offset, search, search, categoryId, status, sortBy, hide_by_admin);
+        for (Course c : cList) {
+            c.setCategory(cateDao.getCategoryById(c.getCategory_id()));
+            c.setUserCreated(cDao.getCourseCreatedBy(c.getId()));
+        }
         int countAllCourse = cDao.countAllCourse("", "", 0, "", false);
         int CountActiveCourses = cDao.countAllCourse("", "", 0, "Active", false);
         int countHiddenCourse = cDao.countAllCourse("", "", 0, "", true);
@@ -116,10 +122,11 @@ public class AdminCoursesController extends HttpServlet {
 
         int courseId = Integer.parseInt(courseIdStr);
 
-        Course c = cDao.getCourseById(courseId);
+        Course c = cService.getCourseById(courseId);
 
         boolean toggle = !c.isHide_by_admin();
 
+        cDao.updateCourseStatus(courseId, "Inactive");
         cDao.UpdateHideByAdmin(courseId, toggle);
         resp.setStatus(200);
         res.put("success", true);

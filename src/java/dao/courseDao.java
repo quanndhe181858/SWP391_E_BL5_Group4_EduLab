@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import model.User;
 
 /**
  *
@@ -1012,4 +1013,65 @@ public class CourseDAO extends dao {
         }
     }
 
+    public User getCourseCreatedBy(int id) {
+        User u = new User();
+        String sql = """
+                     SELECT * FROM user u
+                     JOIN course c ON c.created_by = u.id
+                     WHERE c.id = ?;
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, id);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                u = new User();
+                u.setId(rs.getInt("id"));
+                u.setUuid(rs.getString("uuid"));
+                u.setFirst_name(rs.getString("first_name"));
+                u.setLast_name(rs.getString("last_name"));
+                u.setBod(rs.getDate("bod"));
+                u.setStatus(rs.getString("status"));
+                u.setRole_id(rs.getInt("role_id"));
+                u.setCreated_at(rs.getTimestamp("created_at"));
+                u.setUpdated_at(rs.getTimestamp("updated_at"));
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return null;
+        }
+
+        return u;
+    }
+
+    public boolean updateCourseStatus(int id, String status) {
+        String sql = """
+                     UPDATE course
+                     SET status = ?
+                     WHERE id = ?
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, status);
+            ps.setInt(2, id);
+
+            int rows = ps.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        } finally {
+            this.closeResources();
+        }
+    }
 }

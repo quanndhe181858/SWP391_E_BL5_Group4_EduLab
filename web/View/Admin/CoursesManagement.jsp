@@ -161,10 +161,10 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="text-sm text-gray-600"></span>
+                                        <span class="text-sm text-gray-600">${course.category.name}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="text-sm text-gray-600"></span>
+                                        <span class="text-sm text-gray-600">${course.userCreated.first_name} ${course.userCreated.last_name}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <c:choose>
@@ -299,203 +299,203 @@
             }
 
             function displayCourseModal(course, sections) {
-    const contextPath = '${pageContext.request.contextPath}';
-    
-    // Tạo HTML cho sections
-    let sectionsHtml = '';
-    if (sections && sections.length > 0) {
-        sections.forEach((section, index) => {
-            const statusClass = section.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
-            const statusText = section.status === 'Active' ? 'Hoạt động' : 'Không hoạt động';
-            
-            // Xác định icon và label dựa trên type
-            let typeIcon = '';
-            let typeLabel = '';
-            let mediaHtml = '';
-            
-            switch(section.type) {
-    case 'text':
-        typeIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>';
-        typeLabel = 'Văn bản';
-        // Chỉ hiển thị content
-        if (section.content) {
-            mediaHtml = '<div class="ml-11 mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200">' +
-                       '<p class="text-sm text-gray-700 leading-relaxed">' + section.content + '</p>' +
-                       '</div>';
-        }
-        break;
-    case 'video':
-        typeIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-        typeLabel = 'Video';
-        mediaHtml = '<div class="ml-11 mt-3 space-y-3">';
-        // Hiển thị content trước
-        if (section.content) {
-            mediaHtml += '<div class="p-4 bg-gray-50 rounded-lg border border-gray-200">' +
-                        '<p class="text-sm text-gray-700 leading-relaxed">' + section.content + '</p>' +
-                        '</div>';
-        }
-        // Sau đó hiển thị video
-        if (section.media && section.media.path) {
-            mediaHtml += '<video controls class="w-full max-w-2xl rounded-lg shadow-md border border-gray-200">' +
-                        '<source src="' + contextPath + '/' + section.media.path + '" type="' + (section.media.mime_type || 'video/mp4') + '">' +
-                        'Trình duyệt của bạn không hỗ trợ video.' +
-                        '</video>';
-        }
-        mediaHtml += '</div>';
-        break;
-    case 'image':
-        typeIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
-        typeLabel = 'Hình ảnh';
-        mediaHtml = '<div class="ml-11 mt-3 space-y-3">';
-        // Hiển thị content trước
-        if (section.content) {
-            mediaHtml += '<div class="p-4 bg-gray-50 rounded-lg border border-gray-200">' +
-                        '<p class="text-sm text-gray-700 leading-relaxed">' + section.content + '</p>' +
-                        '</div>';
-        }
-        // Sau đó hiển thị image
-        if (section.media && section.media.path) {
-            mediaHtml += '<img src="' + contextPath + '/' + section.media.path + '" ' +
-                        'alt="' + section.title + '" ' +
-                        'class="max-w-2xl rounded-lg shadow-md border border-gray-200">';
-        }
-        mediaHtml += '</div>';
-        break;
-    default:
-        typeIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>';
-        typeLabel = section.type;
-        // Chỉ hiển thị content cho type không xác định
-        if (section.content) {
-            mediaHtml = '<div class="ml-11 mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200">' +
-                       '<p class="text-sm text-gray-700 leading-relaxed">' + section.content + '</p>' +
-                       '</div>';
-        }
-}
-            
-            sectionsHtml += '<div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">' +
-                '<div class="flex items-start justify-between">' +
-                    '<div class="flex-1">' +
-                        '<div class="flex items-center gap-3 mb-2">' +
-                            '<span class="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">' +
+                const contextPath = '${pageContext.request.contextPath}';
+
+                // Tạo HTML cho sections
+                let sectionsHtml = '';
+                if (sections && sections.length > 0) {
+                    sections.forEach((section, index) => {
+                        const statusClass = section.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
+                        const statusText = section.status === 'Active' ? 'Hoạt động' : 'Không hoạt động';
+
+                        // Xác định icon và label dựa trên type
+                        let typeIcon = '';
+                        let typeLabel = '';
+                        let mediaHtml = '';
+
+                        switch (section.type) {
+                            case 'text':
+                                typeIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>';
+                                typeLabel = 'Văn bản';
+                                // Chỉ hiển thị content
+                                if (section.content) {
+                                    mediaHtml = '<div class="ml-11 mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200">' +
+                                            '<p class="text-sm text-gray-700 leading-relaxed">' + section.content + '</p>' +
+                                            '</div>';
+                                }
+                                break;
+                            case 'video':
+                                typeIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                                typeLabel = 'Video';
+                                mediaHtml = '<div class="ml-11 mt-3 space-y-3">';
+                                // Hiển thị content trước
+                                if (section.content) {
+                                    mediaHtml += '<div class="p-4 bg-gray-50 rounded-lg border border-gray-200">' +
+                                            '<p class="text-sm text-gray-700 leading-relaxed">' + section.content + '</p>' +
+                                            '</div>';
+                                }
+                                // Sau đó hiển thị video
+                                if (section.media && section.media.path) {
+                                    mediaHtml += '<video controls class="w-full max-w-2xl rounded-lg shadow-md border border-gray-200">' +
+                                            '<source src="' + contextPath + '/' + section.media.path + '" type="' + (section.media.mime_type || 'video/mp4') + '">' +
+                                            'Trình duyệt của bạn không hỗ trợ video.' +
+                                            '</video>';
+                                }
+                                mediaHtml += '</div>';
+                                break;
+                            case 'image':
+                                typeIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
+                                typeLabel = 'Hình ảnh';
+                                mediaHtml = '<div class="ml-11 mt-3 space-y-3">';
+                                // Hiển thị content trước
+                                if (section.content) {
+                                    mediaHtml += '<div class="p-4 bg-gray-50 rounded-lg border border-gray-200">' +
+                                            '<p class="text-sm text-gray-700 leading-relaxed">' + section.content + '</p>' +
+                                            '</div>';
+                                }
+                                // Sau đó hiển thị image
+                                if (section.media && section.media.path) {
+                                    mediaHtml += '<img src="' + contextPath + '/' + section.media.path + '" ' +
+                                            'alt="' + section.title + '" ' +
+                                            'class="max-w-2xl rounded-lg shadow-md border border-gray-200">';
+                                }
+                                mediaHtml += '</div>';
+                                break;
+                            default:
+                                typeIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>';
+                                typeLabel = section.type;
+                                // Chỉ hiển thị content cho type không xác định
+                                if (section.content) {
+                                    mediaHtml = '<div class="ml-11 mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200">' +
+                                            '<p class="text-sm text-gray-700 leading-relaxed">' + section.content + '</p>' +
+                                            '</div>';
+                                }
+                        }
+
+                        sectionsHtml += '<div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">' +
+                                '<div class="flex items-start justify-between">' +
+                                '<div class="flex-1">' +
+                                '<div class="flex items-center gap-3 mb-2">' +
+                                '<span class="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">' +
                                 section.position +
-                            '</span>' +
-                            '<h4 class="text-base font-semibold text-gray-900">' + section.title + '</h4>' +
-                        '</div>' +
-                        '<p class="text-sm text-gray-600 ml-11 mb-2">' + (section.description || 'Không có mô tả') + '</p>' +
-                        '<div class="flex items-center gap-3 ml-11 mb-2">' +
-                            '<span class="px-2 py-1 text-xs font-medium rounded ' + statusClass + '">' +
+                                '</span>' +
+                                '<h4 class="text-base font-semibold text-gray-900">' + section.title + '</h4>' +
+                                '</div>' +
+                                '<p class="text-sm text-gray-600 ml-11 mb-2">' + (section.description || 'Không có mô tả') + '</p>' +
+                                '<div class="flex items-center gap-3 ml-11 mb-2">' +
+                                '<span class="px-2 py-1 text-xs font-medium rounded ' + statusClass + '">' +
                                 statusText +
-                            '</span>' +
-                            '<span class="inline-flex items-center gap-1 text-xs text-gray-600">' +
+                                '</span>' +
+                                '<span class="inline-flex items-center gap-1 text-xs text-gray-600">' +
                                 typeIcon +
                                 '<span class="font-medium">' + typeLabel + '</span>' +
-                            '</span>' +
-                        '</div>' +
-                        mediaHtml +
-                    '</div>' +
-                '</div>' +
-            '</div>';
-        });
-    } else {
-        sectionsHtml = '<p class="text-center text-gray-500 py-8">Chưa có phần học nào</p>';
-    }
+                                '</span>' +
+                                '</div>' +
+                                mediaHtml +
+                                '</div>' +
+                                '</div>' +
+                                '</div>';
+                    });
+                } else {
+                    sectionsHtml = '<p class="text-center text-gray-500 py-8">Chưa có phần học nào</p>';
+                }
 
-    const courseStatusClass = course.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
-    const courseStatusText = course.status === 'Active' ? 'Hoạt động' : 'Không hoạt động';
-    const hideStatusHtml = course.hide_by_admin ? '<span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700 ml-2">Đã ẩn</span>' : '';
-    const categoryNameDisplay = course.categoryName || 'Chưa phân loại';
-    const createdDate = new Date(course.created_at).toLocaleDateString('vi-VN');
+                const courseStatusClass = course.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
+                const courseStatusText = course.status === 'Active' ? 'Hoạt động' : 'Không hoạt động';
+                const hideStatusHtml = course.hide_by_admin ? '<span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-700 ml-2">Đã ẩn</span>' : '';
+                const categoryNameDisplay = course.categoryName || 'Chưa phân loại';
+                const createdDate = new Date(course.created_at).toLocaleDateString('vi-VN');
 
-    const modalHtml = '<div id="courseDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onclick="closeCourseModal(event)">' +
-        '<div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">' +
-            '<!-- Header -->' +
-            '<div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 flex items-center justify-between">' +
-                '<h2 class="text-2xl font-bold text-white">Chi tiết khóa học</h2>' +
-                '<button onclick="closeCourseModal()" class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">' +
-                    '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                const modalHtml = '<div id="courseDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onclick="closeCourseModal(event)">' +
+                        '<div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">' +
+                        '<!-- Header -->' +
+                        '<div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 flex items-center justify-between">' +
+                        '<h2 class="text-2xl font-bold text-white">Chi tiết khóa học</h2>' +
+                        '<button onclick="closeCourseModal()" class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">' +
+                        '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
                         '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>' +
-                    '</svg>' +
-                '</button>' +
-            '</div>' +
-            '<!-- Content -->' +
-            '<div class="overflow-y-auto max-h-[calc(90vh-120px)]">' +
-                '<!-- Course Info -->' +
-                '<div class="p-6 border-b border-gray-200">' +
-                    '<div class="flex gap-6">' +
-                        '<img src="' + contextPath + '/' + course.thumbnail + '" ' +
-                             'alt="' + course.title + '" ' +
-                             'class="w-48 h-32 rounded-lg object-cover shadow-md flex-shrink-0">' +
-                        '<div class="flex-1">' +
-                            '<div class="flex items-start justify-between mb-3">' +
-                                '<div>' +
-                                    '<h3 class="text-xl font-bold text-gray-900 mb-2">' + course.title + '</h3>' +
-                                    '<p class="text-sm text-gray-600 mb-3">' + course.description + '</p>' +
-                                '</div>' +
-                            '</div>' +
-                            '<div class="grid grid-cols-2 gap-4">' +
-                                '<div>' +
-                                    '<p class="text-xs text-gray-500 mb-1">Trạng thái</p>' +
-                                    '<span class="px-3 py-1 text-xs font-semibold rounded-full ' + courseStatusClass + '">' +
-                                        courseStatusText +
-                                    '</span>' +
-                                    hideStatusHtml +
-                                '</div>' +
-                                '<div>' +
-                                    '<p class="text-xs text-gray-500 mb-1">Danh mục</p>' +
-                                    '<p class="text-sm font-medium text-gray-900">' + categoryNameDisplay + '</p>' +
-                                '</div>' +
-                                '<div>' +
-                                    '<p class="text-xs text-gray-500 mb-1">Ngày tạo</p>' +
-                                    '<p class="text-sm font-medium text-gray-900">' + createdDate + '</p>' +
-                                '</div>' +
-                                '<div>' +
-                                    '<p class="text-xs text-gray-500 mb-1">ID khóa học</p>' +
-                                    '<p class="text-sm font-medium text-gray-900">#' + course.id + '</p>' +
-                                '</div>' +
-                            '</div>' +
+                        '</svg>' +
+                        '</button>' +
                         '</div>' +
-                    '</div>' +
-                '</div>' +
-                '<!-- Sections -->' +
-                '<div class="p-6">' +
-                    '<div class="flex items-center justify-between mb-4">' +
+                        '<!-- Content -->' +
+                        '<div class="overflow-y-auto max-h-[calc(90vh-120px)]">' +
+                        '<!-- Course Info -->' +
+                        '<div class="p-6 border-b border-gray-200">' +
+                        '<div class="flex gap-6">' +
+                        '<img src="' + contextPath + '/' + course.thumbnail + '" ' +
+                        'alt="' + course.title + '" ' +
+                        'class="w-48 h-32 rounded-lg object-cover shadow-md flex-shrink-0">' +
+                        '<div class="flex-1">' +
+                        '<div class="flex items-start justify-between mb-3">' +
+                        '<div>' +
+                        '<h3 class="text-xl font-bold text-gray-900 mb-2">' + course.title + '</h3>' +
+                        '<p class="text-sm text-gray-600 mb-3">' + course.description + '</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="grid grid-cols-2 gap-4">' +
+                        '<div>' +
+                        '<p class="text-xs text-gray-500 mb-1">Trạng thái</p>' +
+                        '<span class="px-3 py-1 text-xs font-semibold rounded-full ' + courseStatusClass + '">' +
+                        courseStatusText +
+                        '</span>' +
+                        hideStatusHtml +
+                        '</div>' +
+                        '<div>' +
+                        '<p class="text-xs text-gray-500 mb-1">Danh mục</p>' +
+                        '<p class="text-sm font-medium text-gray-900">' + categoryNameDisplay + '</p>' +
+                        '</div>' +
+                        '<div>' +
+                        '<p class="text-xs text-gray-500 mb-1">Ngày tạo</p>' +
+                        '<p class="text-sm font-medium text-gray-900">' + createdDate + '</p>' +
+                        '</div>' +
+                        '<div>' +
+                        '<p class="text-xs text-gray-500 mb-1">ID khóa học</p>' +
+                        '<p class="text-sm font-medium text-gray-900">#' + course.id + '</p>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<!-- Sections -->' +
+                        '<div class="p-6">' +
+                        '<div class="flex items-center justify-between mb-4">' +
                         '<h3 class="text-lg font-bold text-gray-900">' +
-                            'Danh sách phần học ' +
-                            '<span class="text-sm font-normal text-gray-500">(' + sections.length + ' phần)</span>' +
+                        'Danh sách phần học ' +
+                        '<span class="text-sm font-normal text-gray-500">(' + sections.length + ' phần)</span>' +
                         '</h3>' +
-                    '</div>' +
-                    '<div class="space-y-3">' +
+                        '</div>' +
+                        '<div class="space-y-3">' +
                         sectionsHtml +
-                    '</div>' +
-                '</div>' +
-            '</div>' +
-            '<!-- Footer -->' +
-            '<div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-200">' +
-                '<button onclick="closeCourseModal()" ' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '<!-- Footer -->' +
+                        '<div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-200">' +
+                        '<button onclick="closeCourseModal()" ' +
                         'class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">' +
-                    'Đóng' +
-                '</button>' +
-            '</div>' +
-        '</div>' +
-    '</div>';
+                        'Đóng' +
+                        '</button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
 
-    $('body').append(modalHtml);
-    
-    $('body').css('overflow', 'hidden');
-}
+                $('body').append(modalHtml);
 
-function closeCourseModal(event) {
-    if (!event || event.target.id === 'courseDetailModal') {
-        $('#courseDetailModal').remove();
-        $('body').css('overflow', 'auto');
-    }
-}
+                $('body').css('overflow', 'hidden');
+            }
 
-$(document).on('keydown', function (e) {
-    if (e.key === 'Escape' && $('#courseDetailModal').length) {
-        closeCourseModal();
-    }
-});
+            function closeCourseModal(event) {
+                if (!event || event.target.id === 'courseDetailModal') {
+                    $('#courseDetailModal').remove();
+                    $('body').css('overflow', 'auto');
+                }
+            }
+
+            $(document).on('keydown', function (e) {
+                if (e.key === 'Escape' && $('#courseDetailModal').length) {
+                    closeCourseModal();
+                }
+            });
         </script>
     </body>
 </html>
