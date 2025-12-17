@@ -528,13 +528,18 @@ public class UserDAO extends dao {
         return users;
     }
 
-    public int countUsers(String keyword, Integer roleId) {
+    public int countUsers(String keyword, Integer roleId, String status) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM user WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
         if (roleId != null) {
             sql.append(" AND role_id = ?");
             params.add(roleId);
+        }
+
+        if (status != null && !status.trim().isEmpty() && !status.equals("all")) {
+            sql.append(" AND status = ?");
+            params.add(status);
         }
 
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -544,6 +549,7 @@ public class UserDAO extends dao {
             params.add(pattern);
             params.add(pattern);
         }
+
 
         try {
             con = dbc.getConnection();
@@ -561,7 +567,7 @@ public class UserDAO extends dao {
         return 0;
     }
 
-    public List<User> searchUsers(String keyword, Integer roleId, int limit, int offset) {
+    public List<User> searchUsers(String keyword, Integer roleId, String status, String sort, int limit, int offset) {
         List<User> users = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
                 SELECT u.*, r.name as role_name, r.description as role_description
@@ -576,6 +582,11 @@ public class UserDAO extends dao {
             params.add(roleId);
         }
 
+        if (status != null && !status.trim().isEmpty() && !status.equals("all")) {
+            sql.append(" AND u.status = ?");
+            params.add(status);
+        }
+
         if (keyword != null && !keyword.trim().isEmpty()) {
             sql.append(" AND (u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ?)");
             String pattern = "%" + keyword.trim() + "%";
@@ -584,9 +595,30 @@ public class UserDAO extends dao {
             params.add(pattern);
         }
 
-        sql.append(" ORDER BY u.created_at DESC LIMIT ? OFFSET ?");
+        // Sorting logic
+        if (sort != null) {
+            switch (sort) {
+                case "name_asc":
+                    sql.append(" ORDER BY u.first_name ASC, u.last_name ASC");
+                    break;
+                case "name_desc":
+                    sql.append(" ORDER BY u.first_name DESC, u.last_name DESC");
+                    break;
+                case "oldest":
+                    sql.append(" ORDER BY u.created_at ASC");
+                    break;
+                default:
+                    sql.append(" ORDER BY u.created_at DESC");
+                    break;
+            }
+        } else {
+            sql.append(" ORDER BY u.created_at DESC");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
         params.add(limit);
         params.add(offset);
+
 
         try {
             con = dbc.getConnection();

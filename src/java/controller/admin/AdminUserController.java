@@ -84,6 +84,8 @@ public class AdminUserController extends HttpServlet {
     private void showUserList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String roleFilter = request.getParameter("role");
+        String statusFilter = request.getParameter("status");
+        String sortFilter = request.getParameter("sort");
         String keyword = request.getParameter("keyword");
         int page = 1;
         try {
@@ -106,13 +108,16 @@ public class AdminUserController extends HttpServlet {
             }
         }
 
-        totalUsers = userDAO.countUsers(keyword, roleId);
-        userList = userDAO.searchUsers(keyword, roleId, limit, offset);
+        totalUsers = userDAO.countUsers(keyword, roleId, statusFilter);
+        userList = userDAO.searchUsers(keyword, roleId, statusFilter, sortFilter, limit, offset);
 
         int totalPages = (int) Math.ceil((double) totalUsers / limit);
 
         request.setAttribute("userList", userList);
         request.setAttribute("selectedRole", roleFilter);
+        request.setAttribute("selectedStatus", statusFilter);
+        request.setAttribute("selectedSort", sortFilter);
+        request.setAttribute("keyword", keyword);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/View/Admin/UserList.jsp").forward(request, response);
