@@ -230,7 +230,7 @@ public class InstructorCourseController extends HttpServlet {
                 resp.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
                 return;
             }
-
+            
             Course c = _courseService.getCourseById(courseId);
 
             if (c == null || c.getUuid() == null) {

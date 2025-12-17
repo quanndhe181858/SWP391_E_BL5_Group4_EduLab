@@ -440,7 +440,7 @@
                             setTimeout(() => window.location.href = "courses", 1500);
                         },
                         error: function (xhr) {
-                            showToast("Hiện tại đã có học viên tham gia khoá học và làm bài, không thể xoá!", "error", 2500);
+                            showToast(xhr.responseJSON.message ? xhr.responseJSON.message : "Hiện tại đã có học viên tham gia khoá học và làm bài, không thể xoá!", "error", 2500);
                         }
                     });
                 });
