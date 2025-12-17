@@ -29,51 +29,6 @@
                                 thống</p>
                         </div>
 
-                        <!-- Success/Error Messages -->
-                        <!-- Messages handled by importBottom.jsp toast logic -->
-
-                        <!-- Search & Filter Bar -->
-                        <div class="bg-white rounded-xl shadow-md p-4 mb-6">
-                            <form method="GET" action="${pageContext.request.contextPath}/admin/users" id="filterForm">
-                                <div class="flex flex-col sm:flex-row gap-4">
-
-                                    <!-- Search Input -->
-                                    <div class="flex-1 relative">
-                                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                        <input type="text" id="searchInput" name="keyword" value="${param.keyword}"
-                                            placeholder="Tìm kiếm người dùng theo tên, email..."
-                                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    </div>
-
-
-                                    <!-- Filter Dropdown -->
-                                    <select name="role" id="filterRole"
-                                        onchange="document.getElementById('filterForm').submit()"
-                                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <option value="all" ${selectedRole==null || selectedRole=='all' ? 'selected'
-                                            : '' }>Tất cả vai trò</option>
-                                        <option value="1" ${selectedRole=='1' ? 'selected' : '' }>Admin</option>
-                                        <option value="2" ${selectedRole=='2' ? 'selected' : '' }>Instructor</option>
-                                        <option value="3" ${selectedRole=='3' ? 'selected' : '' }>Trainee</option>
-                                    </select>
-
-                                    <!-- Search Button -->
-                                    <button type="submit"
-                                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                        Tìm kiếm
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-
                         <!-- Statistics Cards -->
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                             <div class="bg-white rounded-xl shadow-md p-6">
@@ -151,6 +106,50 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Search & Filter Bar -->
+                        <div class="bg-white rounded-xl shadow-md p-4 mb-6">
+                            <form method="GET" action="${pageContext.request.contextPath}/admin/users" id="filterForm">
+                                <div class="flex flex-col sm:flex-row gap-4">
+
+                                    <!-- Search Input -->
+                                    <div class="flex-1 relative">
+                                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        <input type="text" id="searchInput" name="keyword" value="${param.keyword}"
+                                            placeholder="Tìm kiếm người dùng theo tên, email..."
+                                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    </div>
+
+
+                                    <!-- Filter Dropdown -->
+                                    <select name="role" id="filterRole"
+                                        onchange="document.getElementById('filterForm').submit()"
+                                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="all" ${selectedRole==null || selectedRole=='all' ? 'selected'
+                                            : '' }>Tất cả vai trò</option>
+                                        <option value="1" ${selectedRole=='1' ? 'selected' : '' }>Admin</option>
+                                        <option value="2" ${selectedRole=='2' ? 'selected' : '' }>Instructor</option>
+                                        <option value="3" ${selectedRole=='3' ? 'selected' : '' }>Trainee</option>
+                                    </select>
+
+                                    <!-- Search Button -->
+                                    <button type="submit"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        Tìm kiếm
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        
 
                         <!-- Add User Button -->
                         <div class="flex justify-end mb-4">
