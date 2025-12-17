@@ -75,91 +75,99 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
-                        <form action="${pageContext.request.contextPath}/admin/quizzes" method="get"
-                            class="flex flex-wrap gap-4 items-end">
+                    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                        <form action="${pageContext.request.contextPath}/admin/quizzes" method="get" id="filterForm">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                <!-- SEARCH INPUT -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tìm kiếm</label>
+                                    <div class="relative">
+                                        <input type="text" name="keyword" value="${param.keyword}"
+                                            placeholder="Tìm theo nội dung câu hỏi..." class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg
+                                            focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                        <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                </div>
 
-                            <!-- FILTER: SORT -->
-                            <div class="min-w-[150px]">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Sắp xếp</label>
-                                <select name="sort"
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">Mới nhất</option>
-                                    <option value="oldest" ${param.sort=='oldest' ? 'selected' : '' }>Cũ nhất</option>
-                                    <option value="name_asc" ${param.sort=='name_asc' ? 'selected' : '' }>Tên A-Z
-                                    </option>
-                                    <option value="name_desc" ${param.sort=='name_desc' ? 'selected' : '' }>Tên Z-A
-                                    </option>
-                                </select>
-                            </div>
+                                <!-- FILTER: TYPE -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Loại câu hỏi</label>
+                                    <select name="type"
+                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Tất cả loại</option>
+                                        <option value="Single Choice" ${param.type=='Single Choice' ? 'selected' : '' }>
+                                            Single Choice</option>
+                                        <option value="Multiple Choice" ${param.type=='Multiple Choice' ? 'selected'
+                                            : '' }>
+                                            Multiple Choice</option>
+                                    </select>
+                                </div>
 
-                            <!-- FILTER: TYPE -->
-                            <div class="min-w-[150px]">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Loại câu hỏi</label>
-                                <select name="type"
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">Tất cả</option>
-                                    <option value="Single Choice" ${param.type=='Single Choice' ? 'selected' : '' }>
-                                        Single Choice</option>
-                                    <option value="Multiple Choice" ${param.type=='Multiple Choice' ? 'selected' : '' }>
-                                        Multiple Choice</option>
-                                </select>
-                            </div>
-
-                            <!-- FILTER: CATEGORY -->
-                            <div class="min-w-[150px]">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Danh mục</label>
-                                <select name="category"
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">Tất cả</option>
-                                    <c:forEach items="${categories}" var="cat">
-                                        <option value="${cat.id}" ${param.category==cat.id ? 'selected' : '' }>
-                                            ${cat.name}</option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-
-                            <!-- FILTER: STATUS -->
-                            <div class="min-w-[150px]">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
-                                <select name="status"
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">Tất cả</option>
-                                    <option value="Active" ${param.status=='Active' ? 'selected' : '' }>Active</option>
-                                    <option value="Hidden" ${param.status=='Hidden' ? 'selected' : '' }>Hidden</option>
-                                </select>
-                            </div>
-
-                            <!-- SEARCH INPUT -->
-                            <div class="flex-1 min-w-[200px]">
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
-                                <div class="relative">
-                                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-
-                                    <input type="text" name="keyword" value="${param.keyword}"
-                                        placeholder="Nhập nội dung câu hỏi..." class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg
-                                    focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                <!-- FILTER: CATEGORY -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Danh mục</label>
+                                    <select name="category"
+                                        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        <option value="">Tất cả danh mục</option>
+                                        <c:forEach items="${categories}" var="cat">
+                                            <option value="${cat.id}" ${param.category==cat.id ? 'selected' : '' }>
+                                                ${cat.name}</option>
+                                        </c:forEach>
+                                    </select>
                                 </div>
                             </div>
 
-                            <!-- SEARCH BUTTON -->
-                            <div class="pb-0.5">
-                                <button type="submit" class="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5
-                                    rounded-lg hover:bg-blue-700 transition-colors font-semibold h-[46px]">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                    Lọc
-                                </button>
-                            </div>
+                            <div class="flex flex-wrap items-center justify-between gap-4">
+                                <div class="flex flex-wrap items-center gap-4">
+                                    <!-- FILTER: STATUS -->
+                                    <div class="flex items-center gap-2">
+                                        <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Trạng
+                                            thái:</label>
+                                        <select name="status"
+                                            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="">Tất cả</option>
+                                            <option value="Active" ${param.status=='Active' ? 'selected' : '' }>Hoạt
+                                                động</option>
+                                            <option value="Hidden" ${param.status=='Hidden' ? 'selected' : '' }>Đã ẩn
+                                            </option>
+                                        </select>
+                                    </div>
 
+                                    <!-- FILTER: SORT -->
+                                    <div class="flex items-center gap-2">
+                                        <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Sắp
+                                            xếp:</label>
+                                        <select name="sort"
+                                            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="">Mới nhất</option>
+                                            <option value="oldest" ${param.sort=='oldest' ? 'selected' : '' }>Cũ nhất
+                                            </option>
+                                            <option value="name_asc" ${param.sort=='name_asc' ? 'selected' : '' }>Tên
+                                                A-Z</option>
+                                            <option value="name_desc" ${param.sort=='name_desc' ? 'selected' : '' }>Tên
+                                                Z-A</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-3">
+                                    <button type="button" onclick="resetFilter()"
+                                        class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                                        Đặt lại
+                                    </button>
+                                    <button type="submit"
+                                        class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md">
+                                        Áp dụng
+                                    </button>
+                                </div>
+                            </div>
                         </form>
                     </div>
+
                     <c:if test="${not empty sessionScope.notification}">
                         <div
                             class="mb-4 p-4 rounded-md ${sessionScope.notificationType == 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}">
@@ -293,6 +301,12 @@
                     </div>
                 </div>
 
+                <script>
+                    function resetFilter() {
+                        window.location.href = '${pageContext.request.contextPath}/admin/quizzes';
+                    }
+                </script>
             </body>
+
 
             </html>
