@@ -112,14 +112,8 @@ public class AdminQuizController extends HttpServlet {
 
     private void listQuizzes(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Reuse similar logic from InstructorQuizController for pagination if needed,
-        // or just getAll for now as per simple requirement.
-        // Let's implement basic pagination to be safe for large datasets.
-
-        int page = 1;
-        int limit = 10;
-
         String pageParam = request.getParameter("page");
+        int page = 1;
         if (pageParam != null && !pageParam.isEmpty()) {
             try {
                 page = Integer.parseInt(pageParam);
@@ -130,19 +124,35 @@ public class AdminQuizController extends HttpServlet {
 
         List<Quiz> allQuizzes = quizDAO.getAllQuizzes();
 
-        // Simple manual pagination since DAO returns all
-        int totalItems = allQuizzes.size();
-        int totalPages = (int) Math.ceil((double) totalItems / limit);
+        // Manual Pagination
+        int pageSize = 10;
+        int totalQuizzes = allQuizzes.size();
+        int totalPages = (int) Math.ceil((double) totalQuizzes / pageSize);
 
-        int start = (page - 1) * limit;
-        int end = Math.min(start + limit, totalItems);
+        if (page < 1)
+            page = 1;
+        if (page > totalPages && totalPages > 0)
+            page = totalPages;
+
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, totalQuizzes);
 
         List<Quiz> paginatedList;
-        if (start < totalItems) {
-            paginatedList = allQuizzes.subList(start, end);
+        if (start > end) {
+            paginatedList = List.of();
         } else {
-            paginatedList = new java.util.ArrayList<>();
+            paginatedList = allQuizzes.subList(start, end);
         }
+
+        // Fetch categories and create a map for easy lookup in JSP
+        List<Category> categories = categoryDAO.getCategories();
+        java.util.Map<Integer, String> categoryMap = new java.util.HashMap<>();
+        if (categories != null) {
+            for (Category c : categories) {
+                categoryMap.put(c.getId(), c.getName());
+            }
+        }
+        request.setAttribute("categoryMap", categoryMap);
 
         request.setAttribute("quizList", paginatedList);
         request.setAttribute("currentPage", page);

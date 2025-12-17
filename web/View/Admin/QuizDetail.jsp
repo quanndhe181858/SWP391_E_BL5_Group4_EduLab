@@ -14,8 +14,9 @@
 
                 <body class="bg-gray-50">
                     <jsp:include page="/layout/header.jsp" />
+                    <jsp:include page="/layout/admin_sidebar.jsp" />
 
-                    <div class="container mx-auto px-4 py-8">
+                    <div class="ml-64 pt-6 px-6 pb-8">
                         <div class="mb-6">
                             <a href="${pageContext.request.contextPath}/admin/quizzes"
                                 class="text-indigo-600 hover:text-indigo-800 flex items-center">
