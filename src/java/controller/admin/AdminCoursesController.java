@@ -12,10 +12,15 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import model.Category;
 import model.Course;
+import model.User;
+import util.ResponseUtils;
 
 /**
  *
@@ -29,6 +34,25 @@ public class AdminCoursesController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+
+        if (session == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+
+        User u = (User) session.getAttribute("user");
+
+        if (u == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+
+        if (u.getRole_id() != 1) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+
         String search = req.getParameter("search");
         String categoryIdStr = req.getParameter("categoryId");
         String status = req.getParameter("status");
@@ -77,8 +101,30 @@ public class AdminCoursesController extends HttpServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Map<String, Object> res = new HashMap<>();
 
+        String courseIdStr = req.getParameter("courseId");
+
+        if (courseIdStr == null || courseIdStr.isBlank()) {
+            resp.setStatus(400);
+            res.put("success", false);
+            res.put("message", "Course ID không hợp lệ");
+            ResponseUtils.sendJsonResponse(resp, res);
+            return;
+        }
+
+        int courseId = Integer.parseInt(courseIdStr);
+
+        Course c = cDao.getCourseById(courseId);
+
+        boolean toggle = !c.isHide_by_admin();
+
+        cDao.UpdateHideByAdmin(courseId, toggle);
+        resp.setStatus(200);
+        res.put("success", true);
+        res.put("message", "Ẩn course thành công");
+        ResponseUtils.sendJsonResponse(resp, res);
     }
 
 }

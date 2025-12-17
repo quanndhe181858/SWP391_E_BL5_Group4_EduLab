@@ -135,8 +135,9 @@ public class LoginGoogleController extends HttpServlet {
 
             if (!"Active".equals(u.getStatus())) {
                 String msg = "Tài khoản đã bị khoá, vui lòng liên hệ quản trị viên.";
-                request.setAttribute("msg", msg);
-                request.getRequestDispatcher("View/Auth/Login.jsp").forward(request, response);
+                request.setAttribute("error", msg);
+                request.getRequestDispatcher("../View/Auth/Login.jsp").forward(request, response);
+                return;
             }
 
             session.setAttribute("user", u);

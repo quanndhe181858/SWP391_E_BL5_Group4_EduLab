@@ -37,7 +37,7 @@ public class AuthUtils {
             return null;
         }
 
-        if (u.getRole_id() != roleAccepted) {
+        if (u.getRole_id() != roleAccepted && u.getRole_id() != 1) {
             resp.sendError(httpStatus.FORBIDDEN.getCode(), httpStatus.FORBIDDEN.getMessage());
             return null;
         }

@@ -249,7 +249,7 @@ public class CourseDAO extends dao {
         StringBuilder sql = new StringBuilder(
                 "SELECT DISTINCT c.* FROM edulab.course c "
                 + "INNER JOIN edulab.course_section cs ON c.id = cs.course_id "
-                + "WHERE 1 = 1"
+                + "WHERE 1 = 1 AND hide_by_admin = 0"
         );
         List<Object> params = new ArrayList<>();
         StringBuilder orGroup = new StringBuilder();
@@ -985,6 +985,31 @@ public class CourseDAO extends dao {
         }
 
         return cList;
+    }
+
+    public boolean UpdateHideByAdmin(int courseId, boolean hide_by_admin) {
+        String sql = """
+                     UPDATE course
+                     SET hide_by_admin = ?
+                     WHERE id = ?
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setBoolean(1, hide_by_admin);
+            ps.setInt(2, courseId);
+
+            int rows = ps.executeUpdate();
+            return rows > 0;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+            return false;
+        } finally {
+            this.closeResources();
+        }
     }
 
 }
