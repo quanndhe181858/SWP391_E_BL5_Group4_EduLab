@@ -819,4 +819,36 @@ public class CourseDAO extends dao {
         return 0;
     }
 
+    public List<Course> getCoursesByInstructorSimple(int instructorId) {
+        List<Course> list = new ArrayList<>();
+
+        String sql = """
+        SELECT id, title
+        FROM courses
+        WHERE instructor_id = ?
+        ORDER BY title
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, instructorId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Course c = new Course();
+                c.setId(rs.getInt("id"));
+                c.setTitle(rs.getString("title"));
+                list.add(c);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+
+        return list;
+    }
+
 }
