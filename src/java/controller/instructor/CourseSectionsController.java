@@ -141,6 +141,14 @@ public class CourseSectionsController extends HttpServlet {
                 return;
             }
 
+            if (course.isHide_by_admin()) {
+                resp.setStatus(403);
+                res.put("success", false);
+                res.put("message", "Khoá học này đã bị khoá bởi quản trị viên, không thể chỉnh sửa!");
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
             String mediaUrl = null;
 
             if (type.equals("image") || type.equals("video")) {
@@ -243,6 +251,8 @@ public class CourseSectionsController extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+        Map<String, Object> res = new HashMap<>();
+
         try {
             User user = AuthUtils.doAuthorize(req, resp, 2);
 
@@ -266,6 +276,16 @@ public class CourseSectionsController extends HttpServlet {
 
             if (c == null || c.getId() != courseSectionId) {
                 resp.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
+                return;
+            }
+
+            Course course = _courseService.getCourseById(c.getCourse_id());
+
+            if (course.isHide_by_admin()) {
+                resp.setStatus(403);
+                res.put("success", false);
+                res.put("message", "Khoá học này đã bị khoá bởi quản trị viên, không thể chỉnh sửa!");
+                ResponseUtils.sendJsonResponse(resp, res);
                 return;
             }
 
@@ -369,6 +389,14 @@ public class CourseSectionsController extends HttpServlet {
                 resp.setStatus(403);
                 res.put("success", false);
                 res.put("message", "Bạn không có quyền chỉnh sửa bài học này");
+                ResponseUtils.sendJsonResponse(resp, res);
+                return;
+            }
+
+            if (course.isHide_by_admin()) {
+                resp.setStatus(403);
+                res.put("success", false);
+                res.put("message", "Khoá học này đã bị khoá bởi quản trị viên, không thể chỉnh sửa!");
                 ResponseUtils.sendJsonResponse(resp, res);
                 return;
             }
@@ -517,7 +545,7 @@ public class CourseSectionsController extends HttpServlet {
         if (cs == null) {
             resp.setStatus(404);
             res.put("success", false);
-            res.put("message", "Không tìm thấy bài học");
+            res.put("message", "Không tìm thấy bài học với id: " + courseSectionId);
             ResponseUtils.sendJsonResponse(resp, res);
             return;
         } else {

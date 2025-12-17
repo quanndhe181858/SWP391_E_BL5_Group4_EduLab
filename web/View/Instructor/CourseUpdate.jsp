@@ -440,7 +440,7 @@
                             setTimeout(() => window.location.href = "courses", 1500);
                         },
                         error: function (xhr) {
-                            showToast("Hiện tại đã có học viên tham gia khoá học và làm bài, không thể xoá!", "error", 2500);
+                            showToast(xhr.responseJSON.message ? xhr.responseJSON.message : "Hiện tại đã có học viên tham gia khoá học và làm bài, không thể xoá!", "error", 2500);
                         }
                     });
                 });
@@ -468,7 +468,7 @@
                             setTimeout(() => location.reload(), 1500);
                         },
                         error: function (xhr) {
-                            showToast("Có lỗi trong quá trình xoá bài học, vui lòng thử lại sau!", "error", 2500);
+                            showToast(xhr.responseJSON.message ? xhr.responseJSON.message : "Có lỗi trong quá trình xoá bài học, vui lòng thử lại sau!", "error", 2500);
                         }
                     });
                 });
