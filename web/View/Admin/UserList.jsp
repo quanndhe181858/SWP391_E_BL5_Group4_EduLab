@@ -44,7 +44,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                         </svg>
-                                        <input type="text" id="searchInput"
+                                        <input type="text" id="searchInput" name="keyword" value="${param.keyword}"
                                             placeholder="Tìm kiếm người dùng theo tên, email..."
                                             class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                     </div>
@@ -60,6 +60,16 @@
                                         <option value="2" ${selectedRole=='2' ? 'selected' : '' }>Instructor</option>
                                         <option value="3" ${selectedRole=='3' ? 'selected' : '' }>Trainee</option>
                                     </select>
+
+                                    <!-- Search Button -->
+                                    <button type="submit"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors flex items-center gap-2 shadow-sm">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                        Tìm kiếm
+                                    </button>
                                 </div>
                             </form>
                         </div>
@@ -353,11 +363,11 @@
                                 class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4 rounded-lg shadow-sm">
                                 <div class="flex flex-1 justify-between sm:hidden">
                                     <c:if test="${currentPage > 1}">
-                                        <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                        <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}&role=${selectedRole != null ? selectedRole : 'all'}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
                                             class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</a>
                                     </c:if>
                                     <c:if test="${currentPage < totalPages}">
-                                        <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                        <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}&role=${selectedRole != null ? selectedRole : 'all'}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
                                             class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Next</a>
                                     </c:if>
                                 </div>
@@ -377,7 +387,7 @@
                                             <!-- Previous Button -->
                                             <c:choose>
                                                 <c:when test="${currentPage > 1}">
-                                                    <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                                    <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}&role=${selectedRole != null ? selectedRole : 'all'}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
                                                         class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
                                                         <span class="sr-only">Previous</span>
                                                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
@@ -410,7 +420,7 @@
                                                             class="relative z-10 inline-flex items-center bg-blue-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">${i}</a>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <a href="${pageContext.request.contextPath}/admin/users?page=${i}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                                        <a href="${pageContext.request.contextPath}/admin/users?page=${i}&role=${selectedRole != null ? selectedRole : 'all'}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
                                                             class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">${i}</a>
                                                     </c:otherwise>
                                                 </c:choose>
@@ -419,7 +429,7 @@
                                             <!-- Next Button -->
                                             <c:choose>
                                                 <c:when test="${currentPage < totalPages}">
-                                                    <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                                    <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}&role=${selectedRole != null ? selectedRole : 'all'}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
                                                         class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
                                                         <span class="sr-only">Next</span>
                                                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
@@ -472,29 +482,7 @@
                         <c:remove var="error" scope="session" />
                     </c:if>
 
-                    <!-- Search Script -->
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function () {
-                            const searchInput = document.getElementById('searchInput');
-                            const rows = document.querySelectorAll('.user-row');
-
-                            searchInput.addEventListener('input', function () {
-                                const searchTerm = this.value.toLowerCase();
-
-                                rows.forEach(row => {
-                                    const firstName = row.dataset.firstname.toLowerCase();
-                                    const lastName = row.dataset.lastname.toLowerCase();
-                                    const email = row.dataset.email.toLowerCase();
-
-                                    const matches = firstName.includes(searchTerm) ||
-                                        lastName.includes(searchTerm) ||
-                                        email.includes(searchTerm);
-
-                                    row.style.display = matches ? '' : 'none';
-                                });
-                            });
-                        });
-                    </script>
+                    <!-- Client-side Search Script Removed -->
 
                 </body>
 

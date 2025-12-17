@@ -113,6 +113,7 @@ public class AdminQuizController extends HttpServlet {
     private void listQuizzes(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pageParam = request.getParameter("page");
+        String keyword = request.getParameter("keyword");
         int page = 1;
         if (pageParam != null && !pageParam.isEmpty()) {
             try {
@@ -122,7 +123,12 @@ public class AdminQuizController extends HttpServlet {
             }
         }
 
-        List<Quiz> allQuizzes = quizDAO.getAllQuizzes();
+        List<Quiz> allQuizzes;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            allQuizzes = quizDAO.searchQuizzes(keyword.trim());
+        } else {
+            allQuizzes = quizDAO.getAllQuizzes();
+        }
 
         // Manual Pagination
         int pageSize = 10;

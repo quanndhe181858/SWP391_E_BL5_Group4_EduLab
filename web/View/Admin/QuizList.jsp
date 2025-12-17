@@ -16,6 +16,8 @@
                 <jsp:include page="/layout/admin_sidebar.jsp" />
 
                 <div class="ml-64 pt-6 px-6 pb-8">
+
+
                     <div class="mb-8 flex justify-between items-center">
                         <div>
                             <h1 class="text-3xl font-bold text-gray-900">Quiz Management</h1>
@@ -23,6 +25,38 @@
                         </div>
                     </div>
 
+
+                    <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
+                        <form action="${pageContext.request.contextPath}/admin/quizzes" method="get"
+                            class="flex flex-wrap gap-4 items-center">
+
+                            <!-- SEARCH INPUT -->
+                            <div class="flex-1 min-w-[300px]">
+                                <div class="relative">
+                                    <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+
+                                    <input type="text" name="keyword" value="${param.keyword}"
+                                        placeholder="Search by question..." class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg
+                                    focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                </div>
+                            </div>
+
+                            <!-- SEARCH BUTTON -->
+                            <button type="submit" class="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5
+                                rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                                Tìm kiếm
+                            </button>
+
+                        </form>
+                    </div>
                     <c:if test="${not empty sessionScope.notification}">
                         <div
                             class="mb-4 p-4 rounded-md ${sessionScope.notificationType == 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}">
@@ -117,11 +151,11 @@
                                 class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                                 <div class="flex-1 flex justify-between sm:hidden">
                                     <c:if test="${currentPage > 1}">
-                                        <a href="?page=${currentPage - 1}"
+                                        <a href="?page=${currentPage - 1}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
                                             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Previous</a>
                                     </c:if>
                                     <c:if test="${currentPage < totalPages}">
-                                        <a href="?page=${currentPage + 1}"
+                                        <a href="?page=${currentPage + 1}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
                                             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Next</a>
                                     </c:if>
                                 </div>
@@ -136,7 +170,8 @@
                                         <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
                                             aria-label="Pagination">
                                             <c:forEach begin="1" end="${totalPages}" var="i">
-                                                <a href="?page=${i}" aria-current="page"
+                                                <a href="?page=${i}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
+                                                    aria-current="page"
                                                     class="${currentPage == i ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'} relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                                                     ${i}
                                                 </a>

@@ -528,23 +528,72 @@ public class UserDAO extends dao {
         return users;
     }
 
-    public List<User> getUsersByRole(int roleId, int limit, int offset) {
-        List<User> users = new ArrayList<>();
-        String sql = """
-                SELECT u.*, r.name as role_name, r.description as role_description
-                FROM user u
-                LEFT JOIN role r ON u.role_id = r.id
-                WHERE u.role_id = ?
-                ORDER BY u.created_at DESC
-                LIMIT ? OFFSET ?;
-                """;
+    public int countUsers(String keyword, Integer roleId) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM user WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (roleId != null) {
+            sql.append(" AND role_id = ?");
+            params.add(roleId);
+        }
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (first_name LIKE ? OR last_name LIKE ? OR email LIKE ?)");
+            String pattern = "%" + keyword.trim() + "%";
+            params.add(pattern);
+            params.add(pattern);
+            params.add(pattern);
+        }
 
         try {
             con = dbc.getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, roleId);
-            ps.setInt(2, limit);
-            ps.setInt(3, offset);
+            ps = con.prepareStatement(sql.toString());
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        }
+        return 0;
+    }
+
+    public List<User> searchUsers(String keyword, Integer roleId, int limit, int offset) {
+        List<User> users = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+                SELECT u.*, r.name as role_name, r.description as role_description
+                FROM user u
+                LEFT JOIN role r ON u.role_id = r.id
+                WHERE 1=1
+                """);
+        List<Object> params = new ArrayList<>();
+
+        if (roleId != null) {
+            sql.append(" AND u.role_id = ?");
+            params.add(roleId);
+        }
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (u.first_name LIKE ? OR u.last_name LIKE ? OR u.email LIKE ?)");
+            String pattern = "%" + keyword.trim() + "%";
+            params.add(pattern);
+            params.add(pattern);
+            params.add(pattern);
+        }
+
+        sql.append(" ORDER BY u.created_at DESC LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
             rs = ps.executeQuery();
 
             while (rs.next()) {

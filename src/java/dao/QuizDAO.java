@@ -501,4 +501,51 @@ public class QuizDAO extends dao {
             }
         }
     }
+
+    public List<Quiz> searchQuizzes(String keyword) {
+        String sql = """
+                SELECT
+                    id,
+                    question,
+                    type,
+                    category_id,
+                    created_at,
+                    updated_at,
+                    created_by,
+                    updated_by,
+                    status
+                FROM edulab.quiz
+                WHERE question LIKE ?;
+                """;
+        List<Quiz> quizzes = new ArrayList<>();
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setString(1, "%" + keyword + "%");
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Quiz quiz = new Quiz();
+                quiz.setId(rs.getInt("id"));
+                quiz.setQuestion(rs.getString("question"));
+                quiz.setType(rs.getString("type"));
+                quiz.setCategory_id(rs.getInt("category_id"));
+                quiz.setCreated_at(rs.getTimestamp("created_at"));
+                quiz.setUpdated_at(rs.getTimestamp("updated_at"));
+                quiz.setCreated_by(rs.getInt("created_by"));
+                quiz.setUpdated_by(rs.getInt("updated_by"));
+                quiz.setStatus(rs.getString("status"));
+
+                quizzes.add(quiz);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Something wrong while searchQuizzes() execute!", e);
+        } finally {
+            this.closeResources();
+        }
+
+        return quizzes;
+    }
 }
