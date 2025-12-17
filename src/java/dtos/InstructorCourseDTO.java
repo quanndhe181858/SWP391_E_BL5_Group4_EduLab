@@ -17,6 +17,7 @@ public class InstructorCourseDTO {
     private String categoryName;
     private int studentCount;
     private float completionRate;
+    private boolean hide_by_admin;
 
     public InstructorCourseDTO() {
     }
@@ -30,6 +31,14 @@ public class InstructorCourseDTO {
         this.categoryName = categoryName;
         this.studentCount = studentCount;
         this.completionRate = completionRate;
+    }
+
+    public boolean isHide_by_admin() {
+        return hide_by_admin;
+    }
+
+    public void setHide_by_admin(boolean hide_by_admin) {
+        this.hide_by_admin = hide_by_admin;
     }
 
     // Getters and Setters

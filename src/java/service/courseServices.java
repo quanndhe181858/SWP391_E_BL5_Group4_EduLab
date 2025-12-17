@@ -43,7 +43,10 @@ public class CourseServices {
 
     public Course getCourseById(int id) {
         try {
-            return cDao.getCourseById(id);
+            Course course = cDao.getCourseById(id);
+            Category c = categoryDao.getCategoryById(course.getCategory_id());
+            course.setCategory(c);
+            return course;
         } catch (Exception e) {
             logger.log(Level.SEVERE, e.getMessage(), e);
             return null;

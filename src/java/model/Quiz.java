@@ -23,6 +23,7 @@ public class Quiz {
     private Timestamp updated_at;
     private int created_by;
     private int updated_by;
+    private String status;
 
     private List<QuizAnswer> answers;
     private Category category;
@@ -105,6 +106,14 @@ public class Quiz {
 
     public void setUpdated_by(int updated_by) {
         this.updated_by = updated_by;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public List<QuizAnswer> getAnswers() {

@@ -60,7 +60,7 @@ public class CourseSectionDAO extends dao {
 //        boolean deleted = dao.deleteCourseSection(testId);
 //
 //        CourseSection afterDelete = dao.getCourseSectionById(testId);
-        System.out.println(dao.getSectionsByPositionAndCourseId(1, 6));
+        System.out.println(dao.getCourseSectionById(23));
     }
 
     public List<CourseSection> getSectionsByCourseId(int courseId) {

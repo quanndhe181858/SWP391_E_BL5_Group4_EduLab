@@ -420,6 +420,7 @@ public class DashboardDAO extends dao {
                      c.title,
                      c.thumbnail,
                      c.status,
+                     c.hide_by_admin,
                      cat.name as categoryName,
                      COUNT(DISTINCT e.user_id) as studentCount,
                      COALESCE(ROUND((COUNT(CASE WHEN e.status = 'Completed' THEN 1 END) * 100.0 / NULLIF(COUNT(e.user_id), 0)), 1), 0) as completionRate
@@ -451,6 +452,7 @@ public class DashboardDAO extends dao {
                         rs.getInt("studentCount"),
                         rs.getFloat("completionRate")
                 );
+                course.setHide_by_admin(rs.getBoolean("hide_by_admin"));
                 courseList.add(course);
             }
 
@@ -561,6 +563,31 @@ public class DashboardDAO extends dao {
                  ORDER BY cp.last_accessed_at DESC
                  LIMIT ?)
                  
+                     UNION ALL
+                     
+                     (
+                     SELECT 
+                                          'completion' as type,
+                                          CONCAT(u.first_name, ' ', u.last_name, ' đã hoàn thành khóa "', c.title, '"') as description,
+                     c.title as courseName,
+                                          cp.completed_at as activityTime,
+                                          CASE 
+                                              WHEN TIMESTAMPDIFF(MINUTE, cp.completed_at, NOW()) < 60 
+                                                  THEN CONCAT(TIMESTAMPDIFF(MINUTE, cp.completed_at, NOW()), ' phút trước')
+                                              WHEN TIMESTAMPDIFF(HOUR, cp.completed_at, NOW()) < 24 
+                                                  THEN CONCAT(TIMESTAMPDIFF(HOUR, cp.completed_at, NOW()), ' giờ trước')
+                                              ELSE CONCAT(TIMESTAMPDIFF(DAY, cp.completed_at, NOW()), ' ngày trước')
+                                          END as timeAgo
+                                      FROM course_progress cp
+                                      JOIN user u ON cp.user_id = u.id
+                                      JOIN course c ON cp.course_id = c.id
+                                      WHERE cp.status = 'Completed' 
+                                        AND cp.completed_at IS NOT NULL
+                                        AND c.created_by = ?
+                                      ORDER BY cp.completed_at DESC
+                                      LIMIT ?
+                     )
+                     
                  ORDER BY activityTime DESC
                  LIMIT ?;
                  """;
@@ -573,7 +600,9 @@ public class DashboardDAO extends dao {
             ps.setInt(2, limit);
             ps.setInt(3, instructorId);
             ps.setInt(4, limit);
-            ps.setInt(5, limit);
+            ps.setInt(5, instructorId);
+            ps.setInt(6, limit);
+            ps.setInt(7, limit);
 
             rs = ps.executeQuery();
 

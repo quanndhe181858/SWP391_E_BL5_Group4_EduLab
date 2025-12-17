@@ -29,7 +29,17 @@ public class CourseSection {
     private int created_by;
     private int updated_by;
 
+    private Media media;
+
     public CourseSection() {
+    }
+
+    public Media getMedia() {
+        return media;
+    }
+
+    public void setMedia(Media media) {
+        this.media = media;
     }
 
     public int getId() {
