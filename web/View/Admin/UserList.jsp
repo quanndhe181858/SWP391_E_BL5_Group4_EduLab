@@ -24,14 +24,14 @@
 
                         <!-- Page Title -->
                         <div class="mb-8">
-                            <h1 class="text-3xl font-bold text-gray-800 mb-2">👥 Quản lý Người dùng</h1>
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">Quản lý Người dùng</h1>
                             <p class="text-gray-600">Quản lý thông tin và trạng thái của tất cả người dùng trong hệ
                                 thống</p>
                         </div>
 
                         <!-- Statistics Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                            <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 ">
+                            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm text-gray-600">Tổng người dùng</p>
@@ -61,7 +61,7 @@
                                 </c:if>
                             </c:forEach>
 
-                            <div class="bg-white rounded-xl shadow-md p-6">
+                            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm text-gray-600">Admin</p>
@@ -77,7 +77,7 @@
                                 </div>
                             </div>
 
-                            <div class="bg-white rounded-xl shadow-md p-6">
+                            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm text-gray-600">Instructor</p>
@@ -92,7 +92,7 @@
                                 </div>
                             </div>
 
-                            <div class="bg-white rounded-xl shadow-md p-6">
+                            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-orange-500">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm text-gray-600">Trainee</p>
@@ -526,6 +526,9 @@
                             <c:if test="${not empty sessionScope.error}">
                                 showToast("${sessionScope.error}", "error");
                             </c:if>
+                            <c:if test="${not empty sessionScope.notification}">
+                                showToast("${sessionScope.notification}", "${sessionScope.notificationType != null ? sessionScope.notificationType : 'info'}");
+                            </c:if>
                         });
                     </script>
                     <c:if test="${not empty sessionScope.success}">
@@ -533,6 +536,10 @@
                     </c:if>
                     <c:if test="${not empty sessionScope.error}">
                         <c:remove var="error" scope="session" />
+                    </c:if>
+                    <c:if test="${not empty sessionScope.notification}">
+                        <c:remove var="notification" scope="session" />
+                        <c:remove var="notificationType" scope="session" />
                     </c:if>
 
                     <!-- Client-side Search Script Removed -->

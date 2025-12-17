@@ -168,14 +168,7 @@
                         </form>
                     </div>
 
-                    <c:if test="${not empty sessionScope.notification}">
-                        <div
-                            class="mb-4 p-4 rounded-md ${sessionScope.notificationType == 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}">
-                            ${sessionScope.notification}
-                        </div>
-                        <c:remove var="notification" scope="session" />
-                        <c:remove var="notificationType" scope="session" />
-                    </c:if>
+
 
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-lg font-semibold text-gray-700">Kết quả tìm kiếm: <span
@@ -371,7 +364,31 @@
                     function resetFilter() {
                         window.location.href = '${pageContext.request.contextPath}/admin/quizzes';
                     }
+
+                    document.addEventListener('DOMContentLoaded', function () {
+                        <c:if test="${not empty sessionScope.success}">
+                            showToast("${sessionScope.success}", "success");
+                        </c:if>
+                        <c:if test="${not empty sessionScope.error}">
+                            showToast("${sessionScope.error}", "error");
+                        </c:if>
+                        <c:if test="${not empty sessionScope.notification}">
+                            showToast("${sessionScope.notification}", "${sessionScope.notificationType != null ? sessionScope.notificationType : 'info'}");
+                        </c:if>
+                    });
                 </script>
+                <jsp:include page="/layout/importBottom.jsp" />
+
+                <c:if test="${not empty sessionScope.success}">
+                    <c:remove var="success" scope="session" />
+                </c:if>
+                <c:if test="${not empty sessionScope.error}">
+                    <c:remove var="error" scope="session" />
+                </c:if>
+                <c:if test="${not empty sessionScope.notification}">
+                    <c:remove var="notification" scope="session" />
+                    <c:remove var="notificationType" scope="session" />
+                </c:if>
             </body>
 
 
