@@ -15,8 +15,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import dao.QuizDAO;
 import dao.CategoryDAO;
+import dao.QuizAnswerDAO;
+import dao.UserDAO;
 import model.User;
 import model.Quiz;
+import model.QuizAnswer;
+import model.Category;
 import java.util.List;
 
 @WebServlet(name = "AdminQuizController", urlPatterns = { "/admin/quizzes" })
@@ -24,12 +28,16 @@ public class AdminQuizController extends HttpServlet {
 
     private QuizDAO quizDAO;
     private CategoryDAO categoryDAO;
+    private QuizAnswerDAO quizAnswerDAO; // Added field
+    private UserDAO userDAO;
 
     @Override
     public void init() throws ServletException {
         super.init();
         quizDAO = new QuizDAO();
         categoryDAO = new CategoryDAO();
+        quizAnswerDAO = new QuizAnswerDAO(); // Initialized
+        userDAO = new UserDAO();
     }
 
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
@@ -59,10 +67,47 @@ public class AdminQuizController extends HttpServlet {
             case "show":
                 updateStatus(request, response, "Active");
                 break;
+            case "detail":
+                viewDetail(request, response);
+                break;
             default:
                 listQuizzes(request, response);
                 break;
         }
+    }
+
+    private void viewDetail(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String idParam = request.getParameter("id");
+        if (idParam != null && !idParam.isEmpty()) {
+            try {
+                int id = Integer.parseInt(idParam);
+                Quiz quiz = quizDAO.getQuizById(id);
+                if (quiz != null) {
+                    Category category = categoryDAO.getCategoryById(quiz.getCategory_id());
+                    quiz.setCategory(category);
+
+                    List<QuizAnswer> answers = quizAnswerDAO.getQuizAnswersByQuizId(id);
+                    quiz.setAnswers(answers);
+
+                    if (quiz.getCreated_by() > 0) {
+                        User creator = userDAO.getUserById(quiz.getCreated_by());
+                        request.setAttribute("creator", creator);
+                    }
+                    if (quiz.getUpdated_by() > 0) {
+                        User updater = userDAO.getUserById(quiz.getUpdated_by());
+                        request.setAttribute("updater", updater);
+                    }
+
+                    request.setAttribute("quiz", quiz);
+                    request.getRequestDispatcher("/View/Admin/QuizDetail.jsp").forward(request, response);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                // ignore
+            }
+        }
+        response.sendRedirect(request.getContextPath() + "/admin/quizzes");
     }
 
     private void listQuizzes(HttpServletRequest request, HttpServletResponse response)

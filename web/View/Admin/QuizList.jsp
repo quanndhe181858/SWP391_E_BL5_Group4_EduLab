@@ -68,7 +68,7 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                                        <a href="View%20Quiz%20Detail.jsp?id=${quiz.id}" class="text-indigo-600 hover:text-indigo-900">View Detail</a>
+                                        <a href="${pageContext.request.contextPath}/admin/quizzes?action=detail&id=${quiz.id}" class="text-indigo-600 hover:text-indigo-900">View Detail</a>
                                         
                                         <c:choose>
                                             <c:when test="${quiz.status == 'Hidden'}">
