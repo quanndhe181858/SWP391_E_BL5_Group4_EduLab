@@ -94,7 +94,7 @@ public class AdminUserController extends HttpServlet {
             page = 1;
         }
 
-        int limit = constant.paging.USER_LIST_ITEM_PER_PAGE;
+        int limit = constant.paging.ADMIN_USER_LIST_ITEM_PER_PAGE;
         int offset = (page - 1) * limit;
         int totalUsers;
         List<User> userList;

@@ -140,18 +140,17 @@ public class AdminQuizController extends HttpServlet {
         // Use the new search method that handles all filters and sorting
         List<Quiz> allQuizzes = quizDAO.searchQuizzes(keyword, type, categoryId, status, sort);
 
-        // Manual Pagination
-        int pageSize = 10;
+        int limit = constant.paging.ADMIN_QUIZ_LIST_ITEM_PER_PAGE;
         int totalQuizzes = allQuizzes.size();
-        int totalPages = (int) Math.ceil((double) totalQuizzes / pageSize);
+        int totalPages = (int) Math.ceil((double) totalQuizzes / limit);
 
         if (page < 1)
             page = 1;
         if (page > totalPages && totalPages > 0)
             page = totalPages;
 
-        int start = (page - 1) * pageSize;
-        int end = Math.min(start + pageSize, totalQuizzes);
+        int start = (page - 1) * limit;
+        int end = Math.min(start + limit, totalQuizzes);
 
         List<Quiz> paginatedList;
         if (start > end) {
@@ -174,6 +173,13 @@ public class AdminQuizController extends HttpServlet {
         request.setAttribute("quizList", paginatedList);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
+
+        // Pass filter parameters for pagination links
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("selectedType", type);
+        request.setAttribute("selectedCategory", categoryId);
+        request.setAttribute("selectedStatus", status);
+        request.setAttribute("selectedSort", sort);
 
         // Fetch global counts for statistics cards
         java.util.Map<String, Integer> counts = quizDAO.getQuizCounts();
