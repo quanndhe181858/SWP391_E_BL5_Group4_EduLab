@@ -28,7 +28,6 @@ public class CourseDAO extends dao {
 
     public static void main(String[] args) {
         CourseDAO dao = new CourseDAO();
-        System.out.println(dao.countCoursesByCategoryId(5));
     }
 
     public Course createCourse(Course course, int uid) {
@@ -326,7 +325,7 @@ public class CourseDAO extends dao {
             }
 
         } catch (SQLException e) {
-            this.log(Level.SEVERE, "Error in getCoursesByInstructorId()", e);
+            this.log(Level.SEVERE, e.getMessage(), e);
         } finally {
             this.closeResources();
         }
@@ -497,6 +496,78 @@ public class CourseDAO extends dao {
         }
 
         return 0;
+    }
+
+    public int countAllCourse(String title, String description,
+            int categoryId, String status, boolean hide_by_admin) {
+        List<Object> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) "
+                + "FROM edulab.course c "
+                + "WHERE 1=1 " // Add base WHERE clause
+        );
+
+        StringBuilder orSearch = new StringBuilder();
+        if (title != null && !title.isBlank()) {
+            orSearch.append(" c.title LIKE ? OR");
+            params.add("%" + title + "%");
+        }
+        if (description != null && !description.isBlank()) {
+            orSearch.append(" c.description LIKE ? OR");
+            params.add("%" + description + "%");
+        }
+        if (orSearch.length() > 0) {
+            sql.append(" AND (");
+            sql.append(orSearch.substring(0, orSearch.length() - 2)); // remove last OR
+            sql.append(")");
+        }
+
+        if (categoryId > 0) {
+            List<Integer> allCategoryIds = new ArrayList<>();
+            allCategoryIds.add(categoryId);
+            List<Integer> children = categoryDao.getChildCategoryIds(categoryId);
+            if (children != null && !children.isEmpty()) {
+                allCategoryIds.addAll(children);
+            }
+            sql.append(" AND c.category_id IN (");
+            for (int i = 0; i < allCategoryIds.size(); i++) {
+                sql.append("?");
+                if (i < allCategoryIds.size() - 1) {
+                    sql.append(",");
+                }
+                params.add(allCategoryIds.get(i));
+            }
+            sql.append(")");
+        }
+
+        if (status != null && !status.isBlank() && !status.equalsIgnoreCase("all")) {
+            sql.append(" AND c.status = ?");
+            params.add(status);
+        }
+
+        if (hide_by_admin) { // Simplified boolean check
+            sql.append(" AND c.hide_by_admin = ?");
+            params.add(hide_by_admin);
+        }
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+            int idx = 1;
+            for (Object p : params) {
+                ps.setObject(idx++, p);
+            }
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error in countAllCourse()", e);
+            return 0;
+        } finally {
+            this.closeResources();
+        }
     }
 
     public int countCoursesByInstructorIdWithFilter(String title, String description,
@@ -820,6 +891,100 @@ public class CourseDAO extends dao {
         }
 
         return 0;
+    }
+
+    public List<Course> getAllCoursesForAdmin(int limit, int offset, String title, String description,
+            int categoryId, String status, String sortBy, boolean hide_by_admin) {
+        List<Course> cList = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT DISTINCT c.* FROM edulab.course c "
+                + "WHERE 1 = 1"
+        );
+        List<Object> params = new ArrayList<>();
+        StringBuilder orGroup = new StringBuilder();
+
+        if (title != null && !title.isEmpty()) {
+            orGroup.append(" OR c.title LIKE ?");
+            params.add("%" + title + "%");
+        }
+        if (description != null && !description.isEmpty()) {
+            orGroup.append(" OR c.description LIKE ?");
+            params.add("%" + description + "%");
+        }
+        if (categoryId > 0) {
+            List<Integer> allCategoryIds = new ArrayList<>();
+            allCategoryIds.add(categoryId);
+            allCategoryIds.addAll(categoryDao.getChildCategoryIds(categoryId));
+            StringBuilder inClause = new StringBuilder(" AND c.category_id IN (");
+            for (int i = 0; i < allCategoryIds.size(); i++) {
+                inClause.append("?");
+                if (i < allCategoryIds.size() - 1) {
+                    inClause.append(",");
+                }
+                params.add(allCategoryIds.get(i));
+            }
+            inClause.append(")");
+            orGroup.append(inClause);
+        }
+        if (status != null && !status.isEmpty()) {
+            orGroup.append(" AND c.status = ?");
+            params.add(status);
+        }
+        if (hide_by_admin == true) {
+            orGroup.append(" AND c.hide_by_admin = ?");
+            params.add(hide_by_admin);
+        }
+        if (orGroup.length() > 0) {
+            sql.append(" AND (");
+            sql.append(orGroup.substring(4));
+            sql.append(")");
+        }
+        if (sortBy != null && !sortBy.isBlank()) {
+            sql.append(" ORDER BY c.").append(sortBy);
+        } else {
+            sql.append(" ORDER BY c.id DESC");
+        }
+        sql.append(" LIMIT ? OFFSET ?");
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+
+            int index = 1;
+            for (Object p : params) {
+                ps.setObject(index++, p);
+            }
+
+            ps.setInt(index++, limit);
+            ps.setInt(index, offset);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Course c = new Course();
+                c.setId(rs.getInt("id"));
+                c.setUuid(rs.getString("uuid"));
+                c.setTitle(rs.getString("title"));
+                c.setDescription(rs.getString("description"));
+                c.setStatus(rs.getString("status"));
+                c.setCategory_id(rs.getInt("category_id"));
+                c.setCreated_at(rs.getTimestamp("created_at"));
+                c.setUpdated_at(rs.getTimestamp("updated_at"));
+                c.setCreated_by(rs.getInt("created_by"));
+                c.setUpdated_by(rs.getInt("updated_by"));
+                c.setThumbnail(rs.getString("thumbnail"));
+                c.setHide_by_admin(rs.getBoolean("hide_by_admin"));
+                cList.add(c);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+
+        return cList;
     }
 
 }

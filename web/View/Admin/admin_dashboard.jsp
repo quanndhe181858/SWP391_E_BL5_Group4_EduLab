@@ -6,7 +6,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Admin Dashboard - EduLab</title>
+        <title>Bảng điều khiển quản trị viên - EduLab</title>
         <jsp:include page="/layout/import.jsp"/>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
