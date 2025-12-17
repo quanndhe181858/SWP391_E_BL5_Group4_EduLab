@@ -458,18 +458,47 @@ public class QuizDAO extends dao {
     }
 
     public boolean updateQuizStatus(int id, String status) {
-        String sql = "UPDATE edulab.quiz SET status = ? WHERE id = ?";
+        String sqlUpdate = "UPDATE edulab.quiz SET status = ? WHERE id = ?";
+        String sqlDelete = "DELETE FROM edulab.quiz_test WHERE quiz_id = ?";
+
         try {
             con = dbc.getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setString(1, status);
-            ps.setInt(2, id);
-            return ps.executeUpdate() > 0;
+            con.setAutoCommit(false); // Start transaction
+
+            try (PreparedStatement psUpdate = con.prepareStatement(sqlUpdate)) {
+                psUpdate.setString(1, status);
+                psUpdate.setInt(2, id);
+                psUpdate.executeUpdate();
+            }
+
+            if ("Hidden".equals(status)) {
+                try (PreparedStatement psDelete = con.prepareStatement(sqlDelete)) {
+                    psDelete.setInt(1, id);
+                    psDelete.executeUpdate();
+                }
+            }
+
+            con.commit();
+            return true;
+
         } catch (SQLException e) {
+            try {
+                if (con != null)
+                    con.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             this.log(Level.SEVERE, "Error in updateQuizStatus", e);
             return false;
         } finally {
-            this.closeResources();
+            try {
+                if (con != null) {
+                    con.setAutoCommit(true);
+                    con.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
