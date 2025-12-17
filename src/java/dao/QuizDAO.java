@@ -502,7 +502,7 @@ public class QuizDAO extends dao {
         }
     }
 
-    public List<Quiz> searchQuizzes(String keyword, String type, Integer categoryId, String status) {
+    public List<Quiz> searchQuizzes(String keyword, String type, Integer categoryId, String status, String sortBy) {
         List<Quiz> quizzes = new ArrayList<>();
         StringBuilder sql = new StringBuilder("""
                 SELECT
@@ -541,12 +541,30 @@ public class QuizDAO extends dao {
             params.add(status);
         }
 
-        sql.append(" ORDER BY id DESC");
+        // Sorting
+        if (sortBy == null || sortBy.isEmpty()) {
+            sql.append(" ORDER BY created_at DESC");
+        } else {
+            switch (sortBy) {
+                case "oldest":
+                    sql.append(" ORDER BY created_at ASC");
+                    break;
+                case "name_asc":
+                    sql.append(" ORDER BY question ASC");
+                    break;
+                case "name_desc":
+                    sql.append(" ORDER BY question DESC");
+                    break;
+                default: // newest or unknown
+                    sql.append(" ORDER BY created_at DESC");
+                    break;
+            }
+        }
 
         try {
             con = dbc.getConnection();
             ps = con.prepareStatement(sql.toString());
-            
+
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
@@ -578,6 +596,6 @@ public class QuizDAO extends dao {
     }
 
     public List<Quiz> searchQuizzes(String keyword) {
-        return searchQuizzes(keyword, null, null, null);
+        return searchQuizzes(keyword, null, null, null, null);
     }
 }

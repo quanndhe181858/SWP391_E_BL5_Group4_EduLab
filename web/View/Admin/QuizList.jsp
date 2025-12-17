@@ -28,13 +28,28 @@
 
                     <div class="bg-white rounded-xl shadow-sm p-6 mb-6 border border-gray-100">
                         <form action="${pageContext.request.contextPath}/admin/quizzes" method="get"
-                            class="flex flex-wrap gap-4 items-center">
+                            class="flex flex-wrap gap-4 items-end">
+
+                            <!-- FILTER: SORT -->
+                            <div class="min-w-[150px]">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Sắp xếp</label>
+                                <select name="sort"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Mới nhất</option>
+                                    <option value="oldest" ${param.sort=='oldest' ? 'selected' : '' }>Cũ nhất</option>
+                                    <option value="name_asc" ${param.sort=='name_asc' ? 'selected' : '' }>Tên A-Z
+                                    </option>
+                                    <option value="name_desc" ${param.sort=='name_desc' ? 'selected' : '' }>Tên Z-A
+                                    </option>
+                                </select>
+                            </div>
 
                             <!-- FILTER: TYPE -->
                             <div class="min-w-[150px]">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Loại câu hỏi</label>
                                 <select name="type"
                                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">Tất cả loại</option>
+                                    <option value="">Tất cả</option>
                                     <option value="Single Choice" ${param.type=='Single Choice' ? 'selected' : '' }>
                                         Single Choice</option>
                                     <option value="Multiple Choice" ${param.type=='Multiple Choice' ? 'selected' : '' }>
@@ -44,9 +59,10 @@
 
                             <!-- FILTER: CATEGORY -->
                             <div class="min-w-[150px]">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Danh mục</label>
                                 <select name="category"
                                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">Tất cả danh mục</option>
+                                    <option value="">Tất cả</option>
                                     <c:forEach items="${categories}" var="cat">
                                         <option value="${cat.id}" ${param.category==cat.id ? 'selected' : '' }>
                                             ${cat.name}</option>
@@ -56,9 +72,10 @@
 
                             <!-- FILTER: STATUS -->
                             <div class="min-w-[150px]">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
                                 <select name="status"
                                     class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="">Tất cả</option>
                                     <option value="Active" ${param.status=='Active' ? 'selected' : '' }>Active</option>
                                     <option value="Hidden" ${param.status=='Hidden' ? 'selected' : '' }>Hidden</option>
                                 </select>
@@ -66,6 +83,7 @@
 
                             <!-- SEARCH INPUT -->
                             <div class="flex-1 min-w-[200px]">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tìm kiếm</label>
                                 <div class="relative">
                                     <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
                                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,20 +92,22 @@
                                     </svg>
 
                                     <input type="text" name="keyword" value="${param.keyword}"
-                                        placeholder="Tìm kiếm câu hỏi..." class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg
+                                        placeholder="Nhập nội dung câu hỏi..." class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg
                                     focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                                 </div>
                             </div>
 
                             <!-- SEARCH BUTTON -->
-                            <button type="submit" class="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5
-                                rounded-lg hover:bg-blue-700 transition-colors font-semibold">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                                Tìm kiếm
-                            </button>
+                            <div class="pb-0.5">
+                                <button type="submit" class="flex items-center gap-2 bg-blue-600 text-white px-6 py-2.5
+                                    rounded-lg hover:bg-blue-700 transition-colors font-semibold h-[46px]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    Lọc
+                                </button>
+                            </div>
 
                         </form>
                     </div>
@@ -185,11 +205,11 @@
                                 class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                                 <div class="flex-1 flex justify-between sm:hidden">
                                     <c:if test="${currentPage > 1}">
-                                        <a href="?page=${currentPage - 1}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}"
+                                        <a href="?page=${currentPage - 1}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}&sort=${param.sort}"
                                             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Trước</a>
                                     </c:if>
                                     <c:if test="${currentPage < totalPages}">
-                                        <a href="?page=${currentPage + 1}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}"
+                                        <a href="?page=${currentPage + 1}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}&sort=${param.sort}"
                                             class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Sau</a>
                                     </c:if>
                                 </div>
@@ -204,7 +224,7 @@
                                         <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px"
                                             aria-label="Pagination">
                                             <c:forEach begin="1" end="${totalPages}" var="i">
-                                                <a href="?page=${i}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}"
+                                                <a href="?page=${i}&keyword=${param.keyword}&type=${param.type}&category=${param.category}&status=${param.status}&sort=${param.sort}"
                                                     aria-current="page"
                                                     class="${currentPage == i ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'} relative inline-flex items-center px-4 py-2 border text-sm font-medium">
                                                     ${i}

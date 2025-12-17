@@ -117,6 +117,7 @@ public class AdminQuizController extends HttpServlet {
         String type = request.getParameter("type");
         String categoryIdParam = request.getParameter("category");
         String status = request.getParameter("status");
+        String sort = request.getParameter("sort");
 
         int page = 1;
         if (pageParam != null && !pageParam.isEmpty()) {
@@ -136,8 +137,8 @@ public class AdminQuizController extends HttpServlet {
             }
         }
 
-        // Use the new search method that handles all filters
-        List<Quiz> allQuizzes = quizDAO.searchQuizzes(keyword, type, categoryId, status);
+        // Use the new search method that handles all filters and sorting
+        List<Quiz> allQuizzes = quizDAO.searchQuizzes(keyword, type, categoryId, status, sort);
 
         // Manual Pagination
         int pageSize = 10;
