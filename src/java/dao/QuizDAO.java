@@ -595,6 +595,34 @@ public class QuizDAO extends dao {
         return quizzes;
     }
 
+    public java.util.Map<String, Integer> getQuizCounts() {
+        java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+        String sql = """
+                SELECT
+                    COUNT(*) as total,
+                    SUM(CASE WHEN COALESCE(status, 'Active') = 'Active' THEN 1 ELSE 0 END) as active,
+                    SUM(CASE WHEN status = 'Hidden' THEN 1 ELSE 0 END) as hidden
+                FROM edulab.quiz
+                """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                counts.put("total", rs.getInt("total"));
+                counts.put("active", rs.getInt("active"));
+                counts.put("hidden", rs.getInt("hidden"));
+            }
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error in getQuizCounts", e);
+        } finally {
+            this.closeResources();
+        }
+        return counts;
+    }
+
     public List<Quiz> searchQuizzes(String keyword) {
         return searchQuizzes(keyword, null, null, null, null);
     }

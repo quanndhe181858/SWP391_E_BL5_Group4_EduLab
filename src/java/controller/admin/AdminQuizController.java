@@ -175,6 +175,15 @@ public class AdminQuizController extends HttpServlet {
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
 
+        // Fetch global counts for statistics cards
+        java.util.Map<String, Integer> counts = quizDAO.getQuizCounts();
+        request.setAttribute("totalQuizzes", counts.getOrDefault("total", 0));
+        request.setAttribute("activeQuizzes", counts.getOrDefault("active", 0));
+        request.setAttribute("hiddenQuizzes", counts.getOrDefault("hidden", 0));
+
+        // Count for filtered results
+        request.setAttribute("totalFilteredQuizzes", totalQuizzes);
+
         request.getRequestDispatcher("/View/Admin/QuizList.jsp").forward(request, response);
     }
 
