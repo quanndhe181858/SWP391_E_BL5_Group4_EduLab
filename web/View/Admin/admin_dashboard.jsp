@@ -6,7 +6,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Admin Dashboard - EduLab</title>
+        <title>Bảng điều khiển quản trị viên - EduLab</title>
         <jsp:include page="/layout/import.jsp"/>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
@@ -113,7 +113,7 @@
                     <div class="p-6 border-b border-gray-100">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-gray-900">Người Dùng Mới</h2>
-                            <a href="user-management.jsp" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Xem tất cả →</a>
+                            <a href="${pageContext.request.contextPath}/admin/users?page=users" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Xem tất cả →</a>
                         </div>
                     </div>
                     <div class="p-6">
@@ -145,7 +145,7 @@
                     <div class="p-6 border-b border-gray-100">
                         <div class="flex items-center justify-between">
                             <h2 class="text-lg font-semibold text-gray-900">Khóa Học Phổ Biến</h2>
-                            <a href="course-management.jsp" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Xem tất cả →</a>
+                            <a href="${pageContext.request.contextPath}/admin/courses?page=courses" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Xem tất cả →</a>
                         </div>
                     </div>
                     <div class="p-6">

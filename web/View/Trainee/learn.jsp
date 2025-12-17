@@ -111,6 +111,57 @@
                                     </p>
 
                                     <c:choose>
+                                        <c:when test="${courseTestAttempt.status == 'Pending'}">
+                                            <div class="p-4 rounded-lg bg-yellow-50 border-2 border-yellow-300">
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-4a1 1 0 00-1 1v3a1 1 0 002 0V7a1 1 0 00-1-1zm0 8a1 1 0 100-2 1 1 0 000 2z"
+                                                          clip-rule="evenodd"/>
+                                                    </svg>
+                                                    <span class="font-bold text-yellow-800">
+                                                        ⏳ Đang chờ chấp nhận thi lại
+                                                    </span>
+                                                </div>
+
+                                                <p class="text-sm text-yellow-700">
+                                                    Yêu cầu thi lại của bạn đã được gửi. Vui lòng chờ giảng viên phê duyệt.
+                                                </p>
+
+                                                <p class="text-xs text-gray-600 mt-2">
+                                                    Đã làm: ${courseTestAttempt.currentAttempted}/2 lần
+                                                </p>
+                                            </div>
+                                        </c:when>
+
+
+                                        <c:when test="${courseTestAttempt.status == 'Rejected'}">
+                                            <div class="p-4 rounded-lg bg-gray-100 border-2 border-gray-300">
+                                                <div class="flex items-center gap-2 mb-2">
+                                                    <svg class="w-6 h-6 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd"
+                                                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-5a1 1 0 012 0v2a1 1 0 11-2 0v-2zm0-6a1 1 0 012 0v4a1 1 0 11-2 0V7z"
+                                                          clip-rule="evenodd"/>
+                                                    </svg>
+                                                    <span class="font-bold text-gray-800">
+                                                        ❌ Yêu cầu thi lại đã bị từ chối
+                                                    </span>
+                                                </div>
+
+                                                <p class="text-sm text-gray-700">
+                                                    Giảng viên đã từ chối yêu cầu thi lại của bạn.
+                                                </p>
+
+                                                <p class="text-xs text-gray-600 mt-2">
+                                                    Trạng thái bài kiểm tra đã bị khóa. Bạn không thể làm lại bài này.
+                                                </p>
+
+                                                <p class="text-xs text-gray-500 mt-1">
+                                                    Đã làm: ${courseTestAttempt.currentAttempted}/2 lần
+                                                </p>
+                                            </div>
+                                        </c:when>
+
                                         <c:when test="${!courseTestLimitReached}">
                                             <c:if test="${not empty courseTestAttempt}">
                                                 <div class="mb-3 p-3 rounded ${courseTestAttempt.status == 'Passed' ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}">
@@ -155,9 +206,21 @@
                                                 <p class="text-xs text-gray-600 mt-1">Đã làm: ${courseTestAttempt.currentAttempted}/2 lần</p>
                                                 <c:if test="${courseTestAttempt.status != 'Passed'}">
                                                     <p class="text-xs text-red-600 mt-2">Đã hết lượt. Liên hệ giảng viên nếu cần hỗ trợ.</p>
+                                                    <form method="post"
+                                                          action="${pageContext.request.contextPath}/trainee/request_retake"
+                                                          class="mt-2">
+                                                        <input type="hidden" name="testId" value="${courseTest.id}">
+                                                        <button type="submit"
+                                                                class="text-sm text-yellow-700 underline hover:text-yellow-900 font-semibold">
+                                                            Yêu cầu thi lại
+                                                        </button>
+                                                    </form>
+
                                                 </c:if>
                                             </div>
                                         </c:otherwise>
+
+
                                     </c:choose>
                                 </div>
                             </div>

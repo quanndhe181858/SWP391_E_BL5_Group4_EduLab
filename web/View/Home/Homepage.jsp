@@ -10,7 +10,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>LabEdu - Học Mọi Lúc, Mọi Nơi</title>
+        <title>EduLAB - Học Mọi Lúc, Mọi Nơi</title>
         <jsp:include page="/layout/import.jsp" />
     </head>
     <body class="bg-gray-50">
@@ -50,7 +50,7 @@
         <section class="py-16 bg-white">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
-                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Tại Sao Chọn LabEdu?</h2>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Tại Sao Chọn EduLAB?</h2>
                     <p class="text-gray-600">Mọi thứ bạn cần để thăng tiến trong hành trình học tập</p>
                 </div>
                 <div class="grid md:grid-cols-4 gap-8">
