@@ -7,7 +7,7 @@
 
             <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-                <title>Admin - Quiz List</title>
+                <title>Admin - Danh sách câu hỏi</title>
                 <jsp:include page="/layout/import.jsp" />
             </head>
 
@@ -20,8 +20,8 @@
 
                     <div class="mb-8 flex justify-between items-center">
                         <div>
-                            <h1 class="text-3xl font-bold text-gray-900">Quiz Management</h1>
-                            <p class="text-gray-600 mt-1">Manage system quizzes and their visibility</p>
+                            <h1 class="text-3xl font-bold text-gray-900">Quản lý câu hỏi</h1>
+                            <p class="text-gray-600 mt-1">Quản lý câu hỏi và trạng thái hiển thị</p>
                         </div>
                     </div>
 
@@ -40,7 +40,7 @@
                                     </svg>
 
                                     <input type="text" name="keyword" value="${param.keyword}"
-                                        placeholder="Search by question..." class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg
+                                        placeholder="Tìm kiếm câu hỏi..." class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg
                                     focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                                 </div>
                             </div>
@@ -76,19 +76,19 @@
                                             ID</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Question</th>
+                                            Câu hỏi</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Type</th>
+                                            Loại</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Category</th>
+                                            Danh mục</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Status</th>
+                                            Trạng thái</th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Action</th>
+                                            Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -119,16 +119,16 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                                 <a href="${pageContext.request.contextPath}/admin/quizzes?action=detail&id=${quiz.id}"
-                                                    class="text-indigo-600 hover:text-indigo-900">View Detail</a>
+                                                    class="text-indigo-600 hover:text-indigo-900">Chi tiết</a>
 
                                                 <c:choose>
                                                     <c:when test="${quiz.status == 'Hidden'}">
                                                         <a href="${pageContext.request.contextPath}/admin/quizzes?action=show&id=${quiz.id}"
-                                                            class="text-green-600 hover:text-green-900">Show</a>
+                                                            class="text-green-600 hover:text-green-900">Hiện</a>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <a href="${pageContext.request.contextPath}/admin/quizzes?action=hide&id=${quiz.id}"
-                                                            class="text-red-600 hover:text-red-900">Hide</a>
+                                                            class="text-red-600 hover:text-red-900">Ẩn</a>
                                                     </c:otherwise>
                                                 </c:choose>
                                             </td>
@@ -137,7 +137,7 @@
                                     <c:if test="${empty quizList}">
                                         <tr>
                                             <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">
-                                                No quizzes found.
+                                                Không tìm thấy câu hỏi nào.
                                             </td>
                                         </tr>
                                     </c:if>
@@ -152,17 +152,17 @@
                                 <div class="flex-1 flex justify-between sm:hidden">
                                     <c:if test="${currentPage > 1}">
                                         <a href="?page=${currentPage - 1}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
-                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Previous</a>
+                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Trước</a>
                                     </c:if>
                                     <c:if test="${currentPage < totalPages}">
                                         <a href="?page=${currentPage + 1}${not empty param.keyword ? '&keyword=' : ''}${not empty param.keyword ? param.keyword : ''}"
-                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Next</a>
+                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Sau</a>
                                     </c:if>
                                 </div>
                                 <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                                     <div>
                                         <p class="text-sm text-gray-700">
-                                            Page <span class="font-medium">${currentPage}</span> of <span
+                                            Trang <span class="font-medium">${currentPage}</span> trên <span
                                                 class="font-medium">${totalPages}</span>
                                         </p>
                                     </div>
