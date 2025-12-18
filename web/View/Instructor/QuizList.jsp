@@ -21,7 +21,8 @@
                     class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900">Quản lý câu hỏi</h1>
-                        <p class="text-lg text-gray-600 mt-1">Tạo, chỉnh sửa và quản lý các câu hỏi của bạn</p>
+                        <p class="text-lg text-gray-600 mt-1">Tạo, chỉnh sửa và quản lý các câu hỏi của
+                            bạn</p>
                     </div>
                     <a href="${pageContext.request.contextPath}/instructor/quizzes?action=add"
                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-sm">
@@ -47,7 +48,8 @@
 
                             <div class="mb-6">
                                 <label for="search"
-                                       class="block text-sm font-semibold text-gray-700 mb-2">Tìm kiếm</label>
+                                       class="block text-sm font-semibold text-gray-700 mb-2">Tìm
+                                    kiếm</label>
                                 <div class="relative">
                                     <input
                                         class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -65,80 +67,94 @@
 
                             <div class="mb-6">
                                 <label for="type"
-                                       class="block text-sm font-semibold text-gray-700 mb-2">Loại câu hỏi</label>
+                                       class="block text-sm font-semibold text-gray-700 mb-2">Loại câu
+                                    hỏi</label>
                                 <select id="type" name="type"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                                         onchange="submitFilter()">
                                     <option value="">Tất cả các loại</option>
-                                    <option value="Multiple Choice" ${param.type=='Multiple Choice'? 'selected' : '' }>Multiple Choice</option>
-                                    <option value="Single Choice" ${param.type=='Single Choice' ? 'selected' : '' }>Single Choice</option>
+                                    <option value="Multiple Choice" ${param.type=='Multiple Choice'
+                                                                      ? 'selected' : '' }>Multiple Choice</option>
+                                    <option value="Single Choice" ${param.type=='Single Choice'
+                                                                    ? 'selected' : '' }>Single Choice</option>
                                 </select>
                             </div>
 
                             <div class="mb-6">
                                 <label for="categoryId"
-                                       class="block text-sm font-semibold text-gray-700 mb-2">Danh mục</label>
+                                       class="block text-sm font-semibold text-gray-700 mb-2">Danh
+                                    mục</label>
                                 <select id="categoryId" name="categoryId"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                                         onchange="submitFilter()">
                                     <option value="">Tất cả danh mục</option>
                                     <c:forEach var="category" items="${categories}">
-                                        <option value="${category.id}" ${param.categoryId == category.id ? 'selected' : ''}>
-                                            ${category.name}
-                                        </option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-
-                            <button type="button" onclick="clearFilters()"
-                                    class="w-full px-4 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition">
-                                Xóa tất cả bộ lọc
-                            </button>
-                        </div>
-                    </aside>
-
-                    <main class="w-full lg:w-3/4">
-                        <div class="bg-white rounded-lg shadow-sm">
-                            <div class="p-6 border-b border-gray-200">
-                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                                    <div class="bg-blue-50 p-4 rounded-lg">
-                                        <p class="text-sm text-blue-600 font-semibold">Tổng số câu hỏi</p>
-                                        <p class="text-2xl font-bold text-gray-900 mt-1">${totalQuizzes
-                                                                                           != null ? totalQuizzes : 0}</p>
-                                    </div>
-                                    <div class="bg-green-50 p-4 rounded-lg">
-                                        <p class="text-sm text-green-600 font-semibold">Multiple Choice</p>
-                                        <p class="text-2xl font-bold text-gray-900 mt-1">
-                                            ${multipleChoiceCount != null ? multipleChoiceCount : 0}</p>
-                                    </div>
-                                    <div class="bg-yellow-50 p-4 rounded-lg">
-                                        <p class="text-sm text-yellow-600 font-semibold">Single Choice</p>
-                                        <p class="text-2xl font-bold text-gray-900 mt-1">
-                                            ${singleChoiceCount != null ? singleChoiceCount : 0}</p>
-                                    </div>
-<!--                                    <div class="bg-purple-50 p-4 rounded-lg">
-                                        <p class="text-sm text-purple-600 font-semibold">Các loại khác</p>
-                                        <p class="text-2xl font-bold text-gray-900 mt-1">
-                                            ${otherTypesCount != null ? otherTypesCount : 0}</p>
-                                    </div>-->
+                                        <option value="${category.id}" ${param.categoryId==category.id
+                                                         ? 'selected' : '' }>
+                                                    ${category.name}
+                                                </option>
+                                        </c:forEach>
+                                    </select>
                                 </div>
 
-                                <div
-                                    class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                                    <div>
-                                        <p class="text-sm text-gray-600">Hiển thị ${startItem != null ?
-                                                                                    startItem : 1}-${endItem != null ? endItem : 0} trong tổng số
-                                                                                    ${totalQuizzes != null ? totalQuizzes : 0} câu hỏi</p>
+                                <button type="button" onclick="clearFilters()"
+                                        class="w-full px-4 py-2 text-sm font-medium text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition">
+                                    Xóa tất cả bộ lọc
+                                </button>
+                            </div>
+                        </aside>
+
+                        <main class="w-full lg:w-3/4">
+                            <div class="bg-white rounded-lg shadow-sm">
+                                <div class="p-6 border-b border-gray-200">
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                                        <div class="bg-blue-50 p-4 rounded-lg">
+                                            <p class="text-sm text-blue-600 font-semibold">Tổng số câu hỏi
+                                            </p>
+                                            <p class="text-2xl font-bold text-gray-900 mt-1">${totalQuizzes
+                                                                                               != null ? totalQuizzes : 0}</p>
+                                        </div>
+                                        <div class="bg-green-50 p-4 rounded-lg">
+                                            <p class="text-sm text-green-600 font-semibold">Multiple Choice
+                                            </p>
+                                            <p class="text-2xl font-bold text-gray-900 mt-1">
+                                                ${multipleChoiceCount != null ? multipleChoiceCount : 0}</p>
+                                        </div>
+                                        <div class="bg-yellow-50 p-4 rounded-lg">
+                                            <p class="text-sm text-yellow-600 font-semibold">Single Choice
+                                            </p>
+                                            <p class="text-2xl font-bold text-gray-900 mt-1">
+                                                ${singleChoiceCount != null ? singleChoiceCount : 0}</p>
+                                        </div>
+                                        <!--                                    <div class="bg-purple-50 p-4 rounded-lg">
+                            <p class="text-sm text-purple-600 font-semibold">Các loại khác</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1">
+                                        ${otherTypesCount != null ? otherTypesCount : 0}</p>
+                                </div>-->
+                                    </div>
+
+                                    <div
+                                        class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                        <div>
+                                            <p class="text-sm text-gray-600">Hiển thị ${startItem != null ?
+                                                                                        startItem : 1}-${endItem != null ? endItem : 0} trong tổng
+                                                số
+                                                ${totalQuizzes != null ? totalQuizzes : 0} câu hỏi</p>
                                         </div>
                                         <div class="flex items-center gap-3">
                                             <label class="text-sm text-gray-700">Sắp xếp:</label>
                                             <select name="sortBy"
                                                     class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
                                                     onchange="submitFilter()">
-                                                <option value="updated_desc" ${param.sortBy=='updated_desc' ? 'selected' : '' }>Mới cập nhật</option>
-                                                <option value="question_asc" ${param.sortBy=='question_asc' ? 'selected' : '' }>Câu hỏi (A-Z)</option>
-                                                <option value="created_desc" ${param.sortBy=='created_desc' || param.sortBy==null ? 'selected' : '' }>Mới nhất</option>
-                                                <option value="created_asc" ${param.sortBy=='created_asc' ? 'selected' : '' }>Cũ nhất</option>
+                                                <option value="updated_desc" ${param.sortBy=='updated_desc'
+                                                                               ? 'selected' : '' }>Mới cập nhật</option>
+                                                <option value="question_asc" ${param.sortBy=='question_asc'
+                                                                               ? 'selected' : '' }>Câu hỏi (A-Z)</option>
+                                                <option value="created_desc" ${param.sortBy=='created_desc'
+                                                                               || param.sortBy==null ? 'selected' : '' }>Mới nhất
+                                                </option>
+                                                <option value="created_asc" ${param.sortBy=='created_asc'
+                                                                              ? 'selected' : '' }>Cũ nhất</option>
                                             </select>
                                         </div>
                                     </div>
@@ -223,163 +239,150 @@
                                     </div>
                                 </c:if>
                                 <div class="p-6">
-                                    <div class="space-y-4">
-                                        <% List<Quiz> quizList = (List<Quiz>)
-                                                request.getAttribute("quizList");
-                                                if (quizList != null && !quizList.isEmpty()) {
-                                                for (Quiz quiz : quizList) { %>
-                                        <div
-                                            class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition">
-                                            <div class="flex flex-col md:flex-row gap-6">
-                                                <div
-                                                    class="w-full md:w-16 h-16 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-lg flex-shrink-0 flex items-center justify-center">
-                                                    <svg class="w-8 h-8 text-white" fill="none"
-                                                         stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round"
-                                                          stroke-linejoin="round" stroke-width="2"
-                                                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                    </path>
-                                                    </svg>
-                                                </div>
-
-                                                <div class="flex-grow">
-                                                    <div
-                                                        class="flex items-start justify-between mb-2">
-                                                        <div class="flex-grow">
-                                                            <div
-                                                                class="flex items-center gap-2 mb-2 flex-wrap">
-                                                                <span
-                                                                    class="px-2 py-1 text-xs font-semibold text-indigo-600 bg-indigo-100 rounded">
-                                                                    <%= quiz.getType() %>
-                                                                </span>
-                                                                <span
-                                                                    class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-100 rounded">Danh mục:
-                                                                    <%= quiz.getCategory() != null ? quiz.getCategory().getName() : "N/A" %>
-                                                                </span>
-                                                                <span
-                                                                    class="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 rounded">ID:
-                                                                    <%= quiz.getId() %>
-                                                                </span>
-                                                            </div>
-                                                            <h3
-                                                                class="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
-                                                                <%= quiz.getQuestion() %>
-                                                            </h3>
+                                    <div class="overflow-x-auto">
+                                        <table class="min-w-full divide-y divide-gray-200">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th scope="col"
+                                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-16">
+                                                        ID</th>
+                                                    <th scope="col"
+                                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                                        Câu hỏi</th>
+                                                    <th scope="col"
+                                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-32">
+                                                        Loại</th>
+                                                    <th scope="col"
+                                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-40">
+                                                        Danh mục</th>
+                                                    <th scope="col"
+                                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-32">
+                                                        Trạng thái</th>
+                                                    <th scope="col"
+                                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-48">
+                                                        Thao tác</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white divide-y divide-gray-200">
+                                                <% List<Quiz> quizList = (List<Quiz>)
+                                                        request.getAttribute("quizList");
+                                                        if (quizList != null && !quizList.isEmpty()) {
+                                                        for (Quiz quiz : quizList) { %>
+                                                <tr class="hover:bg-gray-50 transition-colors">
+                                                    <td
+                                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        #<%= quiz.getId() %>
+                                                    </td>
+                                                    <td class="px-6 py-4">
+                                                        <div class="text-sm text-gray-900 font-medium line-clamp-2"
+                                                             title="<%= quiz.getQuestion() %>">
+                                                            <%= quiz.getQuestion() %>
                                                         </div>
-                                                    </div>
-
-                                                    <div
-                                                        class="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
-                                                        <div class="flex items-center">
-                                                            <svg class="w-4 h-4 mr-1" fill="none"
-                                                                 stroke="currentColor"
-                                                                 viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round"
-                                                                  stroke-linejoin="round"
-                                                                  stroke-width="2"
-                                                                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                                            </path>
-                                                            </svg>
-                                                            <span>Ngày tạo: <%= quiz.getCreated_at()
-                                                                            !=null ?
-                                                                            quiz.getCreated_at()
-                                                                            : "N/A" %></span>
+                                                        <div class="text-xs text-gray-400 mt-1">
+                                                            Cập nhật: <%= quiz.getUpdated_at() !=null ? quiz.getUpdated_at() : "N/A" %>
                                                         </div>
-                                                        <div class="flex items-center">
-                                                            <svg class="w-4 h-4 mr-1" fill="none"
-                                                                 stroke="currentColor"
-                                                                 viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round"
-                                                                  stroke-linejoin="round"
-                                                                  stroke-width="2"
-                                                                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                            </path>
-                                                            </svg>
-                                                            <span>Cập nhật: <%= quiz.getUpdated_at()
-                                                                            !=null ?
-                                                                            quiz.getUpdated_at()
-                                                                            : "N/A" %></span>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <span
+                                                            class="px-2.5 py-1 inline-flex text-xs leading-4 font-semibold rounded-full 
+                                                            <%= "Multiple Choice".equals(quiz.getType()) ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800" %>">
+                                                            <%= quiz.getType() %>
+                                                        </span>
+                                                    </td>
+                                                    <td
+                                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                        <%= quiz.getCategory() !=null ? quiz.getCategory().getName() : "N/A" %>
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap">
+                                                        <% boolean isHidden="Hidden".equalsIgnoreCase(quiz.getStatus()); %>
+                                                        <span
+                                                            class="px-2.5 py-1 inline-flex text-xs leading-4 font-semibold rounded-full 
+                                                            <%= isHidden ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800" %>">
+                                                            <%= isHidden ? "Ẩn bởi Admin" : "Đang hoạt động" %>
+                                                        </span>
+                                                    </td>
+                                                    <td
+                                                        class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                        <div class="flex items-center gap-3">
+                                                            <a href="${pageContext.request.contextPath}/instructor/quizzes?action=edit&id=<%= quiz.getId() %>#answers-section"
+                                                               class="text-green-600 hover:text-green-900 flex items-center"
+                                                               title="Thêm câu trả lời">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                     stroke="currentColor"
+                                                                     viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round"
+                                                                      stroke-linejoin="round"
+                                                                      stroke-width="2"
+                                                                      d="M12 4v16m8-8H4"></path>
+                                                                </svg>
+                                                            </a>
+                                                            <a href="${pageContext.request.contextPath}/instructor/quizzes?action=edit&id=<%= quiz.getId() %>"
+                                                               class="text-blue-600 hover:text-blue-900 flex items-center"
+                                                               title="Sửa">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                     stroke="currentColor"
+                                                                     viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round"
+                                                                      stroke-linejoin="round"
+                                                                      stroke-width="2"
+                                                                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                                                </path>
+                                                                </svg>
+                                                            </a>
+                                                            <% String
+                                                                safeQuestion=quiz.getQuestion()
+                                                                !=null ?
+                                                                quiz.getQuestion().replace("\"", "&quot;"
+                                                                ).replace("\n", " "
+                                                                ).replace("\r", "" ) : "" ; %>
+                                                            <button type="button"
+                                                                    class="delete-quiz-btn text-red-600 hover:text-red-900 flex items-center"
+                                                                    data-id="<%= quiz.getId() %>"
+                                                                    data-question="<%= safeQuestion %>"
+                                                                    title="Xóa">
+                                                                <svg class="w-4 h-4" fill="none"
+                                                                     stroke="currentColor"
+                                                                     viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round"
+                                                                      stroke-linejoin="round"
+                                                                      stroke-width="2"
+                                                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                                                                </path>
+                                                                </svg>
+                                                            </button>
                                                         </div>
-                                                    </div>
-
-                                                    <div class="flex flex-wrap gap-2">
-                                                        <% String questionText=quiz.getQuestion();
-                                                                    String safeQuestion="" ; if
-                                                                    (questionText !=null) {
-                                                                    safeQuestion=questionText.replace("\"", "&quot;"
-                                                                    ).replace("\n", " " ).replace("\r", ""
-                                                                    ); } %>
-                                                        <a href="${pageContext.request.contextPath}/instructor/quizzes?action=edit&id=<%= quiz.getId() %>#answers-section"
-                                                           class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition"
-                                                           title="Thêm câu trả lời cho câu hỏi này">
-                                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                                            </svg>
-                                                            Thêm câu trả lời
-                                                        </a>
-                                                                                                                            <a href="${pageContext.request.contextPath}/instructor/quizzes?action=edit&id=<%= quiz.getId() %>"
-                                                                       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
-                                                                        <svg class="w-4 h-4 mr-1"
-                                                                             fill="none"
-                                                                             stroke="currentColor"
-                                                                             viewBox="0 0 24 24">
-                                                                            <path stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                                                            </path>
-                                                                        </svg>
-                                                                        Sửa
-                                                                    </a>
-                                                        <button type="button"
-                                                                class="delete-quiz-btn inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition"
-                                                                data-id="<%= quiz.getId() %>"
-                                                                data-question="<%= safeQuestion %>">
-                                                            <svg class="w-4 h-4 mr-1"
-                                                                 fill="none"
-                                                                 stroke="currentColor"
-                                                                 viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round"
-                                                                  stroke-linejoin="round"
-                                                                  stroke-width="2"
-                                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                            </path>
-                                                            </svg>
-                                                            Xóa
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <% } } else { %>
-                                        <div class="text-center py-12">
-                                            <svg class="mx-auto h-12 w-12 text-gray-400"
-                                                 fill="none" stroke="currentColor"
-                                                 viewBox="0 0 24 24">
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round" stroke-width="2"
-                                                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                            </path>
-                                            </svg>
-                                            <h3 class="mt-2 text-sm font-medium text-gray-900">
-                                                Không tìm thấy câu hỏi nào</h3>
-                                            <p class="mt-1 text-sm text-gray-500">Bắt đầu bằng cách tạo một câu hỏi mới.</p>
-                                            <div class="mt-6">
-                                                <a href="${pageContext.request.contextPath}/instructor/quizzes?action=add"
-                                                   class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                                                    <svg class="w-5 h-5 mr-2" fill="none"
-                                                         stroke="currentColor"
-                                                         viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round"
-                                                          stroke-linejoin="round"
-                                                          stroke-width="2" d="M12 4v16m8-8H4">
-                                                    </path>
-                                                    </svg>
-                                                    Thêm câu hỏi mới
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <% } %>
+                                                    </td>
+                                                </tr>
+                                                <% } } else { %>
+                                                <tr>
+                                                    <td colspan="6"
+                                                        class="px-6 py-12 text-center">
+                                                        <svg class="mx-auto h-12 w-12 text-gray-400"
+                                                             fill="none" stroke="currentColor"
+                                                             viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round"
+                                                              stroke-linejoin="round"
+                                                              stroke-width="2"
+                                                              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                                        </path>
+                                                        </svg>
+                                                        <h3
+                                                            class="mt-2 text-sm font-medium text-gray-900">
+                                                            Không tìm thấy câu hỏi nào</h3>
+                                                        <p class="mt-1 text-sm text-gray-500">
+                                                            Bắt đầu bằng cách tạo một câu hỏi
+                                                            mới.</p>
+                                                        <div class="mt-6">
+                                                            <a href="${pageContext.request.contextPath}/instructor/quizzes?action=add"
+                                                               class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                                                Thêm câu hỏi mới
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <% } %>
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -395,10 +398,9 @@
                         <h2 class="text-xl font-bold text-gray-900">Xóa câu hỏi</h2>
                         <button onclick="closeDeleteModal()"
                                 class="text-gray-400 hover:text-gray-600 transition">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor"
-                                 viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                     </div>
@@ -408,23 +410,22 @@
                             class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
                             <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor"
                                  viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  stroke-width="2"
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
                             </path>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-medium text-gray-900 text-center mb-2">Bạn có chắc chắn muốn xóa câu hỏi này không?</h3>
-                        <p class="text-sm text-gray-500 text-center mb-4">Hành động này không thể hoàn tác.</p>
+                        <h3 class="text-lg font-medium text-gray-900 text-center mb-2">Bạn có chắc chắn muốn
+                            xóa câu hỏi này không?</h3>
+                        <p class="text-sm text-gray-500 text-center mb-4">Hành động này không thể hoàn tác.
+                        </p>
                         <div class="bg-gray-50 rounded-lg p-4 mb-4">
                             <p class="text-sm text-gray-700 font-medium">Câu hỏi:</p>
-                            <p id="deleteQuizQuestion"
-                               class="text-sm text-gray-600 mt-1 line-clamp-3"></p>
+                            <p id="deleteQuizQuestion" class="text-sm text-gray-600 mt-1 line-clamp-3"></p>
                         </div>
                     </div>
 
-                    <form action="${pageContext.request.contextPath}/instructor/quizzes"
-                          method="POST">
+                    <form action="${pageContext.request.contextPath}/instructor/quizzes" method="POST">
                         <input type="hidden" name="action" value="delete">
                         <input type="hidden" name="id" id="deleteQuizId">
                         <div
@@ -433,8 +434,7 @@
                                     class="inline-flex items-center justify-center px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition shadow-sm">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                      viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="2"
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                       d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                                 </path>
                                 </svg>
@@ -444,8 +444,8 @@
                                     class="inline-flex items-center justify-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                      viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                      stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                                 Hủy
                             </button>
