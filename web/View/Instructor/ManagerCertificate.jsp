@@ -97,13 +97,13 @@
             <!-- LIST -->
             <c:choose>
                 <c:when test="${empty certificates}">
-                    <div class="bg-white p-10 rounded-lg shadow-sm text-center text-gray-500">
+                    <div class="bg-white p-10 rounded-lg shadow-sm text-center text-gray-500 min-h-[405px]">
                         Không có chứng chỉ nào
                     </div>
                 </c:when>
 
                 <c:otherwise>
-                    <div class="space-y-4">
+                    <div class="space-y-4 min-h-[405px]">
                         <c:forEach var="cert" items="${certificates}">
                             <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition">
 
@@ -145,18 +145,10 @@
 
                                     <!-- ACTIONS -->
                                     <div class="mt-4 flex gap-2">
-                                        <a href="${pageContext.request.contextPath}/instructor/certificate/view?id=${cert.id}"
-                                           class="inline-flex px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
-                                            View
-                                        </a>
                                         <a href="${pageContext.request.contextPath}/instructor/certificate/edit?id=${cert.id}"
                                            class="inline-flex px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600">
                                             Edit
                                         </a>
-                                        <button onclick="confirmDelete(${cert.id}, '${cert.title}')"
-                                                class="inline-flex px-4 py-2 border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50">
-                                            Delete
-                                        </button>
                                     </div>
 
                                 </div>
