@@ -498,6 +498,15 @@ public class InstructorQuizController extends HttpServlet {
             Quiz quiz = quizServices.getQuizById(quizId);
 
             if (quiz != null) {
+                // Check if quiz is hidden by admin
+                if ("Hidden".equalsIgnoreCase(quiz.getStatus())) {
+                    HttpSession session = request.getSession();
+                    session.setAttribute("notification", "Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.");
+                    session.setAttribute("notificationType", "error");
+                    response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+                    return;
+                }
+
                 // Get quiz answers
                 dao.QuizAnswerDAO quizAnswerDAO = new dao.QuizAnswerDAO();
                 List<model.QuizAnswer> quizAnswers = quizAnswerDAO.getQuizAnswersByQuizId(quizId);
@@ -589,6 +598,14 @@ public class InstructorQuizController extends HttpServlet {
             return;
         }
 
+        // Check if quiz is hidden by admin
+        if ("Hidden".equalsIgnoreCase(existingQuiz.getStatus())) {
+            session.setAttribute("notification", "Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.");
+            session.setAttribute("notificationType", "error");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+            return;
+        }
+
         // Validate type change against existing answers
         dao.QuizAnswerDAO quizAnswerDAO = new dao.QuizAnswerDAO();
         List<model.QuizAnswer> existingAnswers = quizAnswerDAO.getQuizAnswersByQuizId(quizId);
@@ -665,6 +682,35 @@ public class InstructorQuizController extends HttpServlet {
         Quiz existingQuiz = quizServices.getQuizById(quizId);
         if (existingQuiz == null) {
             response.sendError(httpStatus.NOT_FOUND.getCode(), httpStatus.NOT_FOUND.getMessage());
+            return;
+        }
+
+        // Check if quiz is hidden by admin
+        if ("Hidden".equalsIgnoreCase(existingQuiz.getStatus())) {
+            session.setAttribute("notification", "Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.");
+            session.setAttribute("notificationType", "error");
+
+            // Capture current state components from request for proper redirect
+            String page = request.getParameter("page");
+            String search = request.getParameter("search");
+            String type = request.getParameter("type");
+            String categoryId = request.getParameter("categoryId");
+            String sortBy = request.getParameter("sortBy");
+
+            StringBuilder redirectUrl = new StringBuilder(request.getContextPath() + "/instructor/quizzes?action=list");
+            if (page != null && !page.isEmpty())
+                redirectUrl.append("&page=").append(page);
+            if (search != null && !search.isEmpty()) {
+                redirectUrl.append("&search=").append(java.net.URLEncoder.encode(search, "UTF-8"));
+            }
+            if (type != null && !type.isEmpty())
+                redirectUrl.append("&type=").append(type);
+            if (categoryId != null && !categoryId.isEmpty())
+                redirectUrl.append("&categoryId=").append(categoryId);
+            if (sortBy != null && !sortBy.isEmpty())
+                redirectUrl.append("&sortBy=").append(sortBy);
+
+            response.sendRedirect(redirectUrl.toString());
             return;
         }
 

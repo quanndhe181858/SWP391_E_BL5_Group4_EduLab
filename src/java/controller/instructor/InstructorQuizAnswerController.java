@@ -153,6 +153,25 @@ public class InstructorQuizAnswerController extends HttpServlet {
             return;
         }
 
+        // Check if quiz is hidden by admin
+        if ("Hidden".equalsIgnoreCase(existingQuiz.getStatus())) {
+            String ajaxHeader = request.getHeader("X-Requested-With");
+            boolean isAjax = "XMLHttpRequest".equals(ajaxHeader);
+
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(403);
+                response.getWriter().write(
+                        "{\"success\": false, \"message\": \"Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.\"}");
+            } else {
+                session.setAttribute("notification", "Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.");
+                session.setAttribute("notificationType", "error");
+                response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+            }
+            return;
+        }
+
         // Validate max 6 answers
         java.util.List<QuizAnswer> existingAnswers = quizAnswerDAO.getQuizAnswersByQuizId(quizId);
         if (existingAnswers != null && existingAnswers.size() >= 6) {
@@ -378,6 +397,26 @@ public class InstructorQuizAnswerController extends HttpServlet {
 
         // Get quizId for redirect
         int quizId = existingAnswer.getQuiz_id();
+
+        // Check if quiz is hidden by admin
+        Quiz existingQuiz = quizDAO.getQuizById(quizId);
+        if (existingQuiz != null && "Hidden".equalsIgnoreCase(existingQuiz.getStatus())) {
+            String ajaxHeader = request.getHeader("X-Requested-With");
+            boolean isAjax = "XMLHttpRequest".equals(ajaxHeader);
+
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(403);
+                response.getWriter().write(
+                        "{\"success\": false, \"message\": \"Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.\"}");
+            } else {
+                session.setAttribute("notification", "Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.");
+                session.setAttribute("notificationType", "error");
+                response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+            }
+            return;
+        }
 
         // Delete from database
         boolean deleted = quizAnswerDAO.deleteQuizAnswer(answerId);
