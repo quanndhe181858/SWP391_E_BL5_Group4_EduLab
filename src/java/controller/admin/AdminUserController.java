@@ -84,6 +84,9 @@ public class AdminUserController extends HttpServlet {
     private void showUserList(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String roleFilter = request.getParameter("role");
+        String statusFilter = request.getParameter("status");
+        String sortFilter = request.getParameter("sort");
+        String keyword = request.getParameter("keyword");
         int page = 1;
         try {
             page = Integer.parseInt(request.getParameter("page"));
@@ -91,29 +94,30 @@ public class AdminUserController extends HttpServlet {
             page = 1;
         }
 
-        int limit = constant.paging.USER_LIST_ITEM_PER_PAGE;
+        int limit = constant.paging.ADMIN_USER_LIST_ITEM_PER_PAGE;
         int offset = (page - 1) * limit;
-        int totalUsers = 0;
+        int totalUsers;
         List<User> userList;
 
-        if (roleFilter != null && !roleFilter.equals("all")) {
+        Integer roleId = null;
+        if (roleFilter != null && !roleFilter.equals("all") && !roleFilter.isEmpty()) {
             try {
-                int roleId = Integer.parseInt(roleFilter);
-                totalUsers = userDAO.getTotalUsersByRole(roleId);
-                userList = userDAO.getUsersByRole(roleId, limit, offset);
+                roleId = Integer.parseInt(roleFilter);
             } catch (NumberFormatException e) {
-                totalUsers = userDAO.getTotalUsers();
-                userList = userDAO.getAllUsers(limit, offset);
+                // Ignore invalid role id
             }
-        } else {
-            totalUsers = userDAO.getTotalUsers();
-            userList = userDAO.getAllUsers(limit, offset);
         }
+
+        totalUsers = userDAO.countUsers(keyword, roleId, statusFilter);
+        userList = userDAO.searchUsers(keyword, roleId, statusFilter, sortFilter, limit, offset);
 
         int totalPages = (int) Math.ceil((double) totalUsers / limit);
 
         request.setAttribute("userList", userList);
         request.setAttribute("selectedRole", roleFilter);
+        request.setAttribute("selectedStatus", statusFilter);
+        request.setAttribute("selectedSort", sortFilter);
+        request.setAttribute("keyword", keyword);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.getRequestDispatcher("/View/Admin/UserList.jsp").forward(request, response);
@@ -298,7 +302,8 @@ public class AdminUserController extends HttpServlet {
             }
 
             if (!ValidateUtils.validatePassword(password)) {
-                request.getSession().setAttribute("error", "Mật khẩu phải có ít nhất 8 ký tự, bao gồm 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt.");
+                request.getSession().setAttribute("error",
+                        "Mật khẩu phải có ít nhất 8 ký tự, bao gồm 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt.");
                 response.sendRedirect(request.getContextPath() + "/admin/users?action=create");
                 return;
             }
@@ -313,7 +318,7 @@ public class AdminUserController extends HttpServlet {
             user.setFirst_name(firstName.trim());
             user.setLast_name(lastName.trim());
             user.setEmail(email.trim());
-            user.setHash_password(Hash.sha512(password)); 
+            user.setHash_password(Hash.sha512(password));
             user.setRole_id(roleId);
 
             // Parse date if provided

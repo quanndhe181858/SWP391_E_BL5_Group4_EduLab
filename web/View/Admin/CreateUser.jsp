@@ -230,6 +230,9 @@
                             <c:if test="${not empty sessionScope.error}">
                                 showToast("${sessionScope.error}", "error");
                             </c:if>
+                            <c:if test="${not empty sessionScope.notification}">
+                                showToast("${sessionScope.notification}", "${sessionScope.notificationType != null ? sessionScope.notificationType : 'info'}");
+                            </c:if>
                         });
                     </script>
                     <c:if test="${not empty sessionScope.success}">
@@ -237,6 +240,10 @@
                     </c:if>
                     <c:if test="${not empty sessionScope.error}">
                         <c:remove var="error" scope="session" />
+                    </c:if>
+                    <c:if test="${not empty sessionScope.notification}">
+                        <c:remove var="notification" scope="session" />
+                        <c:remove var="notificationType" scope="session" />
                     </c:if>
 
                     <!-- Form Validation Script -->
