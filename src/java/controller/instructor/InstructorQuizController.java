@@ -680,7 +680,28 @@ public class InstructorQuizController extends HttpServlet {
             session.setAttribute("notificationType", "error");
         }
 
-        response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+        // Capture current state components from request
+        String page = request.getParameter("page");
+        String search = request.getParameter("search");
+        String type = request.getParameter("type");
+        String categoryId = request.getParameter("categoryId");
+        String sortBy = request.getParameter("sortBy");
+
+        // Construct redirect URL with existing filters and page
+        StringBuilder redirectUrl = new StringBuilder(request.getContextPath() + "/instructor/quizzes?action=list");
+        if (page != null && !page.isEmpty())
+            redirectUrl.append("&page=").append(page);
+        if (search != null && !search.isEmpty()) {
+            redirectUrl.append("&search=").append(java.net.URLEncoder.encode(search, "UTF-8"));
+        }
+        if (type != null && !type.isEmpty())
+            redirectUrl.append("&type=").append(type);
+        if (categoryId != null && !categoryId.isEmpty())
+            redirectUrl.append("&categoryId=").append(categoryId);
+        if (sortBy != null && !sortBy.isEmpty())
+            redirectUrl.append("&sortBy=").append(sortBy);
+
+        response.sendRedirect(redirectUrl.toString());
     }
 
     private void showCreateFormWithError(HttpServletRequest request, HttpServletResponse response,
