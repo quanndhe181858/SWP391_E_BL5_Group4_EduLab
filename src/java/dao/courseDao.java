@@ -29,6 +29,7 @@ public class CourseDAO extends dao {
 
     public static void main(String[] args) {
         CourseDAO dao = new CourseDAO();
+        System.out.println(dao.getCourseNotHaveCert(1));
     }
 
     public Course createCourse(Course course, int uid) {
@@ -1105,5 +1106,50 @@ public class CourseDAO extends dao {
         }
 
         return list;
+    }
+
+    public List<Course> getCourseNotHaveCert(int instructorId) {
+        List<Course> cList = new ArrayList<>();
+        String sql = """
+                     SELECT 
+                         c.*
+                     FROM course c
+                     LEFT JOIN certificate cert ON c.id = cert.course_id
+                     LEFT JOIN category cat ON c.category_id = cat.id
+                     LEFT JOIN user u ON c.created_by = u.id
+                     WHERE cert.id IS NULL AND c.created_by = ?
+                     ORDER BY c.created_at DESC;
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, instructorId);
+
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Course c = new Course();
+                c.setId(rs.getInt("id"));
+                c.setUuid(rs.getString("uuid"));
+                c.setTitle(rs.getString("title"));
+                c.setDescription(rs.getString("description"));
+                c.setStatus(rs.getString("status"));
+                c.setCategory_id(rs.getInt("category_id"));
+                c.setCreated_at(rs.getTimestamp("created_at"));
+                c.setUpdated_at(rs.getTimestamp("updated_at"));
+                c.setCreated_by(rs.getInt("created_by"));
+                c.setUpdated_by(rs.getInt("updated_by"));
+                c.setThumbnail(rs.getString("thumbnail"));
+                c.setHide_by_admin(rs.getBoolean("hide_by_admin"));
+                cList.add(c);
+            }
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, e.getMessage(), e);
+        } finally {
+            this.closeResources();
+        }
+
+        return cList;
     }
 }

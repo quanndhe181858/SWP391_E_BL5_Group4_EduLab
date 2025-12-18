@@ -668,4 +668,46 @@ public class CertificateDAO extends dao {
         return categories;
     }
 
+    public Certificate createCert(Certificate cert) {
+        String sql = """
+                        INSERT INTO certificate
+                            (title, course_id, description, code_prefix, status, created_at, created_by, category_id)
+                        VALUES
+                            (?, ?, ?, ?, ?, NOW(), ?, ?)
+                    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            ps.setString(1, cert.getTitle());
+            ps.setInt(2, cert.getCourseId());
+            ps.setString(3, cert.getDescription());
+            ps.setString(4, cert.getCodePrefix());
+            ps.setString(5, cert.getStatus());
+            ps.setInt(6, cert.getCreatedBy());
+            ps.setInt(7, cert.getCategoryId());
+
+            ps.executeUpdate();
+
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                Certificate c = new Certificate();
+                c.setId(rs.getInt(1));
+                c.setTitle(cert.getTitle());
+                c.setCourseId(cert.getCourseId());
+                c.setDescription(cert.getDescription());
+                c.setCodePrefix(cert.getCodePrefix());
+                c.setStatus(cert.getStatus());
+                return c;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return null;
+    }
+
 }
