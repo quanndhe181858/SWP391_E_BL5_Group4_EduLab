@@ -39,7 +39,7 @@ public class InstructorManagerCertificate extends HttpServlet {
     }
 
     private final CertificateDAO certificateDAO = new CertificateDAO();
-    private static final int RECORDS_PER_PAGE = 2;
+    private static final int RECORDS_PER_PAGE = 5;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

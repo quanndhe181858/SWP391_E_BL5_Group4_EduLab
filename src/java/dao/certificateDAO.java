@@ -668,4 +668,107 @@ public class CertificateDAO extends dao {
         return categories;
     }
 
+    public Certificate createCert(Certificate cert) {
+        String sql = """
+                        INSERT INTO certificate
+                            (title, course_id, description, code_prefix, status, created_at, created_by, category_id)
+                        VALUES
+                            (?, ?, ?, ?, ?, NOW(), ?, ?)
+                    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            ps.setString(1, cert.getTitle());
+            ps.setInt(2, cert.getCourseId());
+            ps.setString(3, cert.getDescription());
+            ps.setString(4, cert.getCodePrefix());
+            ps.setString(5, cert.getStatus());
+            ps.setInt(6, cert.getCreatedBy());
+            ps.setInt(7, cert.getCategoryId());
+
+            ps.executeUpdate();
+
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                Certificate c = new Certificate();
+                c.setId(rs.getInt(1));
+                c.setTitle(cert.getTitle());
+                c.setCourseId(cert.getCourseId());
+                c.setDescription(cert.getDescription());
+                c.setCodePrefix(cert.getCodePrefix());
+                c.setStatus(cert.getStatus());
+                return c;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return null;
+    }
+
+    public Certificate getCertificateById(int id) {
+        String sql = """
+            SELECT * FROM certificate
+            WHERE id = ?;
+        """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Certificate c = new Certificate();
+                c.setId(rs.getInt("id"));
+                c.setTitle(rs.getString("title"));
+                c.setCourseId(rs.getInt("course_id"));
+                c.setCategoryId(rs.getObject("category_id", Integer.class));
+                c.setDescription(rs.getString("description"));
+                c.setCodePrefix(rs.getString("code_prefix"));
+                c.setStatus(rs.getString("status"));
+                c.setCreatedAt(rs.getTimestamp("created_at"));
+                return c;
+            }
+
+        } catch (SQLException e) {
+        } finally {
+            closeResources();
+        }
+        return null;
+    }
+
+    public boolean updateCertificate(Certificate cert) {
+        String sql = """
+                     UPDATE certificate
+                     SET
+                     title = ?,
+                     description = ?,
+                     status = ?
+                     WHERE id = ?;
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, cert.getTitle());
+            ps.setString(2, cert.getDescription());
+            ps.setString(3, cert.getStatus());
+            ps.setInt(4, cert.getId());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeResources();
+        }
+    }
+
 }
