@@ -172,6 +172,26 @@ public class InstructorQuizAnswerController extends HttpServlet {
             return;
         }
 
+        // Ownership check: Only the creator can add answers to their own quizzes
+        if (existingQuiz.getCreated_by() != user.getId()) {
+            String ajaxHeader = request.getHeader("X-Requested-With");
+            boolean isAjax = "XMLHttpRequest".equals(ajaxHeader);
+
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(403);
+                response.getWriter().write(
+                        "{\"success\": false, \"message\": \"Hành động bị từ chối: Bạn không có quyền thêm câu trả lời cho câu hỏi này.\"}");
+            } else {
+                session.setAttribute("notification",
+                        "Hành động bị từ chối: Bạn không có quyền thêm câu trả lời cho câu hỏi này.");
+                session.setAttribute("notificationType", "error");
+                response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+            }
+            return;
+        }
+
         // Validate max 6 answers
         java.util.List<QuizAnswer> existingAnswers = quizAnswerDAO.getQuizAnswersByQuizId(quizId);
         if (existingAnswers != null && existingAnswers.size() >= 6) {
@@ -319,6 +339,26 @@ public class InstructorQuizAnswerController extends HttpServlet {
             return;
         }
 
+        // Ownership check: Only the creator can update answers for their own quizzes
+        if (existingQuiz.getCreated_by() != user.getId()) {
+            String ajaxHeader = request.getHeader("X-Requested-With");
+            boolean isAjax = "XMLHttpRequest".equals(ajaxHeader);
+
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(403);
+                response.getWriter().write(
+                        "{\"success\": false, \"message\": \"Hành động bị từ chối: Bạn không có quyền chỉnh sửa câu trả lời cho câu hỏi này.\"}");
+            } else {
+                session.setAttribute("notification",
+                        "Hành động bị từ chối: Bạn không có quyền chỉnh sửa câu trả lời cho câu hỏi này.");
+                session.setAttribute("notificationType", "error");
+                response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+            }
+            return;
+        }
+
         // Create quiz answer object with updated data, using quiz type from Quiz
         QuizAnswer answer = new QuizAnswer();
         answer.setId(answerId);
@@ -412,6 +452,27 @@ public class InstructorQuizAnswerController extends HttpServlet {
                         "{\"success\": false, \"message\": \"Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.\"}");
             } else {
                 session.setAttribute("notification", "Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.");
+                session.setAttribute("notificationType", "error");
+                response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+            }
+            return;
+        }
+
+        // Ownership check: Only the creator can delete answers for their own quizzes
+        User user = (User) request.getSession().getAttribute("user");
+        if (existingQuiz != null && existingQuiz.getCreated_by() != user.getId()) {
+            String ajaxHeader = request.getHeader("X-Requested-With");
+            boolean isAjax = "XMLHttpRequest".equals(ajaxHeader);
+
+            if (isAjax) {
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(403);
+                response.getWriter().write(
+                        "{\"success\": false, \"message\": \"Hành động bị từ chối: Bạn không có quyền xóa câu trả lời cho câu hỏi này.\"}");
+            } else {
+                session.setAttribute("notification",
+                        "Hành động bị từ chối: Bạn không có quyền xóa câu trả lời cho câu hỏi này.");
                 session.setAttribute("notificationType", "error");
                 response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
             }
