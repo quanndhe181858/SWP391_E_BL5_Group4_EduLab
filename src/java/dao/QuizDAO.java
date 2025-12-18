@@ -59,15 +59,15 @@ public class QuizDAO extends dao {
 
     public Quiz createQuiz(Quiz quiz, int uid) {
         String sql = """
-                 INSERT INTO `edulab`.`quiz`
-                 (`question`,
-                 `type`,
-                 `category_id`,
-                 `created_by`,
-                 `updated_by`)
-                 VALUES
-                 (?, ?, ?, ?, ?);
-                 """;
+                INSERT INTO `edulab`.`quiz`
+                (`question`,
+                `type`,
+                `category_id`,
+                `created_by`,
+                `updated_by`)
+                VALUES
+                (?, ?, ?, ?, ?);
+                """;
 
         try {
             con = dbc.getConnection();
@@ -99,14 +99,14 @@ public class QuizDAO extends dao {
 
     public Quiz updateQuiz(Quiz quiz, int uid) {
         String sql = """
-                 UPDATE `edulab`.`quiz`
-                 SET 
-                     `question` = ?, 
-                     `type` = ?, 
-                     `category_id` = ?, 
-                     `updated_by` = ?
-                 WHERE `id` = ?;
-                 """;
+                UPDATE `edulab`.`quiz`
+                SET
+                    `question` = ?,
+                    `type` = ?,
+                    `category_id` = ?,
+                    `updated_by` = ?
+                WHERE `id` = ?;
+                """;
 
         try {
             con = dbc.getConnection();
@@ -148,7 +148,8 @@ public class QuizDAO extends dao {
             return rows > 0;
 
         } catch (SQLException e) {
-            // SQLState "23000" usually refers to Integrity Constraint Violation (Foreign Key)
+            // SQLState "23000" usually refers to Integrity Constraint Violation (Foreign
+            // Key)
             if (e.getSQLState().startsWith("23")) {
                 System.out.println("Cannot delete quiz ID " + id + " because it has linked data.");
             } else {
@@ -162,18 +163,19 @@ public class QuizDAO extends dao {
 
     public Quiz getQuizById(int id) {
         String sql = """
-                 SELECT 
-                     id,
-                     question,
-                     type,
-                     category_id,
-                     created_at,
-                     updated_at,
-                     created_by,
-                     updated_by
-                 FROM edulab.quiz
-                 WHERE id = ?;
-                 """;
+                SELECT
+                    id,
+                    question,
+                    type,
+                    category_id,
+                    created_at,
+                    updated_at,
+                    created_by,
+                    updated_by,
+                    status
+                FROM edulab.quiz
+                WHERE id = ?;
+                """;
 
         try {
             con = dbc.getConnection();
@@ -193,6 +195,7 @@ public class QuizDAO extends dao {
                 quiz.setUpdated_at(rs.getTimestamp("updated_at"));
                 quiz.setCreated_by(rs.getInt("created_by"));
                 quiz.setUpdated_by(rs.getInt("updated_by"));
+                quiz.setStatus(rs.getString("status"));
 
                 return quiz;
             }
@@ -209,17 +212,18 @@ public class QuizDAO extends dao {
 
     public List<Quiz> getAllQuizzes() {
         String sql = """
-                 SELECT 
-                     id,
-                     question,
-                     type,
-                     category_id,
-                     created_at,
-                     updated_at,
-                     created_by,
-                     updated_by
-                 FROM edulab.quiz;
-                 """;
+                SELECT
+                    id,
+                    question,
+                    type,
+                    category_id,
+                    created_at,
+                    updated_at,
+                    created_by,
+                    updated_by,
+                    status
+                FROM edulab.quiz;
+                """;
         List<Quiz> quizzes = new ArrayList<>();
 
         try {
@@ -237,6 +241,7 @@ public class QuizDAO extends dao {
                 quiz.setUpdated_at(rs.getTimestamp("updated_at"));
                 quiz.setCreated_by(rs.getInt("created_by"));
                 quiz.setUpdated_by(rs.getInt("updated_by"));
+                quiz.setStatus(rs.getString("status"));
 
                 quizzes.add(quiz);
             }
@@ -252,18 +257,19 @@ public class QuizDAO extends dao {
 
     public List<Quiz> getQuizzesByCategory(int categoryId) {
         String sql = """
-                 SELECT 
-                     id,
-                     question,
-                     type,
-                     category_id,
-                     created_at,
-                     updated_at,
-                     created_by,
-                     updated_by
-                 FROM edulab.quiz
-                 WHERE category_id = ?;
-                 """;
+                SELECT
+                    id,
+                    question,
+                    type,
+                    category_id,
+                    created_at,
+                    updated_at,
+                    created_by,
+                    updated_by,
+                    status
+                FROM edulab.quiz
+                WHERE category_id = ?;
+                """;
         List<Quiz> quizzes = new ArrayList<>();
 
         try {
@@ -283,6 +289,7 @@ public class QuizDAO extends dao {
                 quiz.setUpdated_at(rs.getTimestamp("updated_at"));
                 quiz.setCreated_by(rs.getInt("created_by"));
                 quiz.setUpdated_by(rs.getInt("updated_by"));
+                quiz.setStatus(rs.getString("status"));
 
                 quizzes.add(quiz);
             }
@@ -298,18 +305,19 @@ public class QuizDAO extends dao {
 
     public List<Quiz> getQuizzesByType(String type) {
         String sql = """
-                 SELECT 
-                     id,
-                     question,
-                     type,
-                     category_id,
-                     created_at,
-                     updated_at,
-                     created_by,
-                     updated_by
-                 FROM edulab.quiz
-                 WHERE type = ?;
-                 """;
+                SELECT
+                    id,
+                    question,
+                    type,
+                    category_id,
+                    created_at,
+                    updated_at,
+                    created_by,
+                    updated_by,
+                    status
+                FROM edulab.quiz
+                WHERE type = ?;
+                """;
         List<Quiz> quizzes = new ArrayList<>();
 
         try {
@@ -329,6 +337,7 @@ public class QuizDAO extends dao {
                 quiz.setUpdated_at(rs.getTimestamp("updated_at"));
                 quiz.setCreated_by(rs.getInt("created_by"));
                 quiz.setUpdated_by(rs.getInt("updated_by"));
+                quiz.setStatus(rs.getString("status"));
 
                 quizzes.add(quiz);
             }
@@ -344,12 +353,12 @@ public class QuizDAO extends dao {
 
     public List<Quiz> getRandomQuizzesByCourse(int courseId, int amount) {
         String sql = """
-        SELECT q.* FROM quiz q
-        JOIN course c ON c.category_id = q.category_id
-        WHERE c.id = ?
-        ORDER BY RAND()
-        LIMIT ?
-    """;
+                    SELECT q.* FROM quiz q
+                    JOIN course c ON c.category_id = q.category_id
+                    WHERE c.id = ?
+                    ORDER BY RAND()
+                    LIMIT ?
+                """;
 
         List<Quiz> list = new ArrayList<>();
 
@@ -366,6 +375,7 @@ public class QuizDAO extends dao {
                 q.setQuestion(rs.getString("question"));
                 q.setType(rs.getString("type"));
                 q.setCategory_id(rs.getInt("category_id"));
+                q.setStatus(rs.getString("status"));
                 list.add(q);
             }
 
@@ -409,11 +419,11 @@ public class QuizDAO extends dao {
         String placeholders = String.join(",", Collections.nCopies(categoryIds.size(), "?"));
 
         String sql = """
-        SELECT 
-            id, question, type, category_id,
-            created_at, updated_at, created_by, updated_by
-        FROM edulab.quiz
-        WHERE category_id IN (""" + placeholders + ")";
+                SELECT
+                    id, question, type, category_id,
+                    created_at, updated_at, created_by, updated_by
+                FROM edulab.quiz
+                WHERE category_id IN (""" + placeholders + ")";
 
         try {
             con = dbc.getConnection();
@@ -445,5 +455,175 @@ public class QuizDAO extends dao {
         }
 
         return quizzes;
+    }
+
+    public boolean updateQuizStatus(int id, String status) {
+        String sqlUpdate = "UPDATE edulab.quiz SET status = ? WHERE id = ?";
+        String sqlDelete = "DELETE FROM edulab.quiz_test WHERE quiz_id = ?";
+
+        try {
+            con = dbc.getConnection();
+            con.setAutoCommit(false); // Start transaction
+
+            try (PreparedStatement psUpdate = con.prepareStatement(sqlUpdate)) {
+                psUpdate.setString(1, status);
+                psUpdate.setInt(2, id);
+                psUpdate.executeUpdate();
+            }
+
+            if ("Hidden".equals(status)) {
+                try (PreparedStatement psDelete = con.prepareStatement(sqlDelete)) {
+                    psDelete.setInt(1, id);
+                    psDelete.executeUpdate();
+                }
+            }
+
+            con.commit();
+            return true;
+
+        } catch (SQLException e) {
+            try {
+                if (con != null)
+                    con.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            this.log(Level.SEVERE, "Error in updateQuizStatus", e);
+            return false;
+        } finally {
+            try {
+                if (con != null) {
+                    con.setAutoCommit(true);
+                    con.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public List<Quiz> searchQuizzes(String keyword, String type, Integer categoryId, String status, String sortBy) {
+        List<Quiz> quizzes = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("""
+                SELECT
+                    id,
+                    question,
+                    type,
+                    category_id,
+                    created_at,
+                    updated_at,
+                    created_by,
+                    updated_by,
+                    status
+                FROM edulab.quiz
+                WHERE 1=1
+                """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND question LIKE ?");
+            params.add("%" + keyword.trim() + "%");
+        }
+
+        if (type != null && !type.trim().isEmpty()) {
+            sql.append(" AND type = ?");
+            params.add(type);
+        }
+
+        if (categoryId != null) {
+            sql.append(" AND category_id = ?");
+            params.add(categoryId);
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND status = ?");
+            params.add(status);
+        }
+
+        // Sorting
+        if (sortBy == null || sortBy.isEmpty()) {
+            sql.append(" ORDER BY created_at DESC");
+        } else {
+            switch (sortBy) {
+                case "oldest":
+                    sql.append(" ORDER BY created_at ASC");
+                    break;
+                case "name_asc":
+                    sql.append(" ORDER BY question ASC");
+                    break;
+                case "name_desc":
+                    sql.append(" ORDER BY question DESC");
+                    break;
+                default: // newest or unknown
+                    sql.append(" ORDER BY created_at DESC");
+                    break;
+            }
+        }
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Quiz quiz = new Quiz();
+                quiz.setId(rs.getInt("id"));
+                quiz.setQuestion(rs.getString("question"));
+                quiz.setType(rs.getString("type"));
+                quiz.setCategory_id(rs.getInt("category_id"));
+                quiz.setCreated_at(rs.getTimestamp("created_at"));
+                quiz.setUpdated_at(rs.getTimestamp("updated_at"));
+                quiz.setCreated_by(rs.getInt("created_by"));
+                quiz.setUpdated_by(rs.getInt("updated_by"));
+                quiz.setStatus(rs.getString("status"));
+
+                quizzes.add(quiz);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Something wrong while searchQuizzes() with filters execute!", e);
+        } finally {
+            this.closeResources();
+        }
+
+        return quizzes;
+    }
+
+    public java.util.Map<String, Integer> getQuizCounts() {
+        java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+        String sql = """
+                SELECT
+                    COUNT(*) as total,
+                    SUM(CASE WHEN COALESCE(status, 'Active') = 'Active' THEN 1 ELSE 0 END) as active,
+                    SUM(CASE WHEN status = 'Hidden' THEN 1 ELSE 0 END) as hidden
+                FROM edulab.quiz
+                """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                counts.put("total", rs.getInt("total"));
+                counts.put("active", rs.getInt("active"));
+                counts.put("hidden", rs.getInt("hidden"));
+            }
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Error in getQuizCounts", e);
+        } finally {
+            this.closeResources();
+        }
+        return counts;
+    }
+
+    public List<Quiz> searchQuizzes(String keyword) {
+        return searchQuizzes(keyword, null, null, null, null);
     }
 }

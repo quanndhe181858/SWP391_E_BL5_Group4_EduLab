@@ -51,7 +51,7 @@
                 </form>
             </div>
 
-            <div class="p-3 w-full rounded-lg flex gap-4">
+            <div class="p-3 w-full rounded-lg flex gap-4 min-h-screen">
                 <div class="w-full">
                     <h2 class="text-2xl font-bold mb-4">Danh sách khoá học</h2>
 

@@ -33,6 +33,9 @@ public class Course {
     private Timestamp completedAt;
     private Float passedGrade;
 
+    private boolean hide_by_admin;
+    private User userCreated;
+
     public Course() {
     }
 
@@ -42,6 +45,22 @@ public class Course {
         this.thumbnail = thumbnail;
         this.categoryName = categoryName;
         this.enrollmentCount = enrollmentCount;
+    }
+
+    public User getUserCreated() {
+        return userCreated;
+    }
+
+    public void setUserCreated(User userCreated) {
+        this.userCreated = userCreated;
+    }
+
+    public boolean isHide_by_admin() {
+        return hide_by_admin;
+    }
+
+    public void setHide_by_admin(boolean hide_by_admin) {
+        this.hide_by_admin = hide_by_admin;
     }
 
     public String getCategoryName() {

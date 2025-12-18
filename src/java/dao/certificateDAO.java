@@ -10,9 +10,12 @@ package dao;
  */
 import database.dao;
 import dtos.AccomplishmentDTO;
+import dtos.CertificateDTO;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import model.Certificate;
 import model.UserCertificate;
@@ -454,6 +457,318 @@ public class CertificateDAO extends dao {
             closeResources();
         }
         return null;
+    }
+
+    public int countInstructorCertificates(int instructorId, String search, Integer categoryId, String status) {
+        StringBuilder sql = new StringBuilder("""
+        SELECT COUNT(DISTINCT c.id)
+        FROM certificate c
+        INNER JOIN course co ON c.course_id = co.id
+        WHERE c.created_by = ?
+    """);
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND (\n"
+                    + "    LOWER(c.title) LIKE ?\n"
+                    + " OR LOWER(c.description) LIKE ?\n"
+                    + " OR LOWER(co.title) LIKE ?\n"
+                    + ")");
+        }
+
+        if (categoryId != null) {
+            sql.append(" AND c.category_id = ?");
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND c.status = ?");
+        }
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, instructorId);
+
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim().toLowerCase() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+
+            if (categoryId != null) {
+                ps.setInt(paramIndex++, categoryId);
+            }
+
+            if (status != null && !status.trim().isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return 0;
+    }
+
+    public List<CertificateDTO> getInstructorCertificates(int instructorId, String search,
+            Integer categoryId, String status, String sortBy, String sortOrder, int offset, int limit) {
+
+        List<CertificateDTO> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT c.id, c.title, c.course_id, c.category_id, c.description, 
+               c.code_prefix, c.status, c.created_at,
+               co.title AS course_title,
+               cat.name AS category_name,
+               COUNT(DISTINCT uc.id) AS issued_count
+        FROM certificate c
+        INNER JOIN course co ON c.course_id = co.id
+        LEFT JOIN category cat ON c.category_id = cat.id
+        LEFT JOIN user_certificate uc ON uc.certificate_id = c.id
+        WHERE c.created_by = ?
+    """);
+
+        if (search != null && !search.trim().isEmpty()) {
+            sql.append(" AND (c.title LIKE ? OR c.description LIKE ? OR co.title LIKE ?)");
+        }
+
+        if (categoryId != null) {
+            sql.append(" AND c.category_id = ?");
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND c.status = ?");
+        }
+
+        sql.append(" GROUP BY c.id, c.title, c.course_id, c.category_id, c.description, ");
+        sql.append("c.code_prefix, c.status, c.created_at, co.title, cat.name");
+
+        // Sorting
+        if (sortBy != null && !sortBy.isEmpty()) {
+            sql.append(" ORDER BY ");
+            switch (sortBy) {
+                case "title":
+                    sql.append("c.title");
+                    break;
+                case "course":
+                    sql.append("co.title");
+                    break;
+                case "category":
+                    sql.append("cat.name");
+                    break;
+                case "issued":
+                    sql.append("issued_count");
+                    break;
+                case "created":
+                    sql.append("c.created_at");
+                    break;
+                default:
+                    sql.append("c.created_at");
+            }
+            sql.append(" ").append(sortOrder != null && sortOrder.equalsIgnoreCase("asc") ? "ASC" : "DESC");
+        } else {
+            sql.append(" ORDER BY c.created_at DESC");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql.toString());
+
+            int paramIndex = 1;
+            ps.setInt(paramIndex++, instructorId);
+
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim() + "%";
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+                ps.setString(paramIndex++, searchPattern);
+            }
+
+            if (categoryId != null) {
+                ps.setInt(paramIndex++, categoryId);
+            }
+
+            if (status != null && !status.trim().isEmpty()) {
+                ps.setString(paramIndex++, status);
+            }
+
+            ps.setInt(paramIndex++, limit);
+            ps.setInt(paramIndex++, offset);
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                CertificateDTO dto = new CertificateDTO();
+                dto.setId(rs.getInt("id"));
+                dto.setTitle(rs.getString("title"));
+                dto.setCourseId(rs.getInt("course_id"));
+                dto.setCourseTitle(rs.getString("course_title"));
+                dto.setCategoryId(rs.getObject("category_id", Integer.class));
+                dto.setCategoryName(rs.getString("category_name"));
+                dto.setDescription(rs.getString("description"));
+                dto.setCodePrefix(rs.getString("code_prefix"));
+                dto.setStatus(rs.getString("status"));
+                dto.setCreatedAt(rs.getTimestamp("created_at"));
+                dto.setIssuedCount(rs.getInt("issued_count"));
+
+                list.add(dto);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+
+        return list;
+    }
+
+    public List<Map<String, Object>> getCategoriesForInstructor(int instructorId) {
+        List<Map<String, Object>> categories = new ArrayList<>();
+
+        String sql = """
+        SELECT DISTINCT cat.id, cat.name, COUNT(c.id) as cert_count
+        FROM category cat
+        INNER JOIN certificate c ON c.category_id = cat.id
+        INNER JOIN course co ON c.course_id = co.id
+        WHERE c.created_by  = ?
+        GROUP BY cat.id, cat.name
+        ORDER BY cat.name
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, instructorId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Map<String, Object> cat = new HashMap<>();
+                cat.put("id", rs.getInt("id"));
+                cat.put("name", rs.getString("name"));
+                cat.put("count", rs.getInt("cert_count"));
+                categories.add(cat);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+
+        return categories;
+    }
+
+    public Certificate createCert(Certificate cert) {
+        String sql = """
+                        INSERT INTO certificate
+                            (title, course_id, description, code_prefix, status, created_at, created_by, category_id)
+                        VALUES
+                            (?, ?, ?, ?, ?, NOW(), ?, ?)
+                    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            ps.setString(1, cert.getTitle());
+            ps.setInt(2, cert.getCourseId());
+            ps.setString(3, cert.getDescription());
+            ps.setString(4, cert.getCodePrefix());
+            ps.setString(5, cert.getStatus());
+            ps.setInt(6, cert.getCreatedBy());
+            ps.setInt(7, cert.getCategoryId());
+
+            ps.executeUpdate();
+
+            rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                Certificate c = new Certificate();
+                c.setId(rs.getInt(1));
+                c.setTitle(cert.getTitle());
+                c.setCourseId(cert.getCourseId());
+                c.setDescription(cert.getDescription());
+                c.setCodePrefix(cert.getCodePrefix());
+                c.setStatus(cert.getStatus());
+                return c;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return null;
+    }
+
+    public Certificate getCertificateById(int id) {
+        String sql = """
+            SELECT * FROM certificate
+            WHERE id = ?;
+        """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Certificate c = new Certificate();
+                c.setId(rs.getInt("id"));
+                c.setTitle(rs.getString("title"));
+                c.setCourseId(rs.getInt("course_id"));
+                c.setCategoryId(rs.getObject("category_id", Integer.class));
+                c.setDescription(rs.getString("description"));
+                c.setCodePrefix(rs.getString("code_prefix"));
+                c.setStatus(rs.getString("status"));
+                c.setCreatedAt(rs.getTimestamp("created_at"));
+                return c;
+            }
+
+        } catch (SQLException e) {
+        } finally {
+            closeResources();
+        }
+        return null;
+    }
+
+    public boolean updateCertificate(Certificate cert) {
+        String sql = """
+                     UPDATE certificate
+                     SET
+                     title = ?,
+                     description = ?,
+                     status = ?
+                     WHERE id = ?;
+                     """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, cert.getTitle());
+            ps.setString(2, cert.getDescription());
+            ps.setString(3, cert.getStatus());
+            ps.setInt(4, cert.getId());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            closeResources();
+        }
     }
 
 }

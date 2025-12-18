@@ -23,7 +23,7 @@
                         <h1 class="text-3xl font-bold text-gray-900">Quản lý câu hỏi</h1>
                         <p class="text-lg text-gray-600 mt-1">Tạo, chỉnh sửa và quản lý các câu hỏi của bạn</p>
                     </div>
-                    <a href="${pageContext.request.contextPath}/instructor/quizes?action=add"
+                    <a href="${pageContext.request.contextPath}/instructor/quizzes?action=add"
                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-sm">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -35,7 +35,7 @@
             </div>
 
             <form id="filterForm" method="get"
-                  action="${pageContext.request.contextPath}/instructor/quizes">
+                  action="${pageContext.request.contextPath}/instructor/quizzes">
                 <input type="hidden" name="action" value="list">
                 <input type="hidden" name="page" id="pageInput"
                        value="${param.page != null ? param.page : 1}">
@@ -309,7 +309,7 @@
                                                                     safeQuestion=questionText.replace("\"", "&quot;"
                                                                     ).replace("\n", " " ).replace("\r", ""
                                                                     ); } %>
-                                                        <a href="${pageContext.request.contextPath}/instructor/quizes?action=edit&id=<%= quiz.getId() %>#answers-section"
+                                                        <a href="${pageContext.request.contextPath}/instructor/quizzes?action=edit&id=<%= quiz.getId() %>#answers-section"
                                                            class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition"
                                                            title="Thêm câu trả lời cho câu hỏi này">
                                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,7 +317,7 @@
                                                             </svg>
                                                             Thêm câu trả lời
                                                         </a>
-                                                                                                                            <a href="${pageContext.request.contextPath}/instructor/quizes?action=edit&id=<%= quiz.getId() %>"
+                                                                                                                            <a href="${pageContext.request.contextPath}/instructor/quizzes?action=edit&id=<%= quiz.getId() %>"
                                                                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition">
                                                                         <svg class="w-4 h-4 mr-1"
                                                                              fill="none"
@@ -365,7 +365,7 @@
                                                 Không tìm thấy câu hỏi nào</h3>
                                             <p class="mt-1 text-sm text-gray-500">Bắt đầu bằng cách tạo một câu hỏi mới.</p>
                                             <div class="mt-6">
-                                                <a href="${pageContext.request.contextPath}/instructor/quizes?action=add"
+                                                <a href="${pageContext.request.contextPath}/instructor/quizzes?action=add"
                                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
                                                     <svg class="w-5 h-5 mr-2" fill="none"
                                                          stroke="currentColor"
@@ -423,7 +423,7 @@
                         </div>
                     </div>
 
-                    <form action="${pageContext.request.contextPath}/instructor/quizes"
+                    <form action="${pageContext.request.contextPath}/instructor/quizzes"
                           method="POST">
                         <input type="hidden" name="action" value="delete">
                         <input type="hidden" name="id" id="deleteQuizId">
@@ -481,7 +481,7 @@
 
                 // Clear all filters
                 function clearFilters() {
-                    window.location.href = '${pageContext.request.contextPath}/instructor/quizes?action=list';
+                    window.location.href = '${pageContext.request.contextPath}/instructor/quizzes?action=list';
                 }
 
                 // Search on Enter key

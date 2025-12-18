@@ -19,7 +19,7 @@
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                 <div>
                                     <div class="flex items-center gap-3 mb-2">
-                                        <a href="${pageContext.request.contextPath}/instructor/quizes?action=list"
+                                        <a href="${pageContext.request.contextPath}/instructor/quizzes?action=list"
                                             class="inline-flex items-center text-gray-600 hover:text-blue-600 transition">
                                             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -40,7 +40,7 @@
                             <!-- Main Content -->
                             <main class="w-full">
                                 <!-- Quiz Create Form -->
-                                <form id="createQuizForm" action="${pageContext.request.contextPath}/instructor/quizes"
+                                <form id="createQuizForm" action="${pageContext.request.contextPath}/instructor/quizzes"
                                     method="POST" onsubmit="return validateForm()">
                                     <input type="hidden" name="action" value="create">
 
@@ -183,7 +183,7 @@
                                             </svg>
                                             Tạo câu hỏi
                                         </button>
-                                        <a href="${pageContext.request.contextPath}/instructor/quizes?action=list"
+                                        <a href="${pageContext.request.contextPath}/instructor/quizzes?action=list"
                                             class="inline-flex items-center px-6 py-3 bg-white border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">
                                             Hủy
                                         </a>

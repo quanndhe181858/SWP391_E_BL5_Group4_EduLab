@@ -6,6 +6,7 @@ package dao;
 
 import java.sql.*;
 import database.dao;
+import dtos.RetakeRequestDTO;
 import java.util.ArrayList;
 import java.util.List;
 import model.TestAttempt;
@@ -224,6 +225,192 @@ public class TestAttemptDAOv2 extends dao {
 
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public boolean updateStatus(int userId, int testId, String status) {
+        String sql = "UPDATE test_attempt SET status = ? WHERE user_id = ? AND test_id = ?";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setString(1, status);
+            ps.setInt(2, userId);
+            ps.setInt(3, testId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+
+        return false;
+    }
+
+    public boolean deletePendingAttempt(int userId, int testId) {
+        String sql = """
+        DELETE FROM test_attempt
+        WHERE user_id = ?
+          AND test_id = ?
+          AND status = 'Pending'
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ps.setInt(2, testId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+        return false;
+    }
+
+    public boolean isLimitReached(int userId, int testId) {
+        String sql = """
+        SELECT current_attempted
+        FROM test_attempt
+        WHERE user_id = ? AND test_id = ?
+    """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ps.setInt(2, testId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("current_attempted") >= 2;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+
+        return false;
+    }
+
+    public boolean isBlockedStatus(int userId, int testId) {
+        String sql = "SELECT status FROM test_attempt WHERE user_id = ? AND test_id = ?";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, userId);
+            ps.setInt(2, testId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String status = rs.getString("status");
+                return "Pending".equals(status) || "Rejected".equals(status) || "Retaking".equals(status);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
+        }
+
+        return false;
+    }
+
+    public List<RetakeRequestDTO> getPendingRetakeRequestsByInstructor(
+            int instructorId,
+            Integer courseId,
+            String search) {
+        List<RetakeRequestDTO> list = new ArrayList<>();
+
+        String sql = """
+SELECT 
+    ta.user_id,
+    CONCAT(u.first_name, ' ', u.last_name) AS full_name,
+    u.email,
+
+    c.id AS course_id,
+    c.title AS course_title,
+
+    t.id AS test_id,
+    t.title AS test_title,
+
+    ta.grade,
+    ta.current_attempted,
+    ta.status
+
+FROM test_attempt ta
+JOIN user u ON ta.user_id = u.id
+JOIN test t ON ta.test_id = t.id
+JOIN course c ON t.course_id = c.id
+
+WHERE ta.status = 'Pending'
+  AND c.created_by = ?
+""";
+
+        if (courseId != null) {
+            sql += " AND c.id = ? ";
+        }
+
+        if (search != null && !search.isBlank()) {
+            sql += """
+      AND (
+          CONCAT(u.first_name, ' ', u.last_name) LIKE ?
+          OR u.email LIKE ?
+      )
+    """;
+        }
+
+        sql += " ORDER BY ta.user_id DESC ";
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+
+            int idx = 1;
+            ps.setInt(idx++, instructorId);
+
+            if (courseId != null) {
+                ps.setInt(idx++, courseId);
+            }
+
+            if (search != null && !search.isBlank()) {
+                String kw = "%" + search + "%";
+                ps.setString(idx++, kw);
+                ps.setString(idx++, kw);
+            }
+
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                RetakeRequestDTO dto = new RetakeRequestDTO();
+                dto.setUserId(rs.getInt("user_id"));
+                dto.setUserName(rs.getString("full_name"));
+                dto.setUserEmail(rs.getString("email"));
+
+                dto.setCourseId(rs.getInt("course_id"));
+                dto.setCourseTitle(rs.getString("course_title"));
+
+                dto.setTestId(rs.getInt("test_id"));
+                dto.setTestTitle(rs.getString("test_title"));
+
+                dto.setGrade(rs.getFloat("grade"));
+                dto.setCurrentAttempted(rs.getInt("current_attempted"));
+
+                list.add(dto);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            closeResources();
         }
 
         return list;

@@ -9,7 +9,7 @@
                 <head>
                     <meta charset="UTF-8" />
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Quản lý Người dùng - Admin</title>
+                    <title>Quản lý người dùng - Quản trị viên</title>
                     <jsp:include page="/layout/import.jsp" />
                 </head>
 
@@ -24,49 +24,14 @@
 
                         <!-- Page Title -->
                         <div class="mb-8">
-                            <h1 class="text-3xl font-bold text-gray-800 mb-2">👥 Quản lý Người dùng</h1>
+                            <h1 class="text-3xl font-bold text-gray-800 mb-2">👥 Quản lý người dùng</h1>
                             <p class="text-gray-600">Quản lý thông tin và trạng thái của tất cả người dùng trong hệ
                                 thống</p>
                         </div>
 
-                        <!-- Success/Error Messages -->
-                        <!-- Messages handled by importBottom.jsp toast logic -->
-
-                        <!-- Search & Filter Bar -->
-                        <div class="bg-white rounded-xl shadow-md p-4 mb-6">
-                            <form method="GET" action="${pageContext.request.contextPath}/admin/users" id="filterForm">
-                                <div class="flex flex-col sm:flex-row gap-4">
-
-                                    <!-- Search Input -->
-                                    <div class="flex-1 relative">
-                                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                        <input type="text" id="searchInput"
-                                            placeholder="Tìm kiếm người dùng theo tên, email..."
-                                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    </div>
-
-
-                                    <!-- Filter Dropdown -->
-                                    <select name="role" id="filterRole"
-                                        onchange="document.getElementById('filterForm').submit()"
-                                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        <option value="all" ${selectedRole==null || selectedRole=='all' ? 'selected'
-                                            : '' }>Tất cả vai trò</option>
-                                        <option value="1" ${selectedRole=='1' ? 'selected' : '' }>Admin</option>
-                                        <option value="2" ${selectedRole=='2' ? 'selected' : '' }>Instructor</option>
-                                        <option value="3" ${selectedRole=='3' ? 'selected' : '' }>Trainee</option>
-                                    </select>
-                                </div>
-                            </form>
-                        </div>
-
                         <!-- Statistics Cards -->
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                            <div class="bg-white rounded-xl shadow-md p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 ">
+                            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm text-gray-600">Tổng người dùng</p>
@@ -96,7 +61,7 @@
                                 </c:if>
                             </c:forEach>
 
-                            <div class="bg-white rounded-xl shadow-md p-6">
+                            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm text-gray-600">Admin</p>
@@ -112,7 +77,7 @@
                                 </div>
                             </div>
 
-                            <div class="bg-white rounded-xl shadow-md p-6">
+                            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm text-gray-600">Instructor</p>
@@ -127,7 +92,7 @@
                                 </div>
                             </div>
 
-                            <div class="bg-white rounded-xl shadow-md p-6">
+                            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-orange-500">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-sm text-gray-600">Trainee</p>
@@ -142,6 +107,92 @@
                             </div>
                         </div>
 
+                        <!-- Search & Filter Bar -->
+                        <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                            <form method="GET" action="${pageContext.request.contextPath}/admin/users" id="filterForm">
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                                    <!-- Search Input -->
+                                    <div class="md:col-span-2">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Tìm kiếm</label>
+                                        <div class="relative">
+                                            <svg class="absolute left-3 top-3 w-5 h-5 text-gray-400" fill="none"
+                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                            </svg>
+                                            <input type="text" id="searchInput" name="keyword" value="${keyword}"
+                                                placeholder="Tìm theo tên, email..."
+                                                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                        </div>
+                                    </div>
+
+                                    <!-- Filter Dropdown: Role -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Vai trò</label>
+                                        <select name="role" id="filterRole"
+                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="all" ${selectedRole==null || selectedRole=='all' ? 'selected'
+                                                : '' }>Tất cả vai trò</option>
+                                            <option value="1" ${selectedRole=='1' ? 'selected' : '' }>Admin</option>
+                                            <option value="2" ${selectedRole=='2' ? 'selected' : '' }>Instructor
+                                            </option>
+                                            <option value="3" ${selectedRole=='3' ? 'selected' : '' }>Trainee</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Filter Dropdown: Status -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
+                                        <select name="status" id="filterStatus"
+                                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="all" ${selectedStatus==null || selectedStatus=='all'
+                                                ? 'selected' : '' }>Tất cả</option>
+                                            <option value="Active" ${selectedStatus=='Active' ? 'selected' : '' }>Hoạt
+                                                động</option>
+                                            <option value="Inactive" ${selectedStatus=='Inactive' ? 'selected' : '' }>Vô
+                                                hiệu hóa</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-wrap items-center justify-between gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Sắp
+                                            xếp:</label>
+                                        <select name="sort" id="sortFilter"
+                                            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            <option value="newest" ${selectedSort=='newest' ? 'selected' : '' }>Mới nhất
+                                            </option>
+                                            <option value="oldest" ${selectedSort=='oldest' ? 'selected' : '' }>Cũ nhất
+                                            </option>
+                                            <option value="name_asc" ${selectedSort=='name_asc' ? 'selected' : '' }>Tên
+                                                A-Z</option>
+                                            <option value="name_desc" ${selectedSort=='name_desc' ? 'selected' : '' }>
+                                                Tên Z-A</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="flex gap-3">
+                                        <button type="button" onclick="resetFilter()"
+                                            class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                                            Đặt lại
+                                        </button>
+                                        <button type="submit"
+                                            class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md flex items-center gap-2">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                            </svg>
+                                            Tìm kiếm
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+
+
+
                         <!-- Add User Button -->
                         <div class="flex justify-end mb-4">
                             <a href="${pageContext.request.contextPath}/admin/users?action=create"
@@ -154,8 +205,14 @@
                             </a>
                         </div>
 
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-lg font-semibold text-gray-700">Kết quả tìm kiếm: <span
+                                    class="text-blue-600">${userList.size()}</span> người dùng được tìm thấy</h2>
+                        </div>
+
                         <!-- Table Card -->
                         <div class="bg-white rounded-xl shadow-md overflow-hidden">
+
 
                             <!-- Table -->
                             <div class="overflow-x-auto">
@@ -353,11 +410,11 @@
                                 class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4 rounded-lg shadow-sm">
                                 <div class="flex flex-1 justify-between sm:hidden">
                                     <c:if test="${currentPage > 1}">
-                                        <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                        <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}&role=${selectedRole}&status=${selectedStatus}&sort=${selectedSort}&keyword=${keyword}"
                                             class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Previous</a>
                                     </c:if>
                                     <c:if test="${currentPage < totalPages}">
-                                        <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                        <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}&role=${selectedRole}&status=${selectedStatus}&sort=${selectedSort}&keyword=${keyword}"
                                             class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Next</a>
                                     </c:if>
                                 </div>
@@ -377,7 +434,7 @@
                                             <!-- Previous Button -->
                                             <c:choose>
                                                 <c:when test="${currentPage > 1}">
-                                                    <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                                    <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}&role=${selectedRole}&status=${selectedStatus}&sort=${selectedSort}&keyword=${keyword}"
                                                         class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
                                                         <span class="sr-only">Previous</span>
                                                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
@@ -410,7 +467,7 @@
                                                             class="relative z-10 inline-flex items-center bg-blue-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">${i}</a>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <a href="${pageContext.request.contextPath}/admin/users?page=${i}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                                        <a href="${pageContext.request.contextPath}/admin/users?page=${i}&role=${selectedRole}&status=${selectedStatus}&sort=${selectedSort}&keyword=${keyword}"
                                                             class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">${i}</a>
                                                     </c:otherwise>
                                                 </c:choose>
@@ -419,7 +476,7 @@
                                             <!-- Next Button -->
                                             <c:choose>
                                                 <c:when test="${currentPage < totalPages}">
-                                                    <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}&role=${selectedRole != null ? selectedRole : 'all'}"
+                                                    <a href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}&role=${selectedRole}&status=${selectedStatus}&sort=${selectedSort}&keyword=${keyword}"
                                                         class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
                                                         <span class="sr-only">Next</span>
                                                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"
@@ -443,6 +500,7 @@
                                                     </span>
                                                 </c:otherwise>
                                             </c:choose>
+
                                         </nav>
                                     </div>
                                 </div>
@@ -456,12 +514,20 @@
 
                     <!-- Toast Notification Logic -->
                     <script>
+                        function resetFilter() {
+                            window.location.href = '${pageContext.request.contextPath}/admin/users';
+                        }
+
                         document.addEventListener('DOMContentLoaded', function () {
+
                             <c:if test="${not empty sessionScope.success}">
                                 showToast("${sessionScope.success}", "success");
                             </c:if>
                             <c:if test="${not empty sessionScope.error}">
                                 showToast("${sessionScope.error}", "error");
+                            </c:if>
+                            <c:if test="${not empty sessionScope.notification}">
+                                showToast("${sessionScope.notification}", "${sessionScope.notificationType != null ? sessionScope.notificationType : 'info'}");
                             </c:if>
                         });
                     </script>
@@ -471,30 +537,12 @@
                     <c:if test="${not empty sessionScope.error}">
                         <c:remove var="error" scope="session" />
                     </c:if>
+                    <c:if test="${not empty sessionScope.notification}">
+                        <c:remove var="notification" scope="session" />
+                        <c:remove var="notificationType" scope="session" />
+                    </c:if>
 
-                    <!-- Search Script -->
-                    <script>
-                        document.addEventListener('DOMContentLoaded', function () {
-                            const searchInput = document.getElementById('searchInput');
-                            const rows = document.querySelectorAll('.user-row');
-
-                            searchInput.addEventListener('input', function () {
-                                const searchTerm = this.value.toLowerCase();
-
-                                rows.forEach(row => {
-                                    const firstName = row.dataset.firstname.toLowerCase();
-                                    const lastName = row.dataset.lastname.toLowerCase();
-                                    const email = row.dataset.email.toLowerCase();
-
-                                    const matches = firstName.includes(searchTerm) ||
-                                        lastName.includes(searchTerm) ||
-                                        email.includes(searchTerm);
-
-                                    row.style.display = matches ? '' : 'none';
-                                });
-                            });
-                        });
-                    </script>
+                    <!-- Client-side Search Script Removed -->
 
                 </body>
 

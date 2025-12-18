@@ -20,11 +20,12 @@ public class Certificate {
     private String codePrefix;
     private String status;
     private Timestamp createdAt;
+    private int createdBy;
 
     public Certificate() {
     }
 
-    public Certificate(int id, String title, int courseId, Integer categoryId, String description, String codePrefix, String status, Timestamp createdAt) {
+    public Certificate(int id, String title, int courseId, Integer categoryId, String description, String codePrefix, String status, Timestamp createdAt, int createdBy) {
         this.id = id;
         this.title = title;
         this.courseId = courseId;
@@ -33,6 +34,7 @@ public class Certificate {
         this.codePrefix = codePrefix;
         this.status = status;
         this.createdAt = createdAt;
+        this.createdBy = createdBy;
     }
 
     public int getId() {
@@ -97,6 +99,14 @@ public class Certificate {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public int getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(int createdBy) {
+        this.createdBy = createdBy;
     }
 
 }

@@ -77,8 +77,12 @@ public class LearnCourseController extends HttpServlet {
         }
 
         if (!"Active".equalsIgnoreCase(course.getStatus())) {
-            request.setAttribute("error", "Khóa học chưa được mở");
-            request.getRequestDispatcher("/View/Trainee/learn.jsp").forward(request, response);
+            response.sendRedirect(request.getContextPath() + "/courses");
+            return;
+        }
+
+        if (course.isHide_by_admin()) {
+            response.sendRedirect(request.getContextPath() + "/courses");
             return;
         }
 

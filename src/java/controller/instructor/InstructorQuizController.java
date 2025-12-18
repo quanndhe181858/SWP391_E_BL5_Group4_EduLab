@@ -35,7 +35,7 @@ import jakarta.servlet.http.HttpSession;
  * 
  * @author Le Minh Duc
  */
-@WebServlet(name = "InstructorQuizController", urlPatterns = { "/instructor/quizes" })
+@WebServlet(name = "InstructorQuizController", urlPatterns = { "/instructor/quizzes" })
 public class InstructorQuizController extends HttpServlet {
 
     private final Logger logger = Logger.getLogger(this.getClass().getName());
@@ -467,7 +467,7 @@ public class InstructorQuizController extends HttpServlet {
             session.setAttribute("notification", "Câu hỏi và câu trả lời đã được tạo thành công!");
             session.setAttribute("notificationType", "success");
             // Redirect to list
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
         } else {
             logger.log(Level.SEVERE, "Failed to create quiz for user: " + user.getId());
             request.setAttribute("notification", "Có lỗi xảy ra khi tạo câu hỏi. Vui lòng thử lại.");
@@ -557,7 +557,7 @@ public class InstructorQuizController extends HttpServlet {
         if (question == null || question.trim().isEmpty()) {
             session.setAttribute("notification", "Question is required.");
             session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
             return;
         }
 
@@ -565,7 +565,7 @@ public class InstructorQuizController extends HttpServlet {
         if (type == null || type.trim().isEmpty()) {
             session.setAttribute("notification", "Question type is required.");
             session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
             return;
         }
 
@@ -577,7 +577,7 @@ public class InstructorQuizController extends HttpServlet {
             logger.log(Level.WARNING, "Invalid category ID: " + categoryIdParam);
             session.setAttribute("notification", "Invalid category ID.");
             session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
             return;
         }
 
@@ -600,7 +600,7 @@ public class InstructorQuizController extends HttpServlet {
             session.setAttribute("notification",
                     "Không thể đổi sang Multiple Choice. Cần ít nhất 2 đáp án đúng hiện có.");
             session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
+            response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=edit&id=" + quizId);
             return;
         }
 
@@ -608,7 +608,7 @@ public class InstructorQuizController extends HttpServlet {
             session.setAttribute("notification",
                     "Không thể đổi sang Single Choice. Cần chính xác 1 đáp án đúng hiện có.");
             session.setAttribute("notificationType", "error");
-            response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=edit&id=" + quizId);
+            response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=edit&id=" + quizId);
             return;
         }
 
@@ -631,7 +631,7 @@ public class InstructorQuizController extends HttpServlet {
             session.setAttribute("notificationType", "error");
         }
 
-        response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+        response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
     }
 
     /**
@@ -679,7 +679,7 @@ public class InstructorQuizController extends HttpServlet {
             session.setAttribute("notificationType", "error");
         }
 
-        response.sendRedirect(request.getContextPath() + "/instructor/quizes?action=list");
+        response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
     }
 
     private void showCreateFormWithError(HttpServletRequest request, HttpServletResponse response,
