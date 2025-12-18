@@ -470,7 +470,7 @@ public class QuizDAO extends dao {
                     id, question, type, category_id,
                     created_at, updated_at, created_by, updated_by
                 FROM edulab.quiz
-                WHERE category_id IN (""" + placeholders + ")";
+                WHERE status != 'Hidden' AND category_id IN (""" + placeholders + ")";
 
         try {
             con = dbc.getConnection();
