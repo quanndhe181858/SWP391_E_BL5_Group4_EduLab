@@ -109,20 +109,6 @@ public class InstructorQuizAnswerController extends HttpServlet {
     }
 
     /**
-     * Helper method to check if string can be parsed to int
-     */
-    private boolean isInteger(String s) {
-        try {
-            Integer.parseInt(s);
-        } catch (NumberFormatException e) {
-            return false;
-        } catch (NullPointerException e) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
      * Creates a new quiz answer
      */
     private void createQuizAnswer(HttpServletRequest request, HttpServletResponse response)

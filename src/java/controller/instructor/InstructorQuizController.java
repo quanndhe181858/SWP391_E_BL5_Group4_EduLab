@@ -5,6 +5,7 @@
 package controller.instructor;
 
 import constant.httpStatus;
+import constant.paging;
 import dao.QuizDAO;
 import dao.CategoryDAO;
 import service.QuizServices;
@@ -42,7 +43,6 @@ public class InstructorQuizController extends HttpServlet {
     private QuizDAO quizDAO;
     private CategoryDAO categoryDAO;
     private QuizServices quizServices;
-    private static final int ITEMS_PER_PAGE = 10;
 
     @Override
     public void init() throws ServletException {
@@ -269,14 +269,15 @@ public class InstructorQuizController extends HttpServlet {
             }
 
             int totalItems = filteredQuizzes.size();
-            int totalPages = (int) Math.ceil((double) totalItems / ITEMS_PER_PAGE);
+            int limit = constant.paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE;
+            int totalPages = (int) Math.ceil((double) totalItems / limit);
             if (totalPages < 1)
                 totalPages = 1;
             if (currentPage > totalPages)
                 currentPage = totalPages;
 
-            int startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+            int startIndex = (currentPage - 1) * limit;
+            int endIndex = Math.min(startIndex + limit, totalItems);
 
             List<Quiz> paginatedQuizzes;
             if (startIndex < totalItems) {
