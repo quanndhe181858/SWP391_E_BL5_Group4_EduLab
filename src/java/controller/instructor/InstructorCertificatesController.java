@@ -24,66 +24,66 @@ import model.User;
  */
 @WebServlet(name = "InstructorCertificatesController", urlPatterns = {"/instructor/certificate"})
 public class InstructorCertificatesController extends HttpServlet {
-    
+
     private final CourseDAO cDao = new CourseDAO();
     private final CertificateDAO certDao = new CertificateDAO();
-    
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        
+
         if (session == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
-        
+
         User u = (User) session.getAttribute("user");
-        
+
         if (u == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
-        
+
         if (u.getRole_id() != 2) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
-        
+
         List<Course> cList = cDao.getCourseNotHaveCert(u.getId());
-        
+
         req.setAttribute("courseList", cList);
         req.getRequestDispatcher("../View/Instructor/AddCertificate.jsp").forward(req, resp);
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         HttpSession session = req.getSession(false);
-        
+
         if (session == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
-        
+
         User u = (User) session.getAttribute("user");
-        
+
         if (u == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
-        
+
         if (u.getRole_id() != 2) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
-        
+
         String title = req.getParameter("title");
         String cidStr = req.getParameter("course_id");
         String des = req.getParameter("description");
         String codePrefix = req.getParameter("code_prefix");
         String status = req.getParameter("status");
-        
+
         if (title == null || title.isBlank()
                 || cidStr == null || cidStr.isBlank()
                 || codePrefix == null || codePrefix.isBlank()
@@ -92,9 +92,27 @@ public class InstructorCertificatesController extends HttpServlet {
             req.getRequestDispatcher("../View/Instructor/AddCertificate.jsp").forward(req, resp);
             return;
         }
-        
+
+        if (title.length() > 100) {
+            req.setAttribute("error", "Tiêu đề chỉ được dài tối đa 100 từ!");
+            doGet(req, resp);
+            return;
+        }
+
+        if (codePrefix.length() > 100) {
+            req.setAttribute("error", "Mã tiền tố chỉ được dài tối đa 20 từ!");
+            doGet(req, resp);
+            return;
+        }
+
+        if (des.length() > 200) {
+            req.setAttribute("error", "Mô tả chỉ được dài tối đa 200 từ!");
+            doGet(req, resp);
+            return;
+        }
+
         int cid;
-        
+
         try {
             cid = Integer.parseInt(cidStr);
         } catch (NumberFormatException e) {
@@ -102,9 +120,9 @@ public class InstructorCertificatesController extends HttpServlet {
             req.getRequestDispatcher("../View/Instructor/AddCertificate.jsp").forward(req, resp);
             return;
         }
-        
+
         Course c = cDao.getCourseById(cid);
-        
+
         Certificate cert = new Certificate();
         cert.setTitle(title);
         cert.setCourseId(cid);
@@ -113,21 +131,19 @@ public class InstructorCertificatesController extends HttpServlet {
         cert.setStatus(status);
         cert.setCategoryId(c.getCategory_id());
         cert.setCreatedBy(u.getId());
-        
+
         cert = certDao.createCert(cert);
-        
+
         List<Course> cList = cDao.getCourseNotHaveCert(u.getId());
-        
+
         if (cert == null) {
             req.setAttribute("error", "Tạo chứng chỉ thất bại, vui lòng thử lại sau!");
             req.setAttribute("courseList", cList);
             req.getRequestDispatcher("../View/Instructor/AddCertificate.jsp").forward(req, resp);
         } else {
-            req.setAttribute("success", "Tạo chứng chỉ thành công!");
-            req.setAttribute("courseList", cList);
-            req.getRequestDispatcher("../View/Instructor/AddCertificate.jsp").forward(req, resp);
+            resp.sendRedirect(req.getContextPath() + "/instructor/manager/certificate");
         }
-        
+
     }
-    
+
 }
