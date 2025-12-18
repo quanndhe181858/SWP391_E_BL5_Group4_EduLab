@@ -93,7 +93,6 @@ public class InstructorCertificateEditController extends HttpServlet {
             int certId = Integer.parseInt(req.getParameter("id"));
             String title = req.getParameter("title");
             String description = req.getParameter("description");
-            String codePrefix = req.getParameter("code_prefix");
             String status = req.getParameter("status");
 
             if (title == null || title.trim().isEmpty()) {
@@ -104,18 +103,6 @@ public class InstructorCertificateEditController extends HttpServlet {
 
             if (title.length() > 100) {
                 req.setAttribute("error", "Tiêu đề chỉ được dài tối đa 100 từ!");
-                doGet(req, resp);
-                return;
-            }
-
-            if (codePrefix == null || codePrefix.trim().isEmpty()) {
-                req.setAttribute("error", "Tiền tố mã không được để trống!");
-                doGet(req, resp);
-                return;
-            }
-
-            if (codePrefix.length() > 100) {
-                req.setAttribute("error", "Mã tiền tố chỉ được dài tối đa 20 từ!");
                 doGet(req, resp);
                 return;
             }
@@ -135,7 +122,6 @@ public class InstructorCertificateEditController extends HttpServlet {
 
             cert.setTitle(title.trim());
             cert.setDescription(description != null ? description.trim() : "");
-            cert.setCodePrefix(codePrefix.trim());
             cert.setStatus(status);
 
             boolean success = certDao.updateCertificate(cert);

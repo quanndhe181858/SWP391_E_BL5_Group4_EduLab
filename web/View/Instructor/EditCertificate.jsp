@@ -85,13 +85,11 @@
                                 id="code_prefix" 
                                 name="code_prefix" 
                                 required
+                                disabled=""
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                 placeholder="VD: COURSE-17"
                                 value="${cert.codePrefix}"
                                 />
-                            <p class="mt-1 text-sm text-yellow-600 font-medium">
-                                ⚠️ Lưu ý: Thay đổi tiền tố mã sẽ ảnh hưởng đến các chứng chỉ mới được tạo!
-                            </p>
                         </div>
 
                         <div class="mb-6">

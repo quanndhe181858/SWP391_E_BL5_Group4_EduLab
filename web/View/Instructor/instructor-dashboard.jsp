@@ -123,7 +123,7 @@
 
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                     <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-lg font-semibold text-gray-900">Hiệu suất khóa học</h2>
+                        <h2 class="text-lg font-semibold text-gray-900">Tỉ lệ hoàn thành</h2>
                         <span class="text-sm text-gray-500">${ds.myCourses} khóa học</span>
                     </div>
                     <div style="height: 280px;">

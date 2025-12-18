@@ -429,7 +429,7 @@ public class DashboardDAO extends dao {
                  JOIN category cat ON c.category_id = cat.id
                  WHERE c.created_by = ?
                  GROUP BY c.id, c.title, c.thumbnail, c.status, cat.name
-                 ORDER BY c.created_at DESC
+                 ORDER BY studentCount DESC
                  LIMIT ?;
                  """;
 
