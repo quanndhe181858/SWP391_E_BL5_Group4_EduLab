@@ -5,6 +5,7 @@
 package controller.instructor;
 
 import constant.httpStatus;
+import constant.paging;
 import dao.QuizDAO;
 import dao.CategoryDAO;
 import service.QuizServices;
@@ -42,7 +43,6 @@ public class InstructorQuizController extends HttpServlet {
     private QuizDAO quizDAO;
     private CategoryDAO categoryDAO;
     private QuizServices quizServices;
-    private static final int ITEMS_PER_PAGE = 10;
 
     @Override
     public void init() throws ServletException {
@@ -158,9 +158,16 @@ public class InstructorQuizController extends HttpServlet {
                 }
             }
 
-            // Get all quizzes with categories properly loaded
-            List<Quiz> allQuizzes = quizServices.getAllQuizzes();
-            List<Quiz> filteredQuizzes = new ArrayList<>(allQuizzes);
+            // Get authorized user
+            User user = (User) request.getSession().getAttribute("user");
+            if (user == null) {
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+
+            // Get quizzes created by this instructor
+            List<Quiz> allQuizzes = quizServices.getQuizzesByCreator(user.getId());
+            List<Quiz> filteredQuizzes = new ArrayList<>(allQuizzes != null ? allQuizzes : new ArrayList<>());
 
             // Apply category filter with validation
             if (categoryIdParam != null && !categoryIdParam.isEmpty()) {
@@ -269,14 +276,15 @@ public class InstructorQuizController extends HttpServlet {
             }
 
             int totalItems = filteredQuizzes.size();
-            int totalPages = (int) Math.ceil((double) totalItems / ITEMS_PER_PAGE);
+            int limit = constant.paging.INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE;
+            int totalPages = (int) Math.ceil((double) totalItems / limit);
             if (totalPages < 1)
                 totalPages = 1;
             if (currentPage > totalPages)
                 currentPage = totalPages;
 
-            int startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            int endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalItems);
+            int startIndex = (currentPage - 1) * limit;
+            int endIndex = Math.min(startIndex + limit, totalItems);
 
             List<Quiz> paginatedQuizzes;
             if (startIndex < totalItems) {
@@ -497,6 +505,26 @@ public class InstructorQuizController extends HttpServlet {
             Quiz quiz = quizServices.getQuizById(quizId);
 
             if (quiz != null) {
+                // Check if quiz is hidden by admin
+                if ("Hidden".equalsIgnoreCase(quiz.getStatus())) {
+                    HttpSession session = request.getSession();
+                    session.setAttribute("notification", "Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.");
+                    session.setAttribute("notificationType", "error");
+                    response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+                    return;
+                }
+
+                // Ownership check: Only the creator can edit their own quizzes
+                User user = (User) request.getSession().getAttribute("user");
+                if (quiz.getCreated_by() != user.getId()) {
+                    HttpSession session = request.getSession();
+                    session.setAttribute("notification",
+                            "Hành động bị từ chối: Bạn không có quyền chỉnh sửa câu hỏi này.");
+                    session.setAttribute("notificationType", "error");
+                    response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+                    return;
+                }
+
                 // Get quiz answers
                 dao.QuizAnswerDAO quizAnswerDAO = new dao.QuizAnswerDAO();
                 List<model.QuizAnswer> quizAnswers = quizAnswerDAO.getQuizAnswersByQuizId(quizId);
@@ -588,6 +616,22 @@ public class InstructorQuizController extends HttpServlet {
             return;
         }
 
+        // Check if quiz is hidden by admin
+        if ("Hidden".equalsIgnoreCase(existingQuiz.getStatus())) {
+            session.setAttribute("notification", "Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.");
+            session.setAttribute("notificationType", "error");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+            return;
+        }
+
+        // Ownership check: Only the creator can update their own quizzes
+        if (existingQuiz.getCreated_by() != user.getId()) {
+            session.setAttribute("notification", "Hành động bị từ chối: Bạn không có quyền chỉnh sửa câu hỏi này.");
+            session.setAttribute("notificationType", "error");
+            response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+            return;
+        }
+
         // Validate type change against existing answers
         dao.QuizAnswerDAO quizAnswerDAO = new dao.QuizAnswerDAO();
         List<model.QuizAnswer> existingAnswers = quizAnswerDAO.getQuizAnswersByQuizId(quizId);
@@ -667,6 +711,65 @@ public class InstructorQuizController extends HttpServlet {
             return;
         }
 
+        // Check if quiz is hidden by admin
+        if ("Hidden".equalsIgnoreCase(existingQuiz.getStatus())) {
+            session.setAttribute("notification", "Hành động bị từ chối: Câu hỏi này đã bị Admin ẩn.");
+            session.setAttribute("notificationType", "error");
+
+            // Capture current state components from request for proper redirect
+            String page = request.getParameter("page");
+            String search = request.getParameter("search");
+            String type = request.getParameter("type");
+            String categoryId = request.getParameter("categoryId");
+            String sortBy = request.getParameter("sortBy");
+
+            StringBuilder redirectUrl = new StringBuilder(request.getContextPath() + "/instructor/quizzes?action=list");
+            if (page != null && !page.isEmpty())
+                redirectUrl.append("&page=").append(page);
+            if (search != null && !search.isEmpty()) {
+                redirectUrl.append("&search=").append(java.net.URLEncoder.encode(search, "UTF-8"));
+            }
+            if (type != null && !type.isEmpty())
+                redirectUrl.append("&type=").append(type);
+            if (categoryId != null && !categoryId.isEmpty())
+                redirectUrl.append("&categoryId=").append(categoryId);
+            if (sortBy != null && !sortBy.isEmpty())
+                redirectUrl.append("&sortBy=").append(sortBy);
+
+            response.sendRedirect(redirectUrl.toString());
+            return;
+        }
+
+        // Ownership check: Only the creator can delete their own quizzes
+        User user = (User) request.getSession().getAttribute("user");
+        if (existingQuiz.getCreated_by() != user.getId()) {
+            session.setAttribute("notification", "Hành động bị từ chối: Bạn không có quyền xóa câu hỏi này.");
+            session.setAttribute("notificationType", "error");
+
+            // Capture current state components from request for proper redirect
+            String page = request.getParameter("page");
+            String search = request.getParameter("search");
+            String type = request.getParameter("type");
+            String categoryId = request.getParameter("categoryId");
+            String sortBy = request.getParameter("sortBy");
+
+            StringBuilder redirectUrl = new StringBuilder(request.getContextPath() + "/instructor/quizzes?action=list");
+            if (page != null && !page.isEmpty())
+                redirectUrl.append("&page=").append(page);
+            if (search != null && !search.isEmpty()) {
+                redirectUrl.append("&search=").append(java.net.URLEncoder.encode(search, "UTF-8"));
+            }
+            if (type != null && !type.isEmpty())
+                redirectUrl.append("&type=").append(type);
+            if (categoryId != null && !categoryId.isEmpty())
+                redirectUrl.append("&categoryId=").append(categoryId);
+            if (sortBy != null && !sortBy.isEmpty())
+                redirectUrl.append("&sortBy=").append(sortBy);
+
+            response.sendRedirect(redirectUrl.toString());
+            return;
+        }
+
         // Delete from database
         boolean deleted = quizServices.deleteQuiz(quizId);
 
@@ -679,7 +782,28 @@ public class InstructorQuizController extends HttpServlet {
             session.setAttribute("notificationType", "error");
         }
 
-        response.sendRedirect(request.getContextPath() + "/instructor/quizzes?action=list");
+        // Capture current state components from request
+        String page = request.getParameter("page");
+        String search = request.getParameter("search");
+        String type = request.getParameter("type");
+        String categoryId = request.getParameter("categoryId");
+        String sortBy = request.getParameter("sortBy");
+
+        // Construct redirect URL with existing filters and page
+        StringBuilder redirectUrl = new StringBuilder(request.getContextPath() + "/instructor/quizzes?action=list");
+        if (page != null && !page.isEmpty())
+            redirectUrl.append("&page=").append(page);
+        if (search != null && !search.isEmpty()) {
+            redirectUrl.append("&search=").append(java.net.URLEncoder.encode(search, "UTF-8"));
+        }
+        if (type != null && !type.isEmpty())
+            redirectUrl.append("&type=").append(type);
+        if (categoryId != null && !categoryId.isEmpty())
+            redirectUrl.append("&categoryId=").append(categoryId);
+        if (sortBy != null && !sortBy.isEmpty())
+            redirectUrl.append("&sortBy=").append(sortBy);
+
+        response.sendRedirect(redirectUrl.toString());
     }
 
     private void showCreateFormWithError(HttpServletRequest request, HttpServletResponse response,

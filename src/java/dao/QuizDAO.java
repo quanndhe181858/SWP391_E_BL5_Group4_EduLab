@@ -210,6 +210,53 @@ public class QuizDAO extends dao {
         }
     }
 
+    public List<Quiz> getQuizzesByCreator(int creatorId) {
+        String sql = """
+                SELECT
+                    id,
+                    question,
+                    type,
+                    category_id,
+                    created_at,
+                    updated_at,
+                    created_by,
+                    updated_by,
+                    status
+                FROM edulab.quiz
+                WHERE created_by = ?;
+                """;
+        List<Quiz> quizzes = new ArrayList<>();
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, creatorId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Quiz quiz = new Quiz();
+                quiz.setId(rs.getInt("id"));
+                quiz.setQuestion(rs.getString("question"));
+                quiz.setType(rs.getString("type"));
+                quiz.setCategory_id(rs.getInt("category_id"));
+                quiz.setCreated_at(rs.getTimestamp("created_at"));
+                quiz.setUpdated_at(rs.getTimestamp("updated_at"));
+                quiz.setCreated_by(rs.getInt("created_by"));
+                quiz.setUpdated_by(rs.getInt("updated_by"));
+                quiz.setStatus(rs.getString("status"));
+
+                quizzes.add(quiz);
+            }
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Something wrong while getQuizzesByCreator() execute!", e);
+        } finally {
+            this.closeResources();
+        }
+
+        return quizzes;
+    }
+
     public List<Quiz> getAllQuizzes() {
         String sql = """
                 SELECT
@@ -423,7 +470,7 @@ public class QuizDAO extends dao {
                     id, question, type, category_id,
                     created_at, updated_at, created_by, updated_by
                 FROM edulab.quiz
-                WHERE category_id IN (""" + placeholders + ")";
+                WHERE status != 'Hidden' AND category_id IN (""" + placeholders + ")";
 
         try {
             con = dbc.getConnection();

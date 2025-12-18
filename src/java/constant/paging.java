@@ -13,6 +13,8 @@ public class paging {
     public static final int DEFAULT_PAGE = 1;
 
     public static final int INSTRUCTOR_COURSE_LIST_ITEM_PER_PAGE = 12;
+    
+    private static final int INTRUCTOR_QUIZ_LIST_ITEM_PER_PAGE = 20;
 
     public static final int COURSE_CATALOG_ITEM_PER_PAGE = 12;
 

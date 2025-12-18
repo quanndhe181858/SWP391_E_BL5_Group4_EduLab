@@ -33,8 +33,8 @@ public class QuizServices {
         List<Quiz> quizzes = qs.getAllQuizzes();
         if (quizzes != null && !quizzes.isEmpty()) {
             System.out.println("First quiz: " + quizzes.get(0));
-            System.out.println("Category: " + (quizzes.get(0).getCategory() != null ?
-                    quizzes.get(0).getCategory().getName() : "No category"));
+            System.out.println("Category: "
+                    + (quizzes.get(0).getCategory() != null ? quizzes.get(0).getCategory().getName() : "No category"));
         }
     }
 
@@ -140,6 +140,29 @@ public class QuizServices {
     }
 
     /**
+     * Retrieves quizzes by creator ID with category information
+     *
+     * @param creatorId User ID of the creator
+     * @return List of Quiz objects for the specified creator
+     */
+    public List<Quiz> getQuizzesByCreator(int creatorId) {
+        try {
+            List<Quiz> quizzes = quizDAO.getQuizzesByCreator(creatorId);
+            if (quizzes != null) {
+                // Load category information for each quiz
+                for (Quiz quiz : quizzes) {
+                    Category category = categoryDAO.getCategoryById(quiz.getCategory_id());
+                    quiz.setCategory(category);
+                }
+            }
+            return quizzes;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error getting quizzes by creator ID: " + creatorId, e);
+            return null;
+        }
+    }
+
+    /**
      * Retrieves quizzes by category ID
      *
      * @param categoryId Category ID to filter by
@@ -222,7 +245,8 @@ public class QuizServices {
             // For now, this returns count of all quizzes
             // If QuizDAO had a countQuizzes method with filters, we would use it
             List<Quiz> allQuizzes = quizDAO.getAllQuizzes();
-            if (allQuizzes == null) return 0;
+            if (allQuizzes == null)
+                return 0;
 
             // Apply filters manually since QuizDAO doesn't have filtered count method
             int count = 0;
@@ -251,7 +275,8 @@ public class QuizServices {
                     }
                 }
 
-                if (matches) count++;
+                if (matches)
+                    count++;
             }
 
             return count;
