@@ -75,11 +75,12 @@ public class InstructorTestController extends HttpServlet {
         }
 
         request.setAttribute("selectedCourse", selectedCourse);
-        request.setAttribute("sections", sectionDAO.getAllCourseSectionsByCourseId(selectedCourse));
 
-        // ⭐ LẤY QUIZ THEO CATEGORY CỦA COURSE (CHA + CON)
-        List<Quiz> quizList = new ArrayList<>();
+        // ⭐ KIỂM TRA selectedCourse TRƯỚC KHI SỬ DỤNG
         if (selectedCourse != null) {
+            request.setAttribute("sections", sectionDAO.getAllCourseSectionsByCourseId(selectedCourse));
+
+            // ⭐ LẤY QUIZ THEO CATEGORY CỦA COURSE (CHA + CON)
             Course course = courseDAO.getCourseById(selectedCourse);
             if (course != null && course.getCategory_id() > 0) {
                 CategoryDAO categoryDAO = new CategoryDAO();
@@ -91,10 +92,16 @@ public class InstructorTestController extends HttpServlet {
                     categoryIds.addAll(categoryDAO.getChildCategoryIds(course.getCategory_id()));
                 }
 
-                quizList = quizDAO.getQuizzesByMultipleCategories(categoryIds);
+                List<Quiz> quizList = quizDAO.getQuizzesByMultipleCategories(categoryIds);
+                request.setAttribute("quizList", quizList);
+            } else {
+                request.setAttribute("quizList", new ArrayList<>());
             }
+        } else {
+            // Nếu không có course nào được chọn
+            request.setAttribute("sections", new ArrayList<>());
+            request.setAttribute("quizList", new ArrayList<>());
         }
-        request.setAttribute("quizList", quizList);
 
         request.setAttribute("testList", testDAO.getTestsByInstructor(instructorId));
 
@@ -130,7 +137,7 @@ public class InstructorTestController extends HttpServlet {
                     categoryIds.addAll(categoryDAO.getChildCategoryIds(course.getCategory_id()));
                 }
 
-                quizList = quizDAO.getQuizzesByMultipleCategories(categoryIds);
+                List<Quiz> quizList = quizDAO.getQuizzesByMultipleCategories(categoryIds);
                 request.setAttribute("quizList", quizList);
             }
 
