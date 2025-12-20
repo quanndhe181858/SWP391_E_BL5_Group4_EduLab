@@ -29,7 +29,7 @@ public class CourseDAO extends dao {
 
     public static void main(String[] args) {
         CourseDAO dao = new CourseDAO();
-        System.out.println(dao.getCourseNotHaveCert(1));
+        System.out.println(dao.countCoursesCatalog("", "", 0));
     }
 
     public Course createCourse(Course course, int uid) {
@@ -186,6 +186,54 @@ public class CourseDAO extends dao {
         }
     }
 
+    public Course getCourseByIdForTrainee(int id) {
+        String sql = """
+                 SELECT distinct c.* FROM edulab.course c 
+                 INNER JOIN edulab.course_section cs ON c.id = cs.course_id
+                 INNER JOIN edulab.certificate cert ON c.id = cert.course_id
+                 WHERE cert.status = "Active" AND c.id = ?;
+                 """;
+
+        try {
+            con = dbc.getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setInt(1, id);
+
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Course course = new Course();
+
+                course.setId(rs.getInt("id"));
+                course.setUuid(rs.getString("uuid"));
+                course.setTitle(rs.getString("title"));
+                course.setDescription(rs.getString("description"));
+                course.setStatus(rs.getString("status"));
+
+                course.setCategory_id(rs.getInt("category_id"));
+                // load category object if you have categoryDAO
+                // course.setCategory(categoryDAO.getCategoryById(course.getCategory_id()));
+
+                course.setCreated_at(rs.getTimestamp("created_at"));
+                course.setUpdated_at(rs.getTimestamp("updated_at"));
+                course.setCreated_by(rs.getInt("created_by"));
+                course.setUpdated_by(rs.getInt("updated_by"));
+                course.setThumbnail(rs.getString("thumbnail"));
+                course.setHide_by_admin(rs.getBoolean("hide_by_admin"));
+
+                return course;
+            }
+
+            return null;
+
+        } catch (SQLException e) {
+            this.log(Level.SEVERE, "Something wrong while getCourseById() execute!", e);
+            return null;
+        } finally {
+            this.closeResources();
+        }
+    }
+
     public boolean isExist(int id) {
         String sql = """
                  SELECT 
@@ -251,7 +299,9 @@ public class CourseDAO extends dao {
         StringBuilder sql = new StringBuilder(
                 "SELECT DISTINCT c.* FROM edulab.course c "
                 + "INNER JOIN edulab.course_section cs ON c.id = cs.course_id "
-                + "WHERE 1 = 1 AND hide_by_admin = 0"
+                + "INNER JOIN edulab.certificate cert ON c.id = cert.course_id "
+                + "INNER JOIN edulab.test t ON c.id = t.course_id "
+                + "WHERE cert.status = 'Active' AND hide_by_admin = 0"
         );
         List<Object> params = new ArrayList<>();
         StringBuilder orGroup = new StringBuilder();
@@ -696,7 +746,9 @@ public class CourseDAO extends dao {
         StringBuilder sql = new StringBuilder(
                 "SELECT DISTINCT c.* FROM edulab.course c "
                 + "INNER JOIN edulab.course_section cs ON c.id = cs.course_id "
-                + "WHERE c.status = 'Active' AND c.hide_by_admin = 0"
+                + "INNER JOIN edulab.certificate cert ON c.id = cert.course_id "
+                + "INNER JOIN edulab.test t ON c.id = t.course_id "
+                + "WHERE c.status = 'Active' AND c.hide_by_admin = 0 AND cert.status = 'Active'"
         );
         StringBuilder orSearch = new StringBuilder();
         if (title != null && !title.isBlank()) {
@@ -773,9 +825,11 @@ public class CourseDAO extends dao {
             int categoryId) {
 
         StringBuilder sql = new StringBuilder(
-                "SELECT DISTINCT c.* FROM edulab.course c "
+                "SELECT COUNT(DISTINCT c.id) FROM edulab.course c "
                 + "INNER JOIN edulab.course_section cs ON c.id = cs.course_id "
-                + "WHERE c.status = 'Active' AND c.hide_by_admin = 0"
+                + "INNER JOIN edulab.certificate cert ON c.id = cert.course_id "
+                + "INNER JOIN edulab.test t ON c.id = t.course_id "
+                + "WHERE c.status = 'Active' AND c.hide_by_admin = 0 AND cert.status = 'Active'"
         );
 
         List<Object> params = new ArrayList<>();

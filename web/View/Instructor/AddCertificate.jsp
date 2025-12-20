@@ -125,7 +125,7 @@
                                 Tạo chứng chỉ
                             </button>
                             <a 
-                                href="${pageContext.request.contextPath}/certificate/list" 
+                                href="${pageContext.request.contextPath}/instructor/manager/certificate" 
                                 class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition-colors font-medium text-center"
                                 >
                                 Hủy bỏ
