@@ -211,8 +211,8 @@
                                        placeholder="60">
                             </div>
                             <div>
-                                <label class="block font-semibold text-gray-700 mb-2">Điểm tối thiểu (%)</label>
-                                <input type="number" name="minGrade" required min="0" max="100"
+                                <label class="block font-semibold text-gray-700 mb-2">Điểm tối thiểu</label>
+                                <input type="number" name="minGrade" required min="40" max="100"
                                        value="${editTest.minGrade}"
                                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm
                                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
