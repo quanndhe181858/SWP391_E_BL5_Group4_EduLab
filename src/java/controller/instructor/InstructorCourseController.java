@@ -211,7 +211,7 @@ public class InstructorCourseController extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         Map<String, Object> res = new HashMap<>();
-        
+
         try {
             User user = AuthUtils.doAuthorize(req, resp, 2);
 
@@ -230,7 +230,7 @@ public class InstructorCourseController extends HttpServlet {
                 resp.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
                 return;
             }
-            
+
             Course c = _courseService.getCourseById(courseId);
 
             if (c == null || c.getUuid() == null) {
@@ -238,20 +238,26 @@ public class InstructorCourseController extends HttpServlet {
                 return;
             }
 
-            if(c.isHide_by_admin()){
+            if (c.isHide_by_admin()) {
                 resp.setStatus(403);
                 res.put("success", false);
                 res.put("message", "Khoá học này đã bị khoá bởi quản trị viên, không thể chỉnh sửa!");
                 ResponseUtils.sendJsonResponse(resp, res);
                 return;
             }
-            
+
             boolean isDeleted = _courseService.deleteCourse(courseId);
 
             if (isDeleted) {
-
+                resp.setStatus(200);
+                res.put("success", true);
+                res.put("message", "Xoá khoá học thành công");
+                ResponseUtils.sendJsonResponse(resp, res);
             } else {
-                resp.sendError(httpStatus.INTERNAL_SERVER_ERROR.getCode(), httpStatus.INTERNAL_SERVER_ERROR.getMessage());
+                resp.setStatus(500);
+                res.put("success", false);
+                res.put("message", "Không thể xoá khoá học");
+                ResponseUtils.sendJsonResponse(resp, res);
             }
 
         } catch (IOException e) {
@@ -315,14 +321,14 @@ public class InstructorCourseController extends HttpServlet {
                 return;
             }
 
-            if(c.isHide_by_admin()){
+            if (c.isHide_by_admin()) {
                 resp.setStatus(403);
                 res.put("success", false);
                 res.put("message", "Khoá học này đã bị khoá bởi quản trị viên, không thể chỉnh sửa!");
                 ResponseUtils.sendJsonResponse(resp, res);
                 return;
             }
-            
+
             c.setTitle(title);
             c.setDescription(description);
             c.setCategory_id(categoryId);
