@@ -212,65 +212,39 @@ public class AdminUserController extends HttpServlet {
     }
 
     private void updateUser(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        try {
-            Integer userId = getInt(request, "id");
-
-            if (userId == null) {
-                request.getSession().setAttribute("error", "ID người dùng không hợp lệ!");
-                response.sendRedirect(request.getContextPath() + "/admin/users");
-                return;
-            }
-
-            String firstName = request.getParameter("firstName");
-            String lastName = request.getParameter("lastName");
-            String email = request.getParameter("email");
-            String bodStr = request.getParameter("bod");
-            Integer roleId = getInt(request, "roleId");
-
-            // Validation
-            if (firstName == null || firstName.trim().isEmpty() ||
-                    lastName == null || lastName.trim().isEmpty() ||
-                    email == null || email.trim().isEmpty() ||
-                    roleId == null) {
-                request.getSession().setAttribute("error", "Vui lòng điền đầy đủ thông tin!");
-                response.sendRedirect(request.getContextPath() + "/admin/users?action=edit&id=" + userId);
-                return;
-            }
-
-            User user = new User();
-            user.setId(userId);
-            user.setFirst_name(firstName.trim());
-            user.setLast_name(lastName.trim());
-            user.setEmail(email.trim());
-            user.setRole_id(roleId);
-
-            // Parse date if provided
-            if (bodStr != null && !bodStr.trim().isEmpty()) {
-                try {
-                    Date bod = Date.valueOf(bodStr);
-                    user.setBod(bod);
-                } catch (IllegalArgumentException e) {
-                    request.getSession().setAttribute("error", "Định dạng ngày sinh không hợp lệ!");
-                    response.sendRedirect(request.getContextPath() + "/admin/users?action=edit&id=" + userId);
-                    return;
-                }
-            }
-
-            boolean success = userDAO.updateUser(user);
-
-            if (success) {
-                request.getSession().setAttribute("success", "Cập nhật thông tin người dùng thành công!");
-            } else {
-                request.getSession().setAttribute("error", "Cập nhật thất bại! Email có thể đã tồn tại.");
-            }
-
-        } catch (Exception e) {
-            request.getSession().setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+        throws ServletException, IOException {
+    try {
+        Integer userId = getInt(request, "id");
+        if (userId == null) {
+            request.getSession().setAttribute("error", "ID người dùng không hợp lệ!");
+            response.sendRedirect(request.getContextPath() + "/admin/users");
+            return;
         }
-
-        response.sendRedirect(request.getContextPath() + "/admin/users");
+        
+        Integer roleId = getInt(request, "roleId");
+        
+        // Validation
+        if (roleId == null) {
+            request.getSession().setAttribute("error", "Vui lòng chọn vai trò!");
+            response.sendRedirect(request.getContextPath() + "/admin/users?action=edit&id=" + userId);
+            return;
+        }
+        
+        User user = new User();
+        user.setId(userId);
+        user.setRole_id(roleId);
+        
+        boolean success = userDAO.updateUser(user);
+        if (success) {
+            request.getSession().setAttribute("success", "Cập nhật vai trò người dùng thành công!");
+        } else {
+            request.getSession().setAttribute("error", "Cập nhật thất bại!");
+        }
+    } catch (Exception e) {
+        request.getSession().setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
     }
+    response.sendRedirect(request.getContextPath() + "/admin/users");
+}
 
     private void showCreateForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
