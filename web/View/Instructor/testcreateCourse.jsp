@@ -14,6 +14,32 @@
                 document.getElementById("manualQuizBox").style.display = (mode === "custom") ? "block" : "none";
                 document.getElementById("randomBox").style.display = (mode === "random") ? "flex" : "none";
             }
+
+            function validateForm(event) {
+                const mode = document.querySelector("input[name='mode']:checked").value;
+
+                if (mode === "random") {
+                    const randomCount = document.querySelector("input[name='randomCount']").value;
+
+                    if (!randomCount || randomCount < 1) {
+                        event.preventDefault();
+                        alert("⚠️ Vui lòng nhập số lượng câu hỏi (tối thiểu 1 câu)!");
+                        return false;
+                    }
+                } else if (mode === "custom") {
+                    const checkedBoxes = document.querySelectorAll("input[name='quizId']:checked");
+
+                    if (checkedBoxes.length === 0) {
+                        event.preventDefault();
+                        alert("⚠️ Vui lòng chọn ít nhất 1 câu hỏi!");
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+
             window.onload = toggleMode;
         </script>
     </head>
@@ -158,7 +184,9 @@
                 <c:if test="${not empty quizList or not empty editTest}">
                     <!-- MAIN FORM CREATE / UPDATE -->
                     <form method="POST" action="${pageContext.request.contextPath}/instructor/test-course"
-                          class="bg-white p-8 rounded-xl shadow-lg space-y-6">
+                          class="bg-white p-8 rounded-xl shadow-lg space-y-6"
+                          onsubmit="return validateForm(event)"
+                          >
 
                         <input type="hidden" name="testScope" value="course">
                         <input type="hidden" name="sectionId" value="0">

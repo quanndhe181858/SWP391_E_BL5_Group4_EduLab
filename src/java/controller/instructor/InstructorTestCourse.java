@@ -213,7 +213,7 @@ public class InstructorTestCourse extends HttpServlet {
                 processQuiz(mode, id, courseId, request);
             }
 
-            response.sendRedirect(request.getContextPath() + "/instructor/test-course?courseId=" + courseId);
+            response.sendRedirect(request.getContextPath() + "/managerTest");
             return;
         }
 
