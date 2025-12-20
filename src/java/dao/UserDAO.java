@@ -397,31 +397,23 @@ public class UserDAO extends dao {
     }
 
     public boolean updateUser(User user) {
-        String sql = """
-                UPDATE user
-                SET first_name = ?, last_name = ?, email = ?, bod = ?, role_id = ?, updated_at = NOW()
-                WHERE id = ?;
-                """;
-
-        try {
-            con = dbc.getConnection();
-            ps = con.prepareStatement(sql);
-
-            ps.setString(1, user.getFirst_name());
-            ps.setString(2, user.getLast_name());
-            ps.setString(3, user.getEmail());
-            ps.setDate(4, user.getBod());
-            ps.setInt(5, user.getRole_id());
-            ps.setInt(6, user.getId());
-
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected > 0;
-
-        } catch (SQLException e) {
-            this.log(Level.SEVERE, e.getMessage(), e);
-            return false;
-        }
+    String sql = """
+            UPDATE user
+            SET role_id = ?, updated_at = NOW()
+            WHERE id = ?;
+            """;
+    try {
+        con = dbc.getConnection();
+        ps = con.prepareStatement(sql);
+        ps.setInt(1, user.getRole_id());
+        ps.setInt(2, user.getId());
+        int rowsAffected = ps.executeUpdate();
+        return rowsAffected > 0;
+    } catch (SQLException e) {
+        this.log(Level.SEVERE, e.getMessage(), e);
+        return false;
     }
+}
 
     public boolean addUser(User user) {
         String sql = """
