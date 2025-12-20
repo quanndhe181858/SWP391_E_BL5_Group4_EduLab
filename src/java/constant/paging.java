@@ -16,7 +16,7 @@ public class paging {
     
     private static final int INTRUCTOR_QUIZ_LIST_ITEM_PER_PAGE = 20;
 
-    public static final int COURSE_CATALOG_ITEM_PER_PAGE = 12;
+    public static final int COURSE_CATALOG_ITEM_PER_PAGE = 4;
 
     public static final int ADMIN_USER_LIST_ITEM_PER_PAGE = 5;
     

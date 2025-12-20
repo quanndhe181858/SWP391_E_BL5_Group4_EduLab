@@ -68,7 +68,7 @@
                         <c:otherwise>
                             <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
                                 <c:forEach items="${courseCatalog}" var="c">
-                                    <a href="courses?id=${c.id}" class="block" target="_blank">
+                                    <a href="courses?id=${c.id}" class="block">
                                         <div class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-200 h-full">
                                             <div class="relative h-48 overflow-hidden bg-white p-3">
                                                 <c:choose>
