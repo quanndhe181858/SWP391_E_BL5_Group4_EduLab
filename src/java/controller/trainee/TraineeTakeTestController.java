@@ -1,6 +1,7 @@
 package controller.trainee;
 
 import dao.CertificateDAO;
+import dao.CourseDAO;
 import dao.CourseProgressDAO;
 import dao.CourseSectionDAO;
 import dao.EnrollmentDAO;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import model.Course;
 import model.Question;
 import model.QuizAnswer;
 import model.Test;
@@ -38,8 +40,9 @@ public class TraineeTakeTestController extends HttpServlet {
     private final TestAttemptDAOv2 testAttemptDAO = new TestAttemptDAOv2();
     private final CourseProgressDAO courseProgressDAO = new CourseProgressDAO();
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
-    private final CourseSectionDAO sectionDAO = new CourseSectionDAO();  // THÊM
-    private final CertificateDAO certificateDAO = new CertificateDAO();  // THÊM
+    private final CourseSectionDAO sectionDAO = new CourseSectionDAO();
+    private final CertificateDAO certificateDAO = new CertificateDAO();
+    private final CourseDAO courseDAO = new CourseDAO();
 
     private Integer getInt(HttpServletRequest req, String name) {
         try {
@@ -82,7 +85,20 @@ public class TraineeTakeTestController extends HttpServlet {
             return;
         }
 
+        Course cu = courseDAO.getCourseById(test.getCourseId());
+
+        if (cu.isHide_by_admin()) {
+            response.sendRedirect(request.getContextPath() + "/courses");
+            return;
+        }
+
         TestAttempt previousAttempt = testAttemptDAO.getAttemptByUserAndTest(currentUser.getId(), testId);
+
+        if (previousAttempt != null && "Passed".equals(previousAttempt.getStatus())) {
+            request.getSession().setAttribute("message", "Bạn đã hoàn thành bài test này rồi!");
+            response.sendRedirect(request.getContextPath() + "/learn?courseId=" + test.getCourseId());
+            return;
+        }
 
         if (test.getCourseSectionId() == 0) {  // Course test
             if (previousAttempt != null && previousAttempt.getCurrentAttempted() >= 2) {
@@ -122,6 +138,14 @@ public class TraineeTakeTestController extends HttpServlet {
         }
 
         Test test = testDAO.getById(testId);
+
+        Course cu = courseDAO.getCourseById(test.getCourseId());
+
+        if (cu.isHide_by_admin()) {
+            response.sendRedirect(request.getContextPath() + "/courses");
+            return;
+        }
+
         if (test == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND, "Test not found");
             return;
@@ -129,6 +153,12 @@ public class TraineeTakeTestController extends HttpServlet {
 
         TestAttempt previousAttempt = testAttemptDAO.getAttemptByUserAndTest(
                 currentUser.getId(), testId);
+
+        if (previousAttempt != null && "Passed".equals(previousAttempt.getStatus())) {
+            request.getSession().setAttribute("message", "Bạn đã hoàn thành bài test này rồi!");
+            response.sendRedirect(request.getContextPath() + "/learn?courseId=" + test.getCourseId());
+            return;
+        }
 
         if (test.getCourseSectionId() == 0) {  // Course test
             if (previousAttempt != null && previousAttempt.getCurrentAttempted() >= 2) {
@@ -214,11 +244,7 @@ public class TraineeTakeTestController extends HttpServlet {
         if (passed) {
             attempt.setStatus("Passed");
         } else {
-            if (previousAttempt != null && "Passed".equals(previousAttempt.getStatus())) {
-                attempt.setStatus("Passed");
-            } else {
-                attempt.setStatus("Retaking");
-            }
+            attempt.setStatus("Retaking");
         }
 
         boolean saved = testAttemptDAO.saveTestAttempt(attempt);

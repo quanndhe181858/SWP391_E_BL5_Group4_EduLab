@@ -52,6 +52,18 @@ public class CourseServices {
             return null;
         }
     }
+    
+    public Course getCourseByIdForTrainee(int id) {
+        try {
+            Course course = cDao.getCourseByIdForTrainee(id);
+            Category c = categoryDao.getCategoryById(course.getCategory_id());
+            course.setCategory(c);
+            return course;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, e.getMessage(), e);
+            return null;
+        }
+    }
 
     public boolean deleteCourse(int id) {
         try {
