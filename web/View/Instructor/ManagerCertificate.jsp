@@ -15,22 +15,25 @@
 
         <div class="container mx-auto px-4 py-8">
 
-            <!-- HEADER -->
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">Chứng chỉ</h1>
-                <p class="text-lg text-gray-600 mt-1">
-                    Quản lý các chứng chỉ bạn đã tạo
-                </p>
+            <div class="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Chứng chỉ</h1>
+                    <p class="text-lg text-gray-600 mt-1">
+                        Quản lý các chứng chỉ bạn đã tạo
+                    </p>
+                </div>
+                <div>
+                    <a href="${pageContext.request.contextPath}/instructor/certificate">
+                        <button class="p-3 text-white bg-blue-600 hover:bg-blue-700 transition rounded-xl">Thêm chứng chỉ cho course</button>
+                    </a>
+                </div>
             </div>
 
-            <!-- FILTER BAR -->
             <form method="get" action="${pageContext.request.contextPath}/instructor/manager/certificate">
                 <input type="hidden" name="page" value="${currentPage}"/>
 
                 <div class="bg-white p-6 rounded-lg shadow-sm mb-6">
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-
-                        <!-- SEARCH -->
                         <input type="text"
                                name="search"
                                value="${search}"
@@ -38,7 +41,6 @@
                                class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                                onchange="this.form.submit()"/>
 
-                        <!-- CATEGORY -->
                         <select name="category"
                                 class="px-4 py-2 border rounded-lg bg-white"
                                 onchange="this.form.submit()">
@@ -51,7 +53,6 @@
                             </c:forEach>
                         </select>
 
-                        <!-- STATUS -->
                         <select name="status"
                                 class="px-4 py-2 border rounded-lg bg-white"
                                 onchange="this.form.submit()">
@@ -60,7 +61,6 @@
                             <option value="Inactive" ${selectedStatus == 'Inactive' ? 'selected' : ''}>Không hoạt động</option>
                         </select>
 
-                        <!-- SORT -->
                         <select name="sort"
                                 class="px-4 py-2 border rounded-lg bg-white"
                                 onchange="this.form.submit()">
@@ -70,7 +70,6 @@
                             <option value="issued" ${sortBy == 'issued' ? 'selected' : ''}>Số lượng phát hành</option>
                         </select>
 
-                        <!-- ORDER -->
                         <select name="order"
                                 class="px-4 py-2 border rounded-lg bg-white"
                                 onchange="this.form.submit()">
@@ -97,15 +96,15 @@
             <!-- LIST -->
             <c:choose>
                 <c:when test="${empty certificates}">
-                    <div class="bg-white p-10 rounded-lg shadow-sm text-center text-gray-500">
+                    <div class="bg-white p-10 rounded-lg shadow-sm text-center text-gray-500 min-h-[405px]">
                         Không có chứng chỉ nào
                     </div>
                 </c:when>
 
                 <c:otherwise>
-                    <div class="space-y-4">
+                    <div class="space-y-4 min-h-[405px]">
                         <c:forEach var="cert" items="${certificates}">
-                            <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition">
+                            <div class="bg-white rounded-lg p-6 hover:shadow-md transition">
 
                                 <div class="flex justify-between items-start mb-2">
                                     <h3 class="text-xl font-bold text-gray-900 line-clamp-2">
@@ -145,18 +144,10 @@
 
                                     <!-- ACTIONS -->
                                     <div class="mt-4 flex gap-2">
-                                        <a href="${pageContext.request.contextPath}/instructor/certificate/view?id=${cert.id}"
-                                           class="inline-flex px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
-                                            View
-                                        </a>
                                         <a href="${pageContext.request.contextPath}/instructor/certificate/edit?id=${cert.id}"
                                            class="inline-flex px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-lg hover:bg-yellow-600">
                                             Edit
                                         </a>
-                                        <button onclick="confirmDelete(${cert.id}, '${cert.title}')"
-                                                class="inline-flex px-4 py-2 border border-red-300 text-red-600 text-sm font-medium rounded-lg hover:bg-red-50">
-                                            Delete
-                                        </button>
                                     </div>
 
                                 </div>

@@ -320,14 +320,14 @@
                             </div>
                         </form>
 
-                        <div class="mt-8 pt-8 border-t border-gray-200">
+<!--                        <div class="mt-8 pt-8 border-t border-gray-200">
                             <h3 class="text-lg font-semibold text-gray-800 mb-2">Thông tin tài khoản</h3>
                             <div class="space-y-2 text-sm text-gray-600">
                                 <p><strong>UUID:</strong> ${sessionScope.user.uuid}</p>
                                 <p><strong>Ngày tạo:</strong> <fmt:formatDate value="${sessionScope.user.created_at}" pattern="dd/MM/yyyy HH:mm"/></p>
                                 <p><strong>Cập nhật lần cuối:</strong> <fmt:formatDate value="${sessionScope.user.updated_at}" pattern="dd/MM/yyyy HH:mm"/></p>
                             </div>
-                        </div>
+                        </div>-->
                     </div>
                 </div>
             </div>

@@ -113,6 +113,12 @@ public class AdminQuizController extends HttpServlet {
     private void listQuizzes(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String pageParam = request.getParameter("page");
+        String keyword = request.getParameter("keyword");
+        String type = request.getParameter("type");
+        String categoryIdParam = request.getParameter("category");
+        String status = request.getParameter("status");
+        String sort = request.getParameter("sort");
+
         int page = 1;
         if (pageParam != null && !pageParam.isEmpty()) {
             try {
@@ -122,20 +128,29 @@ public class AdminQuizController extends HttpServlet {
             }
         }
 
-        List<Quiz> allQuizzes = quizDAO.getAllQuizzes();
+        Integer categoryId = null;
+        if (categoryIdParam != null && !categoryIdParam.trim().isEmpty()) {
+            try {
+                categoryId = Integer.parseInt(categoryIdParam);
+            } catch (NumberFormatException e) {
+                // ignore invalid category id
+            }
+        }
 
-        // Manual Pagination
-        int pageSize = 10;
+        // Use the new search method that handles all filters and sorting
+        List<Quiz> allQuizzes = quizDAO.searchQuizzes(keyword, type, categoryId, status, sort);
+
+        int limit = constant.paging.ADMIN_QUIZ_LIST_ITEM_PER_PAGE;
         int totalQuizzes = allQuizzes.size();
-        int totalPages = (int) Math.ceil((double) totalQuizzes / pageSize);
+        int totalPages = (int) Math.ceil((double) totalQuizzes / limit);
 
         if (page < 1)
             page = 1;
         if (page > totalPages && totalPages > 0)
             page = totalPages;
 
-        int start = (page - 1) * pageSize;
-        int end = Math.min(start + pageSize, totalQuizzes);
+        int start = (page - 1) * limit;
+        int end = Math.min(start + limit, totalQuizzes);
 
         List<Quiz> paginatedList;
         if (start > end) {
@@ -146,6 +161,7 @@ public class AdminQuizController extends HttpServlet {
 
         // Fetch categories and create a map for easy lookup in JSP
         List<Category> categories = categoryDAO.getCategories();
+        request.setAttribute("categories", categories); // Passed list for dropdown
         java.util.Map<Integer, String> categoryMap = new java.util.HashMap<>();
         if (categories != null) {
             for (Category c : categories) {
@@ -157,6 +173,22 @@ public class AdminQuizController extends HttpServlet {
         request.setAttribute("quizList", paginatedList);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
+
+        // Pass filter parameters for pagination links
+        request.setAttribute("keyword", keyword);
+        request.setAttribute("selectedType", type);
+        request.setAttribute("selectedCategory", categoryId);
+        request.setAttribute("selectedStatus", status);
+        request.setAttribute("selectedSort", sort);
+
+        // Fetch global counts for statistics cards
+        java.util.Map<String, Integer> counts = quizDAO.getQuizCounts();
+        request.setAttribute("totalQuizzes", counts.getOrDefault("total", 0));
+        request.setAttribute("activeQuizzes", counts.getOrDefault("active", 0));
+        request.setAttribute("hiddenQuizzes", counts.getOrDefault("hidden", 0));
+
+        // Count for filtered results
+        request.setAttribute("totalFilteredQuizzes", totalQuizzes);
 
         request.getRequestDispatcher("/View/Admin/QuizList.jsp").forward(request, response);
     }
